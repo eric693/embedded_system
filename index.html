@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --bg2: #14161a;
+    --bg3: #1c1e24;
+    --bg4: #24272f;
+    --line: #2a2d36;
+    --line2: #363a47;
+    --text: #e8e6df;
+    --muted: #7a7d8a;
+    --dim: #4a4d5a;
+    --accent: #c8a96e;
+    --accent2: #8fa8c8;
+    --green: #6aad8e;
+    --red: #c86a6a;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Noto Serif TC', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 2rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .course-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-title-sidebar {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+
+  .nav-chapter {
+    display: block;
+    padding: 0.55rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.15s, background 0.15s;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-chapter:hover { color: var(--text); background: var(--bg3); }
+  .nav-chapter.active { color: var(--accent); background: var(--bg3); }
+
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    min-width: 20px;
+  }
+
+  .nav-chapter.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .progress-bar-wrap {
+    background: var(--bg4);
+    border-radius: 2px;
+    height: 3px;
+    margin-top: 0.5rem;
+  }
+
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 3px;
+    border-radius: 2px;
+    width: 12.5%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ── Main ── */
+  .main {
+    overflow-y: auto;
+    height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 4rem 4rem 3rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 1rem;
+    max-width: 600px;
+  }
+
+  .hero-desc {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 560px;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--text);
+  }
+
+  .meta-label {
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  /* ── Chapter sections ── */
+  .chapter-section {
+    padding: 3.5rem 4rem;
+    border-bottom: 1px solid var(--line);
+    display: none;
+  }
+
+  .chapter-section.active { display: block; }
+
+  .chapter-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .chapter-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(200,169,110,0.1);
+    border: 1px solid rgba(200,169,110,0.25);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  .chapter-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .chapter-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  /* ── Lesson ── */
+  .lessons-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .lesson {
+    position: relative;
+  }
+
+  .lesson-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+  }
+
+  .lesson-title {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent2);
+  }
+
+  .lesson-body {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+    padding-left: 1rem;
+  }
+
+  .lesson-body p { margin-bottom: 0.75rem; }
+  .lesson-body p:last-child { margin-bottom: 0; }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    margin: 1.25rem 0 1.25rem 1rem;
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--line2);
+  }
+
+  pre {
+    padding: 1.25rem 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text);
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(143,168,200,0.07);
+    border-radius: 0 4px 4px 0;
+    padding: 0.875rem 1.1rem;
+    margin: 1.25rem 0 1.25rem 1rem;
+    font-size: 13.5px;
+    color: #a8bcd4;
+    line-height: 1.75;
+  }
+
+  .callout.warn {
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.07);
+    color: #c8b88a;
+  }
+
+  .callout.tip {
+    border-color: var(--green);
+    background: rgba(106,173,142,0.07);
+    color: #7ec4a0;
+  }
+
+  /* ── Table ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    margin: 1.25rem 0 1.25rem 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line2);
+  }
+
+  tbody td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+
+  td code, p code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg4);
+    color: var(--accent2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+  }
+
+  /* ── Section divider ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0 1.5rem 1rem;
+  }
+
+  .section-divider-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ── Nav buttons ── */
+  .chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    border-top: 1px solid var(--line);
+    gap: 1rem;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1.25rem;
+    border: 1px solid var(--line2);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn:disabled:hover { border-color: var(--line2); color: var(--muted); }
+
+  .nav-btn-primary {
+    background: rgba(200,169,110,0.1);
+    border-color: rgba(200,169,110,0.4);
+    color: var(--accent);
+  }
+
+  .nav-btn-primary:hover {
+    background: rgba(200,169,110,0.2);
+    color: var(--accent);
+  }
+
+  .chapter-indicator {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  /* ── Overview grid (shown on load) ── */
+  .overview { display: block; }
+  .overview.hidden { display: none; }
+
+  .chapters-grid {
+    padding: 3rem 4rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--line);
+  }
+
+  .chapter-card {
+    background: var(--bg);
+    padding: 1.75rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .chapter-card:hover { background: var(--bg2); }
+
+  .card-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+    color: var(--dim);
+  }
+
+  .pill-theory { border-color: rgba(143,168,200,0.3); color: var(--accent2); }
+  .pill-lab    { border-color: rgba(106,173,142,0.3); color: var(--green); }
+  .pill-proj   { border-color: rgba(200,169,110,0.3); color: var(--accent); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .hero, .chapter-section, .chapter-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .hero-title { font-size: 28px; }
+    .chapters-grid { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="course-label">課程導覽</span>
+      <div class="course-title-sidebar">嵌入式系統<br>完整學習路徑</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-chapter active" onclick="showOverview()">
+        <span class="nav-num">--</span>課程總覽
+      </button>
+      <button class="nav-chapter" onclick="showChapter(1)">
+        <span class="nav-num">01</span>嵌入式系統概論
+      </button>
+      <button class="nav-chapter" onclick="showChapter(2)">
+        <span class="nav-num">02</span>微控制器硬體基礎
+      </button>
+      <button class="nav-chapter" onclick="showChapter(3)">
+        <span class="nav-num">03</span>嵌入式 C 程式設計
+      </button>
+      <button class="nav-chapter" onclick="showChapter(4)">
+        <span class="nav-num">04</span>周邊介面與通訊協定
+      </button>
+      <button class="nav-chapter" onclick="showChapter(5)">
+        <span class="nav-num">05</span>即時作業系統 RTOS
+      </button>
+      <button class="nav-chapter" onclick="showChapter(6)">
+        <span class="nav-num">06</span>嵌入式 Linux 系統
+      </button>
+      <button class="nav-chapter" onclick="showChapter(7)">
+        <span class="nav-num">07</span>低功耗與安全設計
+      </button>
+      <button class="nav-chapter" onclick="showChapter(8)">
+        <span class="nav-num">08</span>綜合專案實戰
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>學習進度</span>
+        <span id="progress-text">0 / 8</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow">Embedded Systems — Complete Course</div>
+      <h1 class="hero-title">嵌入式系統<br>完整學習路徑</h1>
+      <p class="hero-desc">
+        從微控制器底層硬體到 Linux 驅動程式開發，涵蓋理論基礎、程式實作、通訊協定與即時作業系統，最終以三個完整專案收尾。
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-value">8</span>
+          <span class="meta-label">章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-value">46</span>
+          <span class="meta-label">堂課</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-value">3</span>
+          <span class="meta-label">實戰專案</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-value">C / Linux</span>
+          <span class="meta-label">主要語言</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overview grid -->
+    <div class="overview" id="overview">
+      <div class="chapters-grid">
+        <div class="chapter-card" onclick="showChapter(1)">
+          <div class="card-num">CHAPTER 01</div>
+          <div class="card-title">嵌入式系統概論</div>
+          <div class="card-desc">定義、應用場景、處理器架構概覽與學習環境建立。</div>
+          <div class="card-meta"><span class="pill pill-theory">理論</span><span class="pill">5 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(2)">
+          <div class="card-num">CHAPTER 02</div>
+          <div class="card-title">微控制器硬體基礎</div>
+          <div class="card-desc">CPU 核心、記憶體架構、GPIO、中斷系統與 DMA。</div>
+          <div class="card-meta"><span class="pill pill-theory">理論</span><span class="pill">6 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(3)">
+          <div class="card-num">CHAPTER 03</div>
+          <div class="card-title">嵌入式 C 程式設計</div>
+          <div class="card-desc">位元操作、指標、工具鏈、連結腳本與 GDB 偵錯。</div>
+          <div class="card-meta"><span class="pill pill-lab">實作</span><span class="pill">6 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(4)">
+          <div class="card-num">CHAPTER 04</div>
+          <div class="card-title">周邊介面與通訊協定</div>
+          <div class="card-desc">UART、SPI、I²C、PWM、ADC 與 CAN Bus 完整實作。</div>
+          <div class="card-meta"><span class="pill pill-lab">實作</span><span class="pill">7 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(5)">
+          <div class="card-num">CHAPTER 05</div>
+          <div class="card-title">即時作業系統 RTOS</div>
+          <div class="card-desc">FreeRTOS 任務、排程、Queue、Semaphore 與記憶體管理。</div>
+          <div class="card-meta"><span class="pill pill-theory">理論</span><span class="pill pill-lab">實作</span><span class="pill">7 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(6)">
+          <div class="card-num">CHAPTER 06</div>
+          <div class="card-title">嵌入式 Linux 系統</div>
+          <div class="card-desc">Bootloader、Device Tree、核心模組與驅動程式開發。</div>
+          <div class="card-meta"><span class="pill pill-lab">實作</span><span class="pill">6 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(7)">
+          <div class="card-num">CHAPTER 07</div>
+          <div class="card-title">低功耗與安全設計</div>
+          <div class="card-desc">省電模式、OTA 更新、Secure Boot 與 Watchdog。</div>
+          <div class="card-meta"><span class="pill pill-theory">理論</span><span class="pill">4 堂</span></div>
+        </div>
+        <div class="chapter-card" onclick="showChapter(8)">
+          <div class="card-num">CHAPTER 08</div>
+          <div class="card-title">綜合專案實戰</div>
+          <div class="card-desc">智慧環境監測、馬達控制器與 IoT Linux 閘道器三大專案。</div>
+          <div class="card-meta"><span class="pill pill-proj">專案</span><span class="pill">5 堂</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 1
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch1">
+      <div class="chapter-header">
+        <div>
+          <span class="chapter-number">CHAPTER 01</span>
+        </div>
+        <div>
+          <h2 class="chapter-title">嵌入式系統概論</h2>
+          <p class="chapter-subtitle">建立對嵌入式世界的完整認識，了解與通用電腦的本質差異</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 1.1</div>
+          <div class="lesson-title">什麼是嵌入式系統？定義與特性</div>
+          <div class="lesson-body">
+            <p>嵌入式系統（Embedded System）是指為了特定任務而設計的計算系統，通常嵌入在更大型的裝置或設備之中。與桌上型電腦不同，嵌入式系統必須在嚴格的資源限制下可靠運行，這些限制包括記憶體大小、運算速度、功耗，以及即時回應的時間要求。</p>
+            <p>判斷一個系統是否屬於嵌入式系統，可從三個維度觀察：功能專一性（只做特定幾件事）、資源受限性（RAM 可能只有數 KB）、以及可靠性要求（汽車 ABS 系統不能出錯）。</p>
+            <div class="callout">
+              「即時性」並不等於「快」。即時系統（Real-time System）的核心要求是在<strong>確定的時間限制內</strong>完成任務，無論這個時限是 1 毫秒還是 1 秒。
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>特性</th><th>通用電腦</th><th>嵌入式系統</th></tr></thead>
+                <tbody>
+                  <tr><td>用途</td><td>多工、通用</td><td>單一/少數功能</td></tr>
+                  <tr><td>RAM</td><td>GB 等級</td><td>KB ~ MB 等級</td></tr>
+                  <tr><td>作業系統</td><td>Windows / macOS / Linux</td><td>Bare-metal / RTOS / 嵌入式 Linux</td></tr>
+                  <tr><td>功耗</td><td>數十瓦</td><td>毫瓦 ~ 數瓦</td></tr>
+                  <tr><td>即時需求</td><td>通常無</td><td>常有硬性時間限制</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 1.2</div>
+          <div class="lesson-title">嵌入式系統的應用領域</div>
+          <div class="lesson-body">
+            <p>嵌入式系統幾乎無所不在。消費性電子（智慧家電、穿戴裝置）、汽車電子（ECU、ADAS）、工業控制（PLC、感測器節點）、醫療設備（心律調整器、血糖機）、航太與國防，都是嵌入式技術的舞台。</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>領域</th><th>典型應用</th><th>關鍵要求</th></tr></thead>
+                <tbody>
+                  <tr><td>汽車</td><td>引擎控制、ABS、氣囊</td><td>功能安全 ISO 26262</td></tr>
+                  <tr><td>工業</td><td>PLC、機器人控制</td><td>確定性即時回應</td></tr>
+                  <tr><td>醫療</td><td>輸液幫浦、心電圖機</td><td>IEC 62304 軟體生命週期</td></tr>
+                  <tr><td>消費性電子</td><td>智慧手錶、TWS 耳機</td><td>低功耗、小尺寸</td></tr>
+                  <tr><td>IoT</td><td>感測器節點、智慧閘道</td><td>無線連接、OTA 更新</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 1.3</div>
+          <div class="lesson-title">常見處理器架構概覽</div>
+          <div class="lesson-body">
+            <p>選擇正確的處理器架構是嵌入式設計的第一步。目前主流架構有三大家族：</p>
+            <p><strong style="color:var(--text)">ARM Cortex-M</strong> 系列（M0/M3/M4/M7/M33）是 32 位元 MCU 的業界主流，STM32、nRF52、RP2040 等都屬此家族。Cortex-A 系列則用於需要跑 Linux 的應用處理器（如 Raspberry Pi）。</p>
+            <p><strong style="color:var(--text)">AVR</strong>（Atmel，現 Microchip）是 8 位元架構，Arduino Uno 的 ATmega328P 即屬此類，適合學習入門與低成本應用。</p>
+            <p><strong style="color:var(--text)">RISC-V</strong> 是開放指令集架構，近年在 IoT 領域快速崛起，GD32VF103 是代表性 MCU。</p>
+            <div class="callout tip">
+              本課程以 <strong>ARM Cortex-M（STM32F4 系列）</strong> 為主要實作平台，使用 HAL 庫與 STM32CubeIDE 開發環境，搭配 Raspberry Pi 4 進行嵌入式 Linux 實驗。
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 1.4</div>
+          <div class="lesson-title">開發工具安裝與環境設定</div>
+          <div class="lesson-body">
+            <p>本課程需要安裝以下工具鏈：</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">bash — 安裝 ARM 交叉編譯器（Ubuntu/Debian）</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm"># 安裝 ARM GCC 交叉編譯器</span>
+sudo apt update
+sudo apt install gcc-arm-none-eabi \
+                 gdb-multiarch \
+                 openocd \
+                 stlink-tools \
+                 cmake \
+                 ninja-build
+
+<span class="cm"># 確認安裝版本</span>
+arm-none-eabi-gcc --version
+<span class="cm"># 輸出：arm-none-eabi-gcc (GNU Arm Embedded Toolchain) 12.2.Rel1</span></pre>
+            </div>
+            <div class="callout warn">
+              Windows 使用者建議安裝 WSL2（Ubuntu 22.04），並在 WSL2 內執行上述指令。STM32CubeIDE 則安裝在 Windows 端，透過 USB 連接開發板。
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 2
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch2">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 02</span></div>
+        <div>
+          <h2 class="chapter-title">微控制器硬體基礎</h2>
+          <p class="chapter-subtitle">深入 MCU 內部架構，從暫存器層級理解硬體行為</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 2.1</div>
+          <div class="lesson-title">記憶體架構：Flash、SRAM 與記憶體映射</div>
+          <div class="lesson-body">
+            <p>STM32F407 的記憶體空間採用哈佛架構變體，程式碼（Flash）與資料（SRAM）位於不同的實體記憶體，但透過統一的 32 位元位址空間存取。理解位址映射是讀懂 Linker Script 的前提。</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>記憶體</th><th>起始位址</th><th>大小（F407）</th><th>用途</th></tr></thead>
+                <tbody>
+                  <tr><td>Flash</td><td><code>0x08000000</code></td><td>1 MB</td><td>程式碼、唯讀常數</td></tr>
+                  <tr><td>SRAM1</td><td><code>0x20000000</code></td><td>112 KB</td><td>堆疊、堆積、全域變數</td></tr>
+                  <tr><td>SRAM2</td><td><code>0x2001C000</code></td><td>16 KB</td><td>備用 RAM</td></tr>
+                  <tr><td>CCM RAM</td><td><code>0x10000000</code></td><td>64 KB</td><td>僅 CPU 可存取，速度最快</td></tr>
+                  <tr><td>Peripheral</td><td><code>0x40000000</code></td><td>—</td><td>記憶體映射暫存器</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — 直接操作記憶體映射暫存器（不用 HAL）</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* 透過記憶體映射位址直接控制 GPIOA */</span>
+<span class="pp">#define</span> GPIOA_BASE   0x40020000UL
+<span class="pp">#define</span> GPIOA_MODER  (<span class="tp">*</span>(<span class="kw">volatile</span> <span class="tp">uint32_t</span> <span class="tp">*</span>)(GPIOA_BASE + 0x00))
+<span class="pp">#define</span> GPIOA_ODR    (<span class="tp">*</span>(<span class="kw">volatile</span> <span class="tp">uint32_t</span> <span class="tp">*</span>)(GPIOA_BASE + 0x14))
+
+<span class="kw">void</span> <span class="fn">gpio_init</span>(<span class="kw">void</span>) {
+    <span class="cm">/* 設定 PA5 為輸出模式（MODER[11:10] = 01）*/</span>
+    GPIOA_MODER &= ~(<span class="num">0x3</span> &lt;&lt; <span class="num">10</span>);
+    GPIOA_MODER |=  (<span class="num">0x1</span> &lt;&lt; <span class="num">10</span>);
+}
+
+<span class="kw">void</span> <span class="fn">gpio_toggle</span>(<span class="kw">void</span>) {
+    GPIOA_ODR ^= (<span class="num">1</span> &lt;&lt; <span class="num">5</span>);  <span class="cm">/* 切換 PA5 */</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 2.2</div>
+          <div class="lesson-title">時脈系統：RCC 與 PLL 配置</div>
+          <div class="lesson-body">
+            <p>STM32 的時脈樹（Clock Tree）決定了整個系統的運行速度。從外部晶振（HSE）或內部 RC 振盪器（HSI）出發，經過 PLL 倍頻後得到系統時脈（SYSCLK），再分頻給 AHB、APB1、APB2 匯流排。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — 配置 PLL 使 SYSCLK = 168 MHz（HSE = 8 MHz）</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/*
+ * PLL 公式：
+ *   VCO 輸入  = HSE / PLLM  = 8 / 4 = 2 MHz
+ *   VCO 輸出  = VCO 輸入 × PLLN = 2 × 168 = 336 MHz
+ *   SYSCLK    = VCO 輸出 / PLLP  = 336 / 2 = 168 MHz
+ *   USB/SDIO  = VCO 輸出 / PLLQ  = 336 / 7 = 48 MHz
+ */</span>
+
+RCC_OscInitTypeDef osc = {<span class="num">0</span>};
+osc.OscillatorType      = RCC_OSCILLATORTYPE_HSE;
+osc.HSEState            = RCC_HSE_ON;
+osc.PLL.PLLState        = RCC_PLL_ON;
+osc.PLL.PLLSource       = RCC_PLLSOURCE_HSE;
+osc.PLL.PLLM            = <span class="num">4</span>;
+osc.PLL.PLLN            = <span class="num">168</span>;
+osc.PLL.PLLP            = RCC_PLLP_DIV2;
+osc.PLL.PLLQ            = <span class="num">7</span>;
+HAL_RCC_OscConfig(&amp;osc);
+
+RCC_ClkInitTypeDef clk = {<span class="num">0</span>};
+clk.ClockType      = RCC_CLOCKTYPE_SYSCLK
+                   | RCC_CLOCKTYPE_HCLK
+                   | RCC_CLOCKTYPE_PCLK1
+                   | RCC_CLOCKTYPE_PCLK2;
+clk.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+clk.AHBCLKDivider  = RCC_SYSCLK_DIV1;   <span class="cm">/* AHB  = 168 MHz */</span>
+clk.APB1CLKDivider = RCC_HCLK_DIV4;     <span class="cm">/* APB1 = 42 MHz  */</span>
+clk.APB2CLKDivider = RCC_HCLK_DIV2;     <span class="cm">/* APB2 = 84 MHz  */</span>
+HAL_RCC_ClockConfig(&amp;clk, FLASH_LATENCY_5);</pre>
+            </div>
+            <div class="callout warn">
+              提高時脈頻率時，必須同步調整 Flash 存取延遲（<code>FLASH_LATENCY</code>）。在 3.3V 供電下，168 MHz 需要設定 5 個等待週期（WS=5）。
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 2.3</div>
+          <div class="lesson-title">中斷系統：NVIC、IRQ 與優先權</div>
+          <div class="lesson-body">
+            <p>ARM Cortex-M 的嵌套向量中斷控制器（NVIC）支援最多 240 個外部中斷，並允許中斷巢狀（高優先權中斷可打斷低優先權中斷的處理程式）。STM32F4 使用 4 位元優先權，分為搶佔優先權（Preemption Priority）與子優先權（Sub Priority）。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — EXTI 外部中斷配置與 ISR 撰寫</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* 配置 PA0 的下降緣觸發中斷，搶佔優先權 = 1，子優先權 = 0 */</span>
+GPIO_InitTypeDef gpio = {<span class="num">0</span>};
+gpio.Pin  = GPIO_PIN_0;
+gpio.Mode = GPIO_MODE_IT_FALLING;  <span class="cm">/* 下降緣觸發 */</span>
+gpio.Pull = GPIO_PULLUP;
+HAL_GPIO_Init(GPIOA, &amp;gpio);
+
+HAL_NVIC_SetPriority(EXTI0_IRQn, <span class="num">1</span>, <span class="num">0</span>);
+HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+<span class="cm">/* ISR：名稱必須與向量表一致 */</span>
+<span class="kw">void</span> <span class="fn">EXTI0_IRQHandler</span>(<span class="kw">void</span>) {
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
+
+<span class="cm">/* HAL Callback，在 ISR 清旗標後呼叫 */</span>
+<span class="kw">void</span> <span class="fn">HAL_GPIO_EXTI_Callback</span>(<span class="tp">uint16_t</span> GPIO_Pin) {
+    <span class="kw">if</span> (GPIO_Pin == GPIO_PIN_0) {
+        <span class="cm">/* 按鍵事件處理：盡量短，不要在 ISR 內做複雜運算 */</span>
+        button_event_flag = <span class="num">1</span>;
+    }
+}</pre>
+            </div>
+            <div class="callout">
+              ISR 應盡可能短暫。複雜的邏輯應透過旗標（flag）或 RTOS 的 Queue 傳遞給主迴圈或工作任務處理，避免 ISR 佔用 CPU 時間過長。
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 2.4</div>
+          <div class="lesson-title">DMA：直接記憶體存取</div>
+          <div class="lesson-body">
+            <p>DMA（Direct Memory Access）允許周邊裝置直接讀寫記憶體，不需要 CPU 介入每一個位元組的搬移。這對 ADC 連續取樣、UART 大量傳輸、SPI 顯示器驅動等場景至關重要，可大幅降低 CPU 佔用率。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — UART 使用 DMA 接收，非阻塞模式</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="tp">uint8_t</span> rx_buf[<span class="num">64</span>];
+
+<span class="cm">/* 啟動 DMA 接收 64 位元組，完成後觸發回呼 */</span>
+HAL_UART_Receive_DMA(&amp;huart2, rx_buf, <span class="kw">sizeof</span>(rx_buf));
+
+<span class="cm">/* DMA 接收完成回呼 */</span>
+<span class="kw">void</span> <span class="fn">HAL_UART_RxCpltCallback</span>(UART_HandleTypeDef <span class="tp">*</span>huart) {
+    <span class="kw">if</span> (huart-&gt;Instance == USART2) {
+        <span class="cm">/* rx_buf 已填滿，可以處理資料 */</span>
+        <span class="fn">process_data</span>(rx_buf, <span class="kw">sizeof</span>(rx_buf));
+        <span class="cm">/* 重新啟動下一次接收 */</span>
+        HAL_UART_Receive_DMA(&amp;huart2, rx_buf, <span class="kw">sizeof</span>(rx_buf));
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 3
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch3">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 03</span></div>
+        <div>
+          <h2 class="chapter-title">嵌入式 C 程式設計</h2>
+          <p class="chapter-subtitle">針對資源受限環境的 C 語言技巧、工具鏈與偵錯方法</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 3.1</div>
+          <div class="lesson-title">位元運算與暫存器操作</div>
+          <div class="lesson-body">
+            <p>在嵌入式開發中，位元運算是日常。設定、清除、切換、讀取特定位元是操作硬體暫存器的基本功。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — 常用位元操作模式</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="pp">#define</span> BIT(n)           (<span class="num">1U</span> &lt;&lt; (n))
+<span class="pp">#define</span> SET_BIT(reg, n)   ((reg) |=  BIT(n))
+<span class="pp">#define</span> CLR_BIT(reg, n)   ((reg) &amp;= ~BIT(n))
+<span class="pp">#define</span> TGL_BIT(reg, n)   ((reg) ^=  BIT(n))
+<span class="pp">#define</span> READ_BIT(reg, n)  (((reg) &gt;&gt; (n)) &amp; <span class="num">1U</span>)
+
+<span class="cm">/* 設定多位元欄位（先清除再設值）*/</span>
+<span class="pp">#define</span> SET_FIELD(reg, mask, shift, val) \
+    ((reg) = ((reg) &amp; ~(mask)) | (((val) &lt;&lt; (shift)) &amp; (mask)))
+
+<span class="cm">/* 範例：設定 USART_CR1 的 OVER8 位元（bit 15）*/</span>
+SET_BIT(USART2-&gt;CR1, <span class="num">15</span>);
+
+<span class="cm">/* 範例：設定 GPIO OSPEEDR[3:2] = 0b10（High Speed）*/</span>
+SET_FIELD(GPIOA-&gt;OSPEEDR, <span class="num">0x3</span> &lt;&lt; <span class="num">2</span>, <span class="num">2</span>, <span class="num">0x2</span>);</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 3.2</div>
+          <div class="lesson-title">volatile、const 與型別修飾詞</div>
+          <div class="lesson-body">
+            <p><code>volatile</code> 告訴編譯器：這個變數的值可能在程式的控制流之外被改變（例如 ISR、硬體暫存器），因此每次存取都必須真正讀寫記憶體，不能被最佳化快取到暫存器中。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — volatile 的正確使用情境</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* 錯誤：編譯器可能最佳化成空迴圈，認為 flag 永遠是 0 */</span>
+<span class="kw">int</span> flag = <span class="num">0</span>;
+<span class="kw">while</span> (flag == <span class="num">0</span>) { }  <span class="cm">/* ISR 中設定了 flag，但這裡看不到 */</span>
+
+<span class="cm">/* 正確：volatile 確保每次迴圈都真正讀取 flag */</span>
+<span class="kw">volatile</span> <span class="kw">int</span> flag = <span class="num">0</span>;
+<span class="kw">while</span> (flag == <span class="num">0</span>) { }
+
+<span class="cm">/* 常數暫存器：volatile const — 只能讀，但每次都要讀 */</span>
+<span class="kw">volatile</span> <span class="kw">const</span> <span class="tp">uint32_t</span> <span class="tp">*</span>status_reg =
+    (<span class="kw">volatile</span> <span class="kw">const</span> <span class="tp">uint32_t</span> <span class="tp">*</span>)<span class="num">0x40020010</span>UL;</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 3.3</div>
+          <div class="lesson-title">連結腳本（Linker Script）解析</div>
+          <div class="lesson-body">
+            <p>Linker Script（<code>.ld</code> 檔）告訴連結器如何將各個目的檔的段（section）放置到正確的記憶體位址。理解它是閱讀啟動程式（startup.s）與優化記憶體佈局的關鍵。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">ld — STM32F407 簡化版 Linker Script</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* 定義記憶體區域 */</span>
+MEMORY {
+    FLASH (rx)  : ORIGIN = <span class="num">0x08000000</span>, LENGTH = <span class="num">1024K</span>
+    SRAM  (rwx) : ORIGIN = <span class="num">0x20000000</span>, LENGTH = <span class="num">128K</span>
+}
+
+SECTIONS {
+    <span class="cm">/* 向量表與程式碼放入 Flash */</span>
+    .isr_vector : { KEEP(*(.isr_vector)) } &gt; FLASH
+    .text       : { *(.text*) *(.rodata*) } &gt; FLASH
+
+    <span class="cm">/* 初始化資料：儲存在 Flash，執行期複製到 SRAM */</span>
+    .data : {
+        _sdata = .;
+        *(.data*)
+        _edata = .;
+    } &gt; SRAM AT &gt; FLASH      <span class="cm">/* VMA=SRAM, LMA=FLASH */</span>
+
+    <span class="cm">/* 未初始化資料（啟動時清零）*/</span>
+    .bss : {
+        _sbss = .;
+        *(.bss*)
+        *(COMMON)
+        _ebss = .;
+    } &gt; SRAM
+
+    <span class="cm">/* 堆疊放在 SRAM 最頂端 */</span>
+    _estack = ORIGIN(SRAM) + LENGTH(SRAM);
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 3.4</div>
+          <div class="lesson-title">GDB + OpenOCD 偵錯實戰</div>
+          <div class="lesson-body">
+            <p>OpenOCD 透過 ST-Link 與開發板的 SWD 介面通訊，GDB 則透過 TCP 連接 OpenOCD 進行原始碼層級偵錯。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">bash — 啟動 OpenOCD 並連接 GDB</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm"># 終端機 1：啟動 OpenOCD（保持執行）</span>
+openocd \
+  -f interface/stlink.cfg \
+  -f target/stm32f4x.cfg
+
+<span class="cm"># 終端機 2：連接 GDB</span>
+arm-none-eabi-gdb build/firmware.elf
+
+<span class="cm"># GDB 內部指令</span>
+(gdb) target extended-remote :3333
+(gdb) monitor reset halt       <span class="cm"># 重置並暫停</span>
+(gdb) load                     <span class="cm"># 燒錄 .elf 到 Flash</span>
+(gdb) break main               <span class="cm"># 在 main() 設定中斷點</span>
+(gdb) continue                 <span class="cm"># 執行到中斷點</span>
+(gdb) print sensor_value       <span class="cm"># 印出變數值</span>
+(gdb) x/16xw 0x20000000        <span class="cm"># 以 16 進位查看記憶體</span></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 4
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch4">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 04</span></div>
+        <div>
+          <h2 class="chapter-title">周邊介面與通訊協定</h2>
+          <p class="chapter-subtitle">掌握 MCU 與感測器、模組之間的各種溝通方式</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 4.1</div>
+          <div class="lesson-title">UART 串列通訊</div>
+          <div class="lesson-body">
+            <p>UART（Universal Asynchronous Receiver-Transmitter）是最常用的非同步串列通訊介面。它只需要兩條線（TX、RX），不需要時脈線，靠雙方預先約定好鮑率（Baud Rate）來同步資料。</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>參數</th><th>典型值</th><th>說明</th></tr></thead>
+                <tbody>
+                  <tr><td>Baud Rate</td><td>115200</td><td>每秒傳輸的符號數</td></tr>
+                  <tr><td>Data bits</td><td>8</td><td>每幀的資料位元數</td></tr>
+                  <tr><td>Stop bits</td><td>1</td><td>停止位元數</td></tr>
+                  <tr><td>Parity</td><td>None</td><td>奇偶校驗</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — UART printf 重定向至 ST-Link Virtual COM</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* 重載 _write()，讓 printf 輸出到 UART2 */</span>
+<span class="kw">int</span> <span class="fn">_write</span>(<span class="kw">int</span> fd, <span class="tp">char</span> <span class="tp">*</span>buf, <span class="kw">int</span> count) {
+    HAL_UART_Transmit(&amp;huart2,
+                      (<span class="tp">uint8_t</span> <span class="tp">*</span>)buf,
+                      (<span class="tp">uint16_t</span>)count,
+                      HAL_MAX_DELAY);
+    <span class="kw">return</span> count;
+}
+
+<span class="cm">/* 之後即可直接使用 printf */</span>
+<span class="fn">printf</span>(<span class="str">"Temperature: %.2f C\r\n"</span>, temperature);</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 4.2</div>
+          <div class="lesson-title">SPI 協定：主從架構與時序</div>
+          <div class="lesson-body">
+            <p>SPI（Serial Peripheral Interface）是同步全雙工協定，四線制：SCLK（時脈）、MOSI（主傳從收）、MISO（從傳主收）、CS（片選）。時序模式由 CPOL（時脈極性）與 CPHA（時脈相位）決定，共有 Mode 0～3 四種組合。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — SPI 讀取 BME280 感測器暫存器</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* BME280 SPI 讀取：最高位元為 1 表示讀取 */</span>
+<span class="tp">uint8_t</span> <span class="fn">bme280_read_reg</span>(<span class="tp">uint8_t</span> reg) {
+    <span class="tp">uint8_t</span> tx[<span class="num">2</span>] = { reg | <span class="num">0x80</span>, <span class="num">0xFF</span> };
+    <span class="tp">uint8_t</span> rx[<span class="num">2</span>] = { <span class="num">0</span> };
+
+    HAL_GPIO_WritePin(SPI_CS_GPIO_Port,
+                      SPI_CS_Pin,
+                      GPIO_PIN_RESET);  <span class="cm">/* CS 拉低：選中裝置 */</span>
+
+    HAL_SPI_TransmitReceive(&amp;hspi1, tx, rx, <span class="num">2</span>, <span class="num">10</span>);
+
+    HAL_GPIO_WritePin(SPI_CS_GPIO_Port,
+                      SPI_CS_Pin,
+                      GPIO_PIN_SET);    <span class="cm">/* CS 拉高：釋放裝置 */</span>
+    <span class="kw">return</span> rx[<span class="num">1</span>];
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 4.3</div>
+          <div class="lesson-title">I²C 協定：位址機制與多裝置匯流排</div>
+          <div class="lesson-body">
+            <p>I²C 只需兩條線（SDA、SCL），支援多主多從架構。每個裝置有 7 位元（或 10 位元）位址，主裝置透過發送啟始條件（START）、位址幀、讀寫位元來選擇從裝置。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — I²C 讀取 MPU-6050 加速度計（7 位元位址 = 0x68）</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="pp">#define</span> MPU6050_ADDR  (<span class="num">0x68</span> &lt;&lt; <span class="num">1</span>)  <span class="cm">/* HAL 使用 8 位元格式 */</span>
+<span class="pp">#define</span> ACCEL_XOUT_H  <span class="num">0x3B</span>
+
+<span class="tp">int16_t</span> <span class="fn">mpu6050_read_accel_x</span>(<span class="kw">void</span>) {
+    <span class="tp">uint8_t</span> reg = ACCEL_XOUT_H;
+    <span class="tp">uint8_t</span> buf[<span class="num">2</span>];
+
+    <span class="cm">/* 寫入要讀取的暫存器位址 */</span>
+    HAL_I2C_Master_Transmit(&amp;hi2c1, MPU6050_ADDR,
+                             &amp;reg, <span class="num">1</span>, <span class="num">10</span>);
+
+    <span class="cm">/* 連續讀取 2 個位元組（高位元組 + 低位元組）*/</span>
+    HAL_I2C_Master_Receive(&amp;hi2c1, MPU6050_ADDR,
+                            buf, <span class="num">2</span>, <span class="num">10</span>);
+
+    <span class="cm">/* 合併成 16 位元有號整數 */</span>
+    <span class="kw">return</span> (<span class="tp">int16_t</span>)((buf[<span class="num">0</span>] &lt;&lt; <span class="num">8</span>) | buf[<span class="num">1</span>]);
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 4.4</div>
+          <div class="lesson-title">ADC 取樣與 PWM 輸出</div>
+          <div class="lesson-body">
+            <p>ADC（Analog-to-Digital Converter）將類比電壓轉換為數位值。STM32F407 內建 12 位元 ADC（0～4095 對應 0～3.3V）。PWM（Pulse Width Modulation）則透過調整方波的占空比（Duty Cycle）來等效控制輸出電壓，廣泛用於馬達速度控制與 LED 亮度調節。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — ADC 單次轉換 + TIM3 PWM 輸出</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* ADC 單次轉換，讀取 PA1（Channel 1）*/</span>
+<span class="tp">uint32_t</span> <span class="fn">adc_read</span>(<span class="kw">void</span>) {
+    HAL_ADC_Start(&amp;hadc1);
+    HAL_ADC_PollForConversion(&amp;hadc1, <span class="num">10</span>);
+    <span class="kw">return</span> HAL_ADC_GetValue(&amp;hadc1);
+}
+
+<span class="cm">/* PWM：TIM3 CH1，將 ADC 值映射到 0~100% 占空比 */</span>
+<span class="kw">void</span> <span class="fn">pwm_set_duty</span>(<span class="tp">uint32_t</span> adc_val) {
+    <span class="cm">/* ADC 12 位元（0~4095）→ TIM3 ARR（假設 = 999）*/</span>
+    <span class="tp">uint32_t</span> duty = (adc_val <span class="tp">*</span> <span class="num">1000</span>) / <span class="num">4095</span>;
+    __HAL_TIM_SET_COMPARE(&amp;htim3, TIM_CHANNEL_1, duty);
+}
+
+<span class="cm">/* 主迴圈：光敏電阻控制 LED 亮度 */</span>
+HAL_TIM_PWM_Start(&amp;htim3, TIM_CHANNEL_1);
+<span class="kw">while</span> (<span class="num">1</span>) {
+    <span class="fn">pwm_set_duty</span>(<span class="fn">adc_read</span>());
+    HAL_Delay(<span class="num">10</span>);
+}</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 5
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch5">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 05</span></div>
+        <div>
+          <h2 class="chapter-title">即時作業系統（RTOS）</h2>
+          <p class="chapter-subtitle">FreeRTOS 多工設計、排程策略與任務間同步機制</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 5.1</div>
+          <div class="lesson-title">RTOS vs 裸機：何時需要 RTOS？</div>
+          <div class="lesson-body">
+            <p>裸機（Bare-metal）開發使用 super-loop 或狀態機驅動，適合邏輯簡單、任務間耦合低的應用。當系統需要同時處理多個具有不同時間要求的任務，或任務間需要複雜的同步與通訊時，RTOS 能提供清晰的架構。</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>考量</th><th>裸機 Super-loop</th><th>RTOS</th></tr></thead>
+                <tbody>
+                  <tr><td>確定性</td><td>難以保證</td><td>可設定任務優先權</td></tr>
+                  <tr><td>程式碼複雜度</td><td>低（初期）</td><td>需學習 API</td></tr>
+                  <tr><td>RAM 開銷</td><td>極低</td><td>每個任務需獨立堆疊</td></tr>
+                  <tr><td>除錯難度</td><td>較直觀</td><td>需工具支援（trace）</td></tr>
+                  <tr><td>適用場景</td><td>單一功能感測器</td><td>多任務 IoT 閘道器</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 5.2</div>
+          <div class="lesson-title">FreeRTOS 任務建立與排程</div>
+          <div class="lesson-body">
+            <p>FreeRTOS 使用搶佔式優先權排程（Preemptive Priority Scheduling）。數字越大優先權越高。排程器每隔一個 Tick（通常 1ms）判斷是否要切換到更高優先權的就緒任務。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — 建立兩個優先權不同的任務</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="kw">void</span> <span class="fn">sensor_task</span>(<span class="kw">void</span> <span class="tp">*</span>param) {
+    <span class="kw">for</span> (;;) {
+        <span class="tp">float</span> temp = <span class="fn">bme280_read_temperature</span>();
+        <span class="fn">printf</span>(<span class="str">"Temp: %.1f\r\n"</span>, temp);
+        <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">500</span>));  <span class="cm">/* 讓出 CPU 500ms */</span>
+    }
+}
+
+<span class="kw">void</span> <span class="fn">comm_task</span>(<span class="kw">void</span> <span class="tp">*</span>param) {
+    <span class="kw">for</span> (;;) {
+        <span class="fn">mqtt_publish_pending</span>();
+        <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">1000</span>));
+    }
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>) {
+    HAL_Init();
+    <span class="fn">SystemClock_Config</span>();
+
+    <span class="fn">xTaskCreate</span>(sensor_task, <span class="str">"Sensor"</span>,
+                 <span class="num">256</span>,    <span class="cm">/* 堆疊大小（字組數）*/</span>
+                 NULL,
+                 <span class="num">2</span>,      <span class="cm">/* 優先權（較高）*/</span>
+                 NULL);
+
+    <span class="fn">xTaskCreate</span>(comm_task, <span class="str">"Comm"</span>,
+                 <span class="num">512</span>, NULL, <span class="num">1</span>, NULL);
+
+    <span class="fn">vTaskStartScheduler</span>();  <span class="cm">/* 永不返回 */</span>
+    <span class="kw">while</span> (<span class="num">1</span>);
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 5.3</div>
+          <div class="lesson-title">Queue、Semaphore 與 Mutex</div>
+          <div class="lesson-body">
+            <p>任務間不能直接共享全域變數（競態條件），需使用 RTOS 提供的同步原語。Queue 用於傳遞資料；Semaphore 用於計數或信號；Mutex 用於保護共享資源（含優先權繼承機制）。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — Queue：感測器任務傳資料給通訊任務</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre>QueueHandle_t data_queue;
+
+<span class="kw">typedef struct</span> {
+    <span class="tp">float</span>    temperature;
+    <span class="tp">float</span>    humidity;
+    <span class="tp">uint32_t</span> timestamp;
+} SensorData_t;
+
+<span class="cm">/* 建立可存放 8 筆資料的 Queue */</span>
+data_queue = <span class="fn">xQueueCreate</span>(<span class="num">8</span>, <span class="kw">sizeof</span>(SensorData_t));
+
+<span class="cm">/* 生產者任務 */</span>
+<span class="kw">void</span> <span class="fn">sensor_task</span>(<span class="kw">void</span> <span class="tp">*</span>p) {
+    SensorData_t d;
+    <span class="kw">for</span> (;;) {
+        d.temperature = <span class="fn">bme280_read_temperature</span>();
+        d.humidity    = <span class="fn">bme280_read_humidity</span>();
+        d.timestamp   = <span class="fn">HAL_GetTick</span>();
+        <span class="fn">xQueueSend</span>(data_queue, &amp;d, <span class="num">0</span>);
+        <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">500</span>));
+    }
+}
+
+<span class="cm">/* 消費者任務 */</span>
+<span class="kw">void</span> <span class="fn">comm_task</span>(<span class="kw">void</span> <span class="tp">*</span>p) {
+    SensorData_t d;
+    <span class="kw">for</span> (;;) {
+        <span class="cm">/* 阻塞等待，直到 Queue 有資料 */</span>
+        <span class="kw">if</span> (<span class="fn">xQueueReceive</span>(data_queue, &amp;d, portMAX_DELAY)) {
+            <span class="fn">mqtt_publish</span>(d.temperature, d.humidity);
+        }
+    }
+}</pre>
+            </div>
+            <div class="callout tip">
+              使用 Mutex 而非 Semaphore 來保護共享資源，原因是 Mutex 具有<strong>優先權繼承</strong>機制，可以防止優先權反轉（Priority Inversion）問題。
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 6
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch6">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 06</span></div>
+        <div>
+          <h2 class="chapter-title">嵌入式 Linux 系統</h2>
+          <p class="chapter-subtitle">從 Bootloader 到驅動程式，掌握嵌入式 Linux 開發全流程</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 6.1</div>
+          <div class="lesson-title">嵌入式 Linux 開機流程</div>
+          <div class="lesson-body">
+            <p>嵌入式 Linux 的開機過程分為四個階段：ROM Bootloader → U-Boot → Linux Kernel → Init（systemd/BusyBox）。每個階段都有明確的職責。</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>階段</th><th>程式</th><th>主要任務</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>ROM Bootloader（SoC 內建）</td><td>初始化 DDR、載入 U-Boot 到 RAM</td></tr>
+                  <tr><td>2</td><td>U-Boot</td><td>設定硬體、載入 Kernel + DTB 到記憶體</td></tr>
+                  <tr><td>3</td><td>Linux Kernel</td><td>初始化驅動、掛載 rootfs</td></tr>
+                  <tr><td>4</td><td>Init（PID 1）</td><td>啟動系統服務與應用程式</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">bash — U-Boot 手動開機指令（序列埠操作）</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm"># 在 U-Boot 命令列手動載入核心</span>
+U-Boot> setenv bootargs <span class="str">"console=ttyS0,115200 root=/dev/mmcblk0p2 rw"</span>
+U-Boot> fatload mmc 0:1 0x80008000 zImage
+U-Boot> fatload mmc 0:1 0x83000000 bcm2711-rpi-4-b.dtb
+U-Boot> bootz 0x80008000 - 0x83000000</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 6.2</div>
+          <div class="lesson-title">設備樹（Device Tree）</div>
+          <div class="lesson-body">
+            <p>Device Tree（DT）是一種描述硬體拓撲的資料結構，以 DTS（Device Tree Source）格式撰寫，編譯為 DTB（Device Tree Blob）後由核心讀取。它的出現解決了 ARM 平台硬體描述散落在核心原始碼中的問題。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">dts — 描述一個 I²C 感測器的設備樹節點</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre>&amp;i2c1 {
+    status = <span class="str">"okay"</span>;
+    clock-frequency = &lt;<span class="num">400000</span>&gt;;  <span class="cm">/* 400 kHz Fast Mode */</span>
+
+    bme280: bme280@76 {
+        compatible = <span class="str">"bosch,bme280"</span>;  <span class="cm">/* 對應驅動的 of_match_table */</span>
+        reg = &lt;<span class="num">0x76</span>&gt;;              <span class="cm">/* I²C 7 位元位址 */</span>
+    };
+
+    mpu6050: mpu6050@68 {
+        compatible = <span class="str">"invensense,mpu6050"</span>;
+        reg = &lt;<span class="num">0x68</span>&gt;;
+        interrupt-parent = &lt;&amp;gpio&gt;;
+        interrupts = &lt;<span class="num">17</span> IRQ_TYPE_EDGE_FALLING&gt;;
+    };
+};</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 6.3</div>
+          <div class="lesson-title">字元設備驅動程式開發</div>
+          <div class="lesson-body">
+            <p>Linux 驅動程式是核心模組（<code>.ko</code>）的一種。字元設備驅動實作 <code>file_operations</code> 結構，提供 open、read、write、ioctl 等操作，讓使用者空間程式透過 <code>/dev/xxx</code> 與硬體互動。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — 最小字元設備驅動程式骨架</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="pp">#include</span> <span class="str">&lt;linux/module.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/fs.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/uaccess.h&gt;</span>
+
+<span class="kw">static</span> <span class="tp">int</span> major;
+<span class="kw">static</span> <span class="tp">char</span> kbuf[<span class="num">256</span>];
+
+<span class="kw">static</span> <span class="tp">ssize_t</span> <span class="fn">mydev_read</span>(<span class="kw">struct</span> file <span class="tp">*</span>f,
+                            <span class="tp">char __user</span> <span class="tp">*</span>buf,
+                            <span class="tp">size_t</span> len, <span class="tp">loff_t</span> <span class="tp">*</span>off) {
+    <span class="tp">size_t</span> n = min(len, <span class="kw">sizeof</span>(kbuf));
+    <span class="kw">if</span> (<span class="fn">copy_to_user</span>(buf, kbuf, n))
+        <span class="kw">return</span> -EFAULT;
+    <span class="kw">return</span> n;
+}
+
+<span class="kw">static</span> <span class="kw">const</span> <span class="kw">struct</span> file_operations fops = {
+    .owner = THIS_MODULE,
+    .read  = mydev_read,
+};
+
+<span class="kw">static</span> <span class="tp">int</span> <span class="fn">__init</span> <span class="fn">mydev_init</span>(<span class="kw">void</span>) {
+    major = <span class="fn">register_chrdev</span>(<span class="num">0</span>, <span class="str">"mydev"</span>, &amp;fops);
+    <span class="fn">pr_info</span>(<span class="str">"mydev: registered with major %d\n"</span>, major);
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">__exit</span> <span class="fn">mydev_exit</span>(<span class="kw">void</span>) {
+    <span class="fn">unregister_chrdev</span>(major, <span class="str">"mydev"</span>);
+}
+
+<span class="fn">module_init</span>(mydev_init);
+<span class="fn">module_exit</span>(mydev_exit);
+MODULE_LICENSE(<span class="str">"GPL"</span>);</pre>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">bash — 編譯並載入核心模組</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm"># 在 Raspberry Pi 上編譯</span>
+make -C /lib/modules/$(uname -r)/build \
+     M=$(pwd) modules
+
+<span class="cm"># 載入模組</span>
+sudo insmod mydev.ko
+dmesg | tail -5          <span class="cm"># 查看 pr_info 輸出</span>
+
+<span class="cm"># 建立設備節點（以 dmesg 回報的 major 號為準）</span>
+sudo mknod /dev/mydev c 240 0
+sudo chmod 666 /dev/mydev
+
+<span class="cm"># 從使用者空間讀取</span>
+cat /dev/mydev</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 7
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch7">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 07</span></div>
+        <div>
+          <h2 class="chapter-title">低功耗與安全設計</h2>
+          <p class="chapter-subtitle">省電策略、韌體安全更新與系統可靠性設計</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 7.1</div>
+          <div class="lesson-title">STM32 低功耗模式</div>
+          <div class="lesson-body">
+            <p>STM32 提供多個層級的低功耗模式，功耗由高到低為：Run → Sleep → Stop → Standby。選擇哪個模式取決於需要保留的上下文與喚醒來源。</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>模式</th><th>CPU</th><th>SRAM</th><th>典型電流</th><th>喚醒來源</th></tr></thead>
+                <tbody>
+                  <tr><td>Run</td><td>執行</td><td>保留</td><td>~50 mA</td><td>—</td></tr>
+                  <tr><td>Sleep</td><td>停止</td><td>保留</td><td>~1 mA</td><td>任何中斷</td></tr>
+                  <tr><td>Stop 2</td><td>停止</td><td>保留</td><td>~2 µA</td><td>EXTI、RTC</td></tr>
+                  <tr><td>Standby</td><td>停止</td><td>清除</td><td>~0.3 µA</td><td>WKUP Pin、RTC</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — 進入 Stop 2 模式，RTC 鬧鐘喚醒</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* 設定 RTC 鬧鐘在 30 秒後觸發 */</span>
+RTC_AlarmTypeDef alarm = {<span class="num">0</span>};
+HAL_RTC_GetTime(&amp;hrtc, &amp;alarm.AlarmTime, RTC_FORMAT_BIN);
+alarm.AlarmTime.Seconds =
+    (alarm.AlarmTime.Seconds + <span class="num">30</span>) % <span class="num">60</span>;
+alarm.AlarmMask         = RTC_ALARMMASK_ALL;
+alarm.AlarmMask        &= ~RTC_ALARMMASK_SECONDS;
+alarm.Alarm             = RTC_ALARM_A;
+HAL_RTC_SetAlarm_IT(&amp;hrtc, &amp;alarm, RTC_FORMAT_BIN);
+
+<span class="cm">/* 關閉不需要的周邊節省電力 */</span>
+HAL_UART_DeInit(&amp;huart2);
+__HAL_RCC_GPIOB_CLK_DISABLE();
+
+<span class="cm">/* 進入 Stop 2 模式（最低功耗 Stop，保留 SRAM）*/</span>
+HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
+
+<span class="cm">/* 喚醒後重新初始化時脈（Stop 模式會重設時脈源到 MSI）*/</span>
+<span class="fn">SystemClock_Config</span>();
+HAL_UART_Init(&amp;huart2);</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 7.2</div>
+          <div class="lesson-title">OTA 韌體更新：Dual Bank Bootloader</div>
+          <div class="lesson-body">
+            <p>OTA（Over-The-Air）更新讓嵌入式裝置可以在不拆機的情況下更新韌體。Dual Bank 設計將 Flash 分成兩個區域（Bank A / Bank B），新韌體寫入非執行中的 Bank，驗證後再切換，確保更新失敗時可以回滾。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — Bootloader 韌體版本驗證與跳轉邏輯</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="pp">#define</span> APP_ADDR       <span class="num">0x08020000</span>UL  <span class="cm">/* Bank B 起始位址 */</span>
+<span class="pp">#define</span> MAGIC_WORD     <span class="num">0xDEADBEEF</span>UL  <span class="cm">/* 韌體有效標記 */</span>
+
+<span class="kw">typedef struct</span> {
+    <span class="tp">uint32_t</span> magic;
+    <span class="tp">uint32_t</span> version;
+    <span class="tp">uint32_t</span> crc32;
+    <span class="tp">uint32_t</span> size;
+} FirmwareHeader_t;
+
+<span class="kw">void</span> <span class="fn">bootloader_jump_to_app</span>(<span class="kw">void</span>) {
+    FirmwareHeader_t <span class="tp">*</span>hdr =
+        (FirmwareHeader_t <span class="tp">*</span>)APP_ADDR;
+
+    <span class="cm">/* 驗證魔術字 */</span>
+    <span class="kw">if</span> (hdr-&gt;magic != MAGIC_WORD) {
+        Error_Handler();
+        <span class="kw">return</span>;
+    }
+
+    <span class="cm">/* 驗證 CRC */</span>
+    <span class="tp">uint32_t</span> calc = <span class="fn">crc32_compute</span>(
+        (uint8_t <span class="tp">*</span>)(APP_ADDR + <span class="kw">sizeof</span>(FirmwareHeader_t)),
+        hdr-&gt;size);
+    <span class="kw">if</span> (calc != hdr-&gt;crc32) {
+        Error_Handler();
+        <span class="kw">return</span>;
+    }
+
+    <span class="cm">/* 關閉所有中斷，跳轉到應用程式 */</span>
+    <span class="fn">__disable_irq</span>();
+    <span class="tp">uint32_t</span> app_stack = <span class="tp">*</span>(<span class="tp">uint32_t</span> <span class="tp">*</span>)APP_ADDR;
+    <span class="tp">uint32_t</span> app_reset = <span class="tp">*</span>(<span class="tp">uint32_t</span> <span class="tp">*</span>)(APP_ADDR + <span class="num">4</span>);
+    <span class="fn">__set_MSP</span>(app_stack);
+    ((<span class="kw">void</span> (<span class="tp">*</span>)(<span class="kw">void</span>))app_reset)();
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 7.3</div>
+          <div class="lesson-title">Watchdog 定時器與故障安全</div>
+          <div class="lesson-body">
+            <p>Watchdog（看門狗）是一個獨立運行的計時器，若主程式在期限內沒有「餵狗」（重置計數器），Watchdog 就會觸發系統重置，防止程式跑飛或卡死。STM32 提供 IWDG（獨立看門狗，使用獨立 LSI 時脈）與 WWDG（視窗看門狗）兩種。</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — IWDG 配置：1 秒超時，主迴圈定期餵狗</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/*
+ * IWDG 時脈 = LSI / Prescaler / Reload
+ * LSI ≈ 32 kHz，Prescaler = /256，Reload = 125
+ * 超時 = 125 / (32000/256) = 1.0 秒
+ */</span>
+hiwdg.Instance       = IWDG;
+hiwdg.Init.Prescaler = IWDG_PRESCALER_256;
+hiwdg.Init.Reload    = <span class="num">125</span>;
+HAL_IWDG_Init(&amp;hiwdg);
+
+<span class="cm">/* 主迴圈每次迭代都要餵狗 */</span>
+<span class="kw">while</span> (<span class="num">1</span>) {
+    <span class="fn">do_sensor_reading</span>();       <span class="cm">/* 任何一步卡住超過 1 秒 */</span>
+    <span class="fn">do_data_processing</span>();      <span class="cm">/* 系統就會自動重置      */</span>
+    <span class="fn">do_network_transmit</span>();
+    HAL_IWDG_Refresh(&amp;hiwdg);  <span class="cm">/* 餵狗：重置計數器      */</span>
+}</pre>
+            </div>
+            <div class="callout warn">
+              IWDG 一旦啟動便無法關閉（即使在偵錯模式下仍然運行）。若在偵錯時頻繁碰到 Watchdog 重置，可在 STM32CubeIDE 的 DBGMCU 暫存器中設定 <code>DBG_IWDG_STOP</code>，讓 Watchdog 在偵錯暫停時一併暫停。
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         CHAPTER 8
+    ══════════════════════════════════════════════ -->
+    <section class="chapter-section" id="ch8">
+      <div class="chapter-header">
+        <div><span class="chapter-number">CHAPTER 08</span></div>
+        <div>
+          <h2 class="chapter-title">綜合專案實戰</h2>
+          <p class="chapter-subtitle">整合前七章所學，完成三個端對端嵌入式專案</p>
+        </div>
+      </div>
+
+      <div class="lessons-grid">
+
+        <div class="lesson">
+          <div class="lesson-label">Project 8.1</div>
+          <div class="lesson-title">智慧環境監測站</div>
+          <div class="lesson-body">
+            <p>使用 STM32F407 + FreeRTOS，整合 BME280（溫濕度氣壓）、MQ-135（空氣品質）感測器，資料透過 UART 傳輸至電腦，並以 OLED 顯示即時數值。系統採用低功耗設計，感測任務每 5 秒喚醒一次。</p>
+
+            <div class="section-divider">
+              <span class="section-divider-label">系統架構</span>
+              <div class="section-divider-line"></div>
+            </div>
+
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>RTOS 任務</th><th>優先權</th><th>週期</th><th>職責</th></tr></thead>
+                <tbody>
+                  <tr><td>SensorTask</td><td>3（最高）</td><td>5000 ms</td><td>讀取感測器，送入 Queue</td></tr>
+                  <tr><td>DisplayTask</td><td>2</td><td>500 ms</td><td>從 Queue 取資料，更新 OLED</td></tr>
+                  <tr><td>CommTask</td><td>1</td><td>事件驅動</td><td>UART 傳輸，處理指令</td></tr>
+                  <tr><td>IdleHook</td><td>0（最低）</td><td>—</td><td>進入 Sleep 模式</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — SensorTask 核心邏輯</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="kw">void</span> <span class="fn">SensorTask</span>(<span class="kw">void</span> <span class="tp">*</span>arg) {
+    EnvData_t data;
+    <span class="kw">for</span> (;;) {
+        data.temperature = <span class="fn">bme280_get_temperature</span>();
+        data.humidity    = <span class="fn">bme280_get_humidity</span>();
+        data.pressure    = <span class="fn">bme280_get_pressure</span>();
+        data.aqi         = <span class="fn">mq135_get_aqi</span>();
+        data.tick        = <span class="fn">xTaskGetTickCount</span>();
+
+        <span class="cm">/* 送入 Queue，不等待（若滿則丟棄最舊資料）*/</span>
+        <span class="kw">if</span> (<span class="fn">xQueueSend</span>(env_queue, &amp;data, <span class="num">0</span>) != pdTRUE) {
+            EnvData_t discard;
+            <span class="fn">xQueueReceive</span>(env_queue, &amp;discard, <span class="num">0</span>);
+            <span class="fn">xQueueSend</span>(env_queue, &amp;data, <span class="num">0</span>);
+        }
+        <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">5000</span>));
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Project 8.2</div>
+          <div class="lesson-title">無刷馬達 FOC 控制器</div>
+          <div class="lesson-body">
+            <p>以 STM32G474（含高解析度 Timer）實作 BLDC 無刷馬達的磁場導向控制（FOC），整合霍爾感測器位置回饋、ADC 電流取樣、PID 速度閉環，並透過 CAN Bus 接收上位機速度指令。</p>
+
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>模組</th><th>技術</th><th>更新頻率</th></tr></thead>
+                <tbody>
+                  <tr><td>電流閉環</td><td>ADC + DMA + Clarke/Park 轉換</td><td>20 kHz</td></tr>
+                  <tr><td>速度閉環</td><td>霍爾感測器 + PID</td><td>1 kHz</td></tr>
+                  <tr><td>指令接收</td><td>CAN Bus（500 kbps）</td><td>事件驅動</td></tr>
+                  <tr><td>保護機制</td><td>過流、過溫、欠壓偵測</td><td>10 kHz</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">c — CAN Bus 接收速度指令</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="cm">/* CAN 訊息格式：ID=0x101，Data[0~1] = 目標 RPM（int16）*/</span>
+<span class="kw">void</span> <span class="fn">HAL_CAN_RxFifo0MsgPendingCallback</span>(CAN_HandleTypeDef <span class="tp">*</span>hcan) {
+    CAN_RxHeaderTypeDef hdr;
+    <span class="tp">uint8_t</span> data[<span class="num">8</span>];
+
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &amp;hdr, data);
+
+    <span class="kw">if</span> (hdr.StdId == <span class="num">0x101</span>) {
+        <span class="tp">int16_t</span> target_rpm = (<span class="tp">int16_t</span>)((data[<span class="num">0</span>] &lt;&lt; <span class="num">8</span>) | data[<span class="num">1</span>]);
+        <span class="fn">motor_set_target_rpm</span>(target_rpm);
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Project 8.3</div>
+          <div class="lesson-title">嵌入式 Linux IoT 閘道器</div>
+          <div class="lesson-body">
+            <p>以 Raspberry Pi 4 + Buildroot 建構最小化 Linux 系統。閘道器透過 I²C 收集感測器資料，以 MQTT over TLS 傳輸至雲端，並支援透過 HTTPS OTA 更新整個 rootfs（使用 SWUpdate）。</p>
+
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">python — MQTT 發布感測器資料（paho-mqtt）</span>
+                <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+              </div>
+              <pre><span class="kw">import</span> paho.mqtt.client <span class="kw">as</span> mqtt
+<span class="kw">import</span> json, time, smbus2
+
+BROKER  = <span class="str">"mqtt.example.com"</span>
+PORT    = <span class="num">8883</span>   <span class="cm"># TLS</span>
+TOPIC   = <span class="str">"gateway/env/data"</span>
+CERT    = <span class="str">"/etc/certs/client.crt"</span>
+KEY     = <span class="str">"/etc/certs/client.key"</span>
+CA      = <span class="str">"/etc/certs/ca.crt"</span>
+
+client = mqtt.Client(client_id=<span class="str">"rpi-gw-001"</span>)
+client.tls_set(ca_certs=CA, certfile=CERT, keyfile=KEY)
+client.connect(BROKER, PORT, keepalive=<span class="num">60</span>)
+client.loop_start()
+
+bus = smbus2.SMBus(<span class="num">1</span>)
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    raw = bus.read_i2c_block_data(<span class="num">0x76</span>, <span class="num">0xF7</span>, <span class="num">8</span>)
+    temp = <span class="fn">bme280_compensate_temperature</span>(raw)
+
+    payload = json.dumps({
+        <span class="str">"device_id"</span>: <span class="str">"rpi-gw-001"</span>,
+        <span class="str">"temperature"</span>: round(temp, <span class="num">2</span>),
+        <span class="str">"ts"</span>: int(time.time())
+    })
+
+    client.publish(TOPIC, payload, qos=<span class="num">1</span>)
+    time.sleep(<span class="num">10</span>)</pre>
+            </div>
+            <div class="callout tip">
+              使用 Buildroot 的 <code>BR2_PACKAGE_SWUPDATE</code> 選項整合 SWUpdate，可以實現帶簽名驗證的雙 rootfs OTA 更新，確保即使更新中斷也能恢復到上一個可用版本。
+            </div>
+          </div>
+        </div>
+
+        <div class="lesson">
+          <div class="lesson-label">Lesson 8.4</div>
+          <div class="lesson-title">嵌入式職涯發展與進階資源</div>
+          <div class="lesson-body">
+            <p>完成本課程後，建議深入以下方向：</p>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>方向</th><th>推薦資源</th></tr></thead>
+                <tbody>
+                  <tr><td>功能安全</td><td>ISO 26262（汽車）、IEC 61508（工業）</td></tr>
+                  <tr><td>無線通訊</td><td>BLE / Wi-Fi / LoRa / Zigbee 協定棧</td></tr>
+                  <tr><td>RTOS 深度</td><td>Zephyr RTOS 官方文件</td></tr>
+                  <tr><td>Linux 核心</td><td><em>Linux Device Drivers</em>（Corbet et al.）</td></tr>
+                  <tr><td>韌體安全</td><td>PSA Certified、ARM TrustZone</td></tr>
+                  <tr><td>FPGA</td><td>Verilog / VHDL 基礎，Xilinx Vivado</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom nav -->
+    <div class="chapter-nav">
+      <button class="nav-btn" id="btn-prev" onclick="navPrev()" disabled>
+        &larr; 上一章
+      </button>
+      <span class="chapter-indicator" id="nav-indicator">總覽</span>
+      <button class="nav-btn nav-btn-primary" id="btn-next" onclick="navNext()">
+        開始課程 &rarr;
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let current = 0; // 0 = overview, 1-8 = chapters
+  const total = 8;
+  const visited = new Set();
+
+  function updateNav() {
+    const prevBtn = document.getElementById('btn-prev');
+    const nextBtn = document.getElementById('btn-next');
+    const indicator = document.getElementById('nav-indicator');
+
+    prevBtn.disabled = current === 0;
+
+    if (current === 0) {
+      indicator.textContent = '課程總覽';
+      nextBtn.textContent = '開始課程 →';
+    } else {
+      indicator.textContent = current + ' / ' + total;
+      nextBtn.textContent = current === total ? '課程完成' : '下一章 →';
+      nextBtn.disabled = current === total;
+    }
+
+    const navBtns = document.querySelectorAll('.nav-chapter');
+    navBtns.forEach((b, i) => {
+      b.classList.toggle('active', i === current);
+    });
+
+    if (current > 0) visited.add(current);
+    const pct = (visited.size / total * 100).toFixed(0);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = visited.size + ' / ' + total;
+  }
+
+  function showOverview() {
+    current = 0;
+    document.getElementById('overview').classList.remove('hidden');
+    document.querySelectorAll('.chapter-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('main').scrollTo(0, 0);
+    updateNav();
+  }
+
+  function showChapter(n) {
+    current = n;
+    document.getElementById('overview').classList.add('hidden');
+    document.querySelectorAll('.chapter-section').forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById('ch' + n);
+    if (sec) sec.classList.add('active');
+    document.getElementById('main').scrollTo(0, 0);
+    updateNav();
+  }
+
+  function navPrev() {
+    if (current === 1) showOverview();
+    else if (current > 1) showChapter(current - 1);
+  }
+
+  function navNext() {
+    if (current === 0) showChapter(1);
+    else if (current < total) showChapter(current + 1);
+  }
+
+  updateNav();
+</script>
+</body>
+</html>
