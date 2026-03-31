@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 1 — 嵌入式系統概論 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 1.75rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+
+  .course-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .sidebar-week-title {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+
+  .nav-section-label {
+    padding: 0.5rem 1.5rem 0.25rem;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-lesson {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active {
+    color: var(--accent);
+    background: var(--bg3);
+    border-left-color: var(--accent);
+  }
+
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    min-width: 22px;
+  }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .progress-bar-wrap {
+    background: var(--bg4);
+    border-radius: 2px;
+    height: 3px;
+  }
+
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 3px;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Main ── */
+  .main {
+    overflow-y: auto;
+    height: 100vh;
+    scroll-behavior: smooth;
+  }
+
+  /* ── Week hero ── */
+  .week-hero {
+    padding: 3.5rem 4rem 2.75rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .week-hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hero-eyebrow::after {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .week-title {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .week-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+    color: var(--dim);
+  }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .tag-setup  { border-color: rgba(200,169,110,0.35); color: var(--accent); }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Objectives ── */
+  .objectives-bar {
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg2);
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .obj-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding-top: 3px;
+    min-width: 60px;
+  }
+
+  .obj-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .obj-item {
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .obj-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── Lesson sections ── */
+  .lesson-section {
+    padding: 3rem 4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lesson-section:last-of-type { border-bottom: none; }
+
+  .lesson-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .lesson-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(200,169,110,0.1);
+    border: 1px solid rgba(200,169,110,0.25);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 5px;
+  }
+
+  .lesson-header-text {}
+
+  .lesson-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+  }
+
+  .lesson-desc {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .lesson-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ── Sub-section ── */
+  .sub-section {}
+
+  .sub-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent2);
+  }
+
+  .body-text {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.85;
+    padding-left: 1rem;
+  }
+
+  .body-text + .body-text { margin-top: 0.75rem; }
+
+  strong.hl { color: var(--text); }
+
+  /* ── Section divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+  }
+
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(143,168,200,0.06);
+    border-radius: 0 4px 4px 0;
+    padding: 0.875rem 1.1rem 0.875rem 1.25rem;
+    margin-left: 1rem;
+    font-size: 13.5px;
+    color: #a8bcd4;
+    line-height: 1.75;
+  }
+
+  .callout.warn {
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.06);
+    color: #c8b88a;
+  }
+
+  .callout.tip {
+    border-color: var(--green);
+    background: rgba(106,173,142,0.06);
+    color: #7ec4a0;
+  }
+
+  .callout.danger {
+    border-color: var(--red);
+    background: rgba(200,106,106,0.06);
+    color: #d48a8a;
+  }
+
+  .callout-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+    opacity: 0.75;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-left: 1rem;
+  }
+
+  .code-header {
+    padding: 0.45rem 1rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  /* ── Table ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    margin-left: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 0.55rem 1rem;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line2);
+  }
+
+  tbody td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+
+  td code, p code, li code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg4);
+    color: var(--accent2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+  }
+
+  td strong { color: var(--text); }
+
+  /* ── List ── */
+  .body-list {
+    padding-left: 2rem;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.85;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .body-list li::marker { color: var(--dim); }
+
+  /* ── Diagram / visual block ── */
+  .diagram-block {
+    margin-left: 1rem;
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    padding: 1.5rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+
+  /* ── Checklist ── */
+  .checklist {
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--bg4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1.25rem;
+    border: 1px solid var(--line2);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary {
+    background: rgba(200,169,110,0.1);
+    border-color: rgba(200,169,110,0.4);
+    color: var(--accent);
+  }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+
+  .week-indicator {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 2L4 6l4 4"/>
+        </svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 01</span>
+      <div class="sidebar-week-title">嵌入式系統概論</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">本週課程</div>
+      <a class="nav-lesson active" href="#lesson-1-1">
+        <span class="nav-num">1.1</span>定義、特性與分類
+      </a>
+      <a class="nav-lesson" href="#lesson-1-2">
+        <span class="nav-num">1.2</span>應用領域與市場現況
+      </a>
+      <a class="nav-lesson" href="#lesson-1-3">
+        <span class="nav-num">1.3</span>處理器架構全覽
+      </a>
+      <a class="nav-lesson" href="#lesson-1-4">
+        <span class="nav-num">1.4</span>開發流程與工具鏈
+      </a>
+      <a class="nav-lesson" href="#lesson-1-5">
+        <span class="nav-num">1.5</span>環境建立與第一個程式
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>本週完成度</span>
+        <span id="progress-text">0 / 5</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Embedded Systems — Week 01</div>
+      <h1 class="week-title">嵌入式系統概論</h1>
+      <p class="week-subtitle">
+        從最基本的問題出發：什麼是嵌入式系統？它和通用電腦有什麼本質區別？
+        本週建立整個課程的底層認知框架，涵蓋定義、應用場景、處理器架構選型，
+        以及完整的開發環境建立流程。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-theory">理論</span>
+        <span class="tag tag-setup">環境建立</span>
+        <span class="tag tag-lab">動手實作</span>
+        <span class="tag">5 堂課</span>
+        <span class="tag">約 6 小時</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">5</span>
+          <span class="stat-label">堂課</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">3</span>
+          <span class="stat-label">程式範例</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">ARM Cortex-M4</span>
+          <span class="stat-label">主要平台</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">STM32F446RE</span>
+          <span class="stat-label">開發板</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <div class="obj-label">學習目標</div>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>說明嵌入式系統的定義與核心特性</div>
+        <div class="obj-item"><div class="obj-dot"></div>辨別 Hard RT / Soft RT 即時性分類</div>
+        <div class="obj-item"><div class="obj-dot"></div>比較 ARM / AVR / RISC-V 架構差異</div>
+        <div class="obj-item"><div class="obj-dot"></div>建立完整 ARM GCC 工具鏈與 OpenOCD</div>
+        <div class="obj-item"><div class="obj-dot"></div>撰寫並燒錄第一個 LED Blink 程式</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 1.1
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-1-1">
+      <div class="lesson-header">
+        <div class="lesson-badge">LESSON 1.1</div>
+        <div class="lesson-header-text">
+          <div class="lesson-title">嵌入式系統的定義、特性與分類</div>
+          <div class="lesson-desc">從根本問題出發，建立對嵌入式世界的準確認識</div>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">什麼是嵌入式系統？</div>
+          <p class="body-text">
+            <strong class="hl">嵌入式系統（Embedded System）</strong>是以特定應用為目標而設計的計算系統，
+            通常嵌入在更大型的機械或電子裝置之中，成為整體產品的一部分。它的核心目標不是提供通用計算能力，
+            而是在嚴格的資源與環境限制下，可靠地完成一組固定任務。
+          </p>
+          <p class="body-text">
+            最簡單的判斷方式：如果一台電腦「被設計來做某幾件特定的事，而且通常不會被拿去做其他事」，
+            它就很可能是嵌入式系統。你的微波爐控制板、汽車的引擎控制單元（ECU）、門禁卡讀卡機，
+            都是嵌入式系統的典型例子。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">嵌入式系統的五大核心特性</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>特性</th>
+                  <th>說明</th>
+                  <th>實際影響</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>功能專一性</strong></td>
+                  <td>針對單一或少數任務優化</td>
+                  <td>軟體通常在出廠前固化，不允許使用者自由安裝程式</td>
+                </tr>
+                <tr>
+                  <td><strong>資源受限性</strong></td>
+                  <td>RAM 可能只有數 KB，Flash 數十至數百 KB</td>
+                  <td>每一個位元組都需要精心管理，動態記憶體分配須謹慎</td>
+                </tr>
+                <tr>
+                  <td><strong>即時性需求</strong></td>
+                  <td>必須在限定時間內回應外部事件</td>
+                  <td>任務排程、中斷延遲、最壞情況執行時間（WCET）成為設計核心</td>
+                </tr>
+                <tr>
+                  <td><strong>可靠性與穩定性</strong></td>
+                  <td>某些場合必須連續運行數年不重啟</td>
+                  <td>需要 Watchdog、ECC 記憶體、Fail-safe 機制</td>
+                </tr>
+                <tr>
+                  <td><strong>功耗敏感性</strong></td>
+                  <td>IoT 節點可能由電池供電</td>
+                  <td>睡眠模式設計、動態電壓頻率調整（DVFS）成為必要技能</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">與通用電腦的本質差異</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>維度</th><th>通用電腦</th><th>嵌入式系統</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>主要用途</td><td>多工、通用運算</td><td>固定應用場景</td></tr>
+                <tr><td>記憶體</td><td>RAM 16 GB 起跳</td><td>RAM 幾 KB 到幾 MB</td></tr>
+                <tr><td>作業系統</td><td>Windows / macOS / Linux</td><td>Bare-metal / RTOS / 嵌入式 Linux</td></tr>
+                <tr><td>儲存</td><td>SSD 幾百 GB</td><td>Flash 幾十 KB 到幾十 MB</td></tr>
+                <tr><td>功耗</td><td>數十至數百瓦</td><td>微瓦至數瓦</td></tr>
+                <tr><td>開機時間</td><td>幾十秒可接受</td><td>可能需要幾毫秒完成初始化</td></tr>
+                <tr><td>即時回應</td><td>通常無硬性要求</td><td>常有嚴格 deadline</td></tr>
+                <tr><td>使用者介面</td><td>豐富 GUI</td><td>可能只有幾個 LED 或無介面</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-title">常見誤解</div>
+          「即時（Real-time）」並不等於「快速（Fast）」。
+          即時系統的核心要求是在<strong>確定且可預期的時間限制</strong>內完成任務。
+          一個 1 秒內必須完成的系統，和一個 1 毫秒內必須完成的系統，都可以是即時系統。
+          關鍵是「<strong>確定性（Determinism）</strong>」，而非絕對速度。
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">即時性分類：Hard RT vs. Soft RT vs. Firm RT</div>
+          <p class="body-text">
+            根據錯過 deadline 的後果嚴重程度，即時系統分為三類：
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>類別</th><th>錯過 Deadline 的後果</th><th>典型應用</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Hard Real-Time</strong></td>
+                  <td>系統失敗，可能造成生命財產危險</td>
+                  <td>汽車 ABS、飛機飛控、心律調整器</td>
+                </tr>
+                <tr>
+                  <td><strong>Firm Real-Time</strong></td>
+                  <td>任務結果作廢，不造成危害但品質下降</td>
+                  <td>工業機器人、數位訊號處理</td>
+                </tr>
+                <tr>
+                  <td><strong>Soft Real-Time</strong></td>
+                  <td>效能降低，使用者體驗變差但可接受</td>
+                  <td>視訊串流、遊戲渲染、UI 動畫</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">本課程定位</div>
+          本課程的目標平台 STM32F4 系列，主要用於需要 <strong>Hard Real-Time</strong> 的工業控制與消費性電子場景。
+          第五章的 FreeRTOS 實作將深入探討如何設計具確定性的即時系統。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 1.2
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-1-2">
+      <div class="lesson-header">
+        <div class="lesson-badge">LESSON 1.2</div>
+        <div class="lesson-header-text">
+          <div class="lesson-title">應用領域與市場現況</div>
+          <div class="lesson-desc">了解嵌入式技術在各產業的滲透深度，以及各領域的技術要求差異</div>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">汽車電子（Automotive）</div>
+          <p class="body-text">
+            現代汽車是嵌入式系統密度最高的消費品之一。一輛高階電動車中，ECU（Electronic Control Unit）的數量可達
+            <strong class="hl">150 個以上</strong>，分別控制引擎、變速箱、ABS、氣囊、電動窗、車身穩定系統（ESC）、
+            ADAS 感測器融合等。這些 ECU 透過 CAN Bus、LIN Bus、FlexRay 和越來越普及的車載乙太網路（Automotive Ethernet）互相通訊。
+          </p>
+          <p class="body-text">
+            汽車嵌入式開發最關鍵的規範是 <strong class="hl">ISO 26262</strong>（功能安全）和 <strong class="hl">AUTOSAR</strong>（軟體架構標準）。
+            前者要求開發過程中的每個環節都要有文件與驗證，後者定義了 BSW（基礎軟體）的分層架構，
+            使不同供應商的模組可以互通。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">工業控制（Industrial Automation）</div>
+          <p class="body-text">
+            工廠自動化場景對確定性即時回應的要求極高。PLC（可程式邏輯控制器）、伺服驅動器、機器視覺系統
+            都是典型的工業嵌入式產品。工業環境的特殊挑戰在於電磁干擾（EMI）、寬溫工作範圍（-40°C 至 +85°C 或更高）、
+            以及長達 10~20 年的產品生命週期。
+          </p>
+          <p class="body-text">
+            工業通訊協定以 <strong class="hl">Modbus</strong>、<strong class="hl">PROFIBUS</strong>、<strong class="hl">EtherCAT</strong> 為主流，
+            近年 TSN（Time-Sensitive Networking）正在推動工業以太網的實時化。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">醫療設備（Medical Devices）</div>
+          <p class="body-text">
+            醫療嵌入式設備的核心要求是「絕對可靠」。一台輸液幫浦、呼吸機或除顫器，容不得任何軟體錯誤。
+            除了功能安全（<strong class="hl">IEC 62304</strong> 醫療軟體生命週期標準）之外，
+            資料安全（患者隱私、HIPAA）和電磁兼容性（EMC）也是強制要求。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">物聯網與消費性電子（IoT &amp; Consumer）</div>
+          <p class="body-text">
+            IoT 感測器節點的典型需求是：極低功耗（電池供電數年）、無線連接（BLE、Zigbee、LoRa、NB-IoT）、
+            以及安全的 OTA（Over-The-Air）韌體更新能力。消費性電子則更強調成本控制、尺寸最小化，
+            以及豐富的用戶體驗（觸控、語音、顯示）。
+          </p>
+        </div>
+
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr><th>領域</th><th>典型產品</th><th>關鍵技術要求</th><th>主要標準</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>汽車</strong></td>
+                <td>ECU、ADAS、BMS</td>
+                <td>功能安全、確定性即時、CAN Bus</td>
+                <td>ISO 26262, AUTOSAR</td>
+              </tr>
+              <tr>
+                <td><strong>工業</strong></td>
+                <td>PLC、伺服驅動、感測器</td>
+                <td>寬溫、抗干擾、長壽命</td>
+                <td>IEC 61131, EtherCAT</td>
+              </tr>
+              <tr>
+                <td><strong>醫療</strong></td>
+                <td>輸液幫浦、監護儀、植入式裝置</td>
+                <td>極高可靠性、軟體生命週期管理</td>
+                <td>IEC 62304, FDA 21 CFR</td>
+              </tr>
+              <tr>
+                <td><strong>消費性電子</strong></td>
+                <td>智慧手錶、TWS 耳機、家電</td>
+                <td>低功耗、低成本、快速量產</td>
+                <td>FCC, CE</td>
+              </tr>
+              <tr>
+                <td><strong>IoT</strong></td>
+                <td>感測節點、智慧閘道器</td>
+                <td>無線連接、OTA 更新、端點安全</td>
+                <td>Matter, PSA Certified</td>
+              </tr>
+              <tr>
+                <td><strong>航太國防</strong></td>
+                <td>飛控電腦、雷達、衛星</td>
+                <td>輻射加固、三重冗餘、DO-178C</td>
+                <td>DO-178C, MIL-STD</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 1.3
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-1-3">
+      <div class="lesson-header">
+        <div class="lesson-badge">LESSON 1.3</div>
+        <div class="lesson-header-text">
+          <div class="lesson-title">主流處理器架構全覽</div>
+          <div class="lesson-desc">了解 ARM、AVR、RISC-V 的架構差異與選型邏輯</div>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">指令集架構（ISA）的基本概念</div>
+          <p class="body-text">
+            <strong class="hl">指令集架構（Instruction Set Architecture, ISA）</strong>定義了處理器能理解的機器指令集合，
+            包括指令格式、暫存器數量與寬度、定址模式、以及記憶體模型。ISA 是硬體與軟體之間的契約介面。
+          </p>
+          <p class="body-text">
+            現代嵌入式 ISA 主要分為兩大設計哲學：
+            <strong class="hl">RISC（精簡指令集）</strong>— 指令數量少、格式固定、執行週期可預測，有利於編譯器最佳化；
+            <strong class="hl">CISC（複雜指令集）</strong>— 單一指令能完成複雜操作，程式碼密度高，x86 是代表。
+            嵌入式領域幾乎由 RISC 架構主導。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">ARM Cortex 系列</div>
+          <p class="body-text">
+            ARM Holdings 設計 ISA 但不自行製造晶片，而是授權給 ST、NXP、Nordic、TI 等廠商。
+            這種 IP 授權模式使 ARM 架構成為全球嵌入式市場的絕對主流。
+          </p>
+          <p class="body-text">
+            ARM 的 Cortex 系列針對不同應用分為三個剖面（Profile）：
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>系列</th><th>定位</th><th>代表核心</th><th>典型應用</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Cortex-A</strong></td>
+                  <td>高性能應用處理器，支援 MMU，可跑完整 Linux</td>
+                  <td>A53, A72, A55</td>
+                  <td>Raspberry Pi, 手機 SoC, 車載資訊娛樂</td>
+                </tr>
+                <tr>
+                  <td><strong>Cortex-R</strong></td>
+                  <td>高確定性即時，支援 MPU，用於安全關鍵</td>
+                  <td>R5, R8</td>
+                  <td>硬碟控制器、汽車 ABS、工業伺服</td>
+                </tr>
+                <tr>
+                  <td><strong>Cortex-M</strong></td>
+                  <td>微控制器專用，低功耗、低成本、易開發</td>
+                  <td>M0, M0+, M3, M4, M7, M33</td>
+                  <td>STM32、nRF52、RP2040 等絕大多數 MCU</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body-text" style="margin-top:1rem">
+            本課程使用的 <strong class="hl">STM32F446RE</strong> 搭載 Cortex-M4F 核心，
+            「F」代表內建 FPU（浮點運算單元），主頻最高 180 MHz，
+            具有單精度浮點硬體加速，適合感測器訊號處理與馬達控制。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Cortex-M 子系列比較</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>核心</th><th>架構</th><th>指令集</th><th>FPU</th><th>DSP</th><th>MPU</th><th>典型用途</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>M0 / M0+</td>
+                  <td>ARMv6-M</td>
+                  <td>Thumb</td>
+                  <td>無</td><td>無</td><td>可選</td>
+                  <td>超低成本、超低功耗感測器</td>
+                </tr>
+                <tr>
+                  <td>M3</td>
+                  <td>ARMv7-M</td>
+                  <td>Thumb-2</td>
+                  <td>無</td><td>部分</td><td>有</td>
+                  <td>通用 MCU，豐富周邊整合</td>
+                </tr>
+                <tr>
+                  <td><strong>M4F</strong></td>
+                  <td>ARMv7E-M</td>
+                  <td>Thumb-2</td>
+                  <td>單精度</td><td>全部</td><td>有</td>
+                  <td>DSP、馬達控制、音訊處理</td>
+                </tr>
+                <tr>
+                  <td>M7F</td>
+                  <td>ARMv7E-M</td>
+                  <td>Thumb-2</td>
+                  <td>單+雙精度</td><td>全部</td><td>有</td>
+                  <td>高效能 MCU，替代 DSP</td>
+                </tr>
+                <tr>
+                  <td>M33</td>
+                  <td>ARMv8-M</td>
+                  <td>Thumb-2</td>
+                  <td>可選</td><td>可選</td><td>有</td>
+                  <td>TrustZone 安全隔離，IoT 安全</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">AVR 架構</div>
+          <p class="body-text">
+            Atmel（現為 Microchip）的 AVR 是一款 <strong class="hl">8 位元 RISC</strong> 架構，以「哈佛架構」設計聞名
+            ——程式記憶體（Flash）與資料記憶體（SRAM）分離，各有獨立匯流排，提升取指效率。
+            AVR 的指令集設計讓大多數指令在單一時脈週期完成，非常適合低功耗應用。
+          </p>
+          <p class="body-text">
+            Arduino Uno 使用的 <strong class="hl">ATmega328P</strong>（16 MHz、32 KB Flash、2 KB RAM）是
+            最廣為人知的 AVR 成員，也是嵌入式入門的重要學習工具。
+            然而 8 位元架構在處理 32 位元資料時效率較低，且缺乏硬體浮點運算，
+            在效能需求較高的場合已逐漸被 ARM Cortex-M 取代。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">RISC-V 開放架構</div>
+          <p class="body-text">
+            RISC-V 是由 UC Berkeley 於 2010 年發起的<strong class="hl">開放指令集架構</strong>，
+            任何人都可以免費實作、修改、甚至商用，無需支付授權費。
+            這使得 RISC-V 在 IoT、邊緣 AI 和開源硬體社群中快速崛起。
+          </p>
+          <p class="body-text">
+            RISC-V 採用模組化設計：基礎整數指令集（RV32I / RV64I）加上可選擴充（M：乘除法、
+            A：原子操作、F/D：浮點、C：壓縮指令），靈活度極高。
+            代表性 MCU 包括 GigaDevice 的 <strong class="hl">GD32VF103</strong> 以及近年爆紅的 ESP32-C3（內建 Wi-Fi + BLE 的 RISC-V SoC）。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">架構選型建議</div>
+          <div class="diagram-block">
+<span class="d-dim">需要跑 Linux？</span>
+  ├── YES ─── <span class="d-acc">ARM Cortex-A</span>  ( Raspberry Pi 4 / i.MX8 / RK3568 )
+  └── NO  ─── 需要即時控制？
+               ├── 安全關鍵 ( 汽車 / 航太 ) ─── <span class="d-acc">ARM Cortex-R</span>
+               └── 一般 MCU 控制
+                    ├── 成本極敏感 / 超低功耗 ─── <span class="d-grn">ARM Cortex-M0+</span>
+                    ├── 通用場景            ─── <span class="d-grn">ARM Cortex-M4F</span>  ← 本課程
+                    ├── 高效能 / 雙精度浮點  ─── <span class="d-grn">ARM Cortex-M7</span>
+                    ├── 需要 TrustZone 安全  ─── <span class="d-grn">ARM Cortex-M33</span>
+                    └── 開源優先 / IoT SoC   ─── <span class="d-blu">RISC-V ( ESP32-C3 / GD32VF )</span>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">課程選型說明</div>
+          本課程選擇 <strong>STM32F446RE（Cortex-M4F）</strong> 作為主要實作平台，原因如下：
+          社群資源豐富、HAL 庫完整、ST-Link 偵錯器普及、覆蓋了大量工業與消費性電子實際應用場景，
+          且 Cortex-M4F 的 DSP 指令與 FPU 使後續的訊號處理章節可以直接在硬體上實測。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 1.4
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-1-4">
+      <div class="lesson-header">
+        <div class="lesson-badge">LESSON 1.4</div>
+        <div class="lesson-header-text">
+          <div class="lesson-title">嵌入式開發流程與工具鏈</div>
+          <div class="lesson-desc">從原始碼到燒錄進晶片，了解每個環節的工具與職責</div>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">嵌入式開發的完整流程</div>
+          <p class="body-text">
+            嵌入式開發與桌面應用開發最大的不同，在於程式碼的執行環境（目標機器）和開發環境（主機）通常不同。
+            這種模式稱為<strong class="hl">交叉編譯（Cross-Compilation）</strong>。
+          </p>
+          <div class="diagram-block">
+<span class="d-dim">開發主機（x86-64 Linux / macOS）</span>
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  原始碼 (.c / .h)                               │
+│     │                                           │
+│     ▼                                           │
+│  <span class="d-acc">arm-none-eabi-gcc</span>  ← 交叉編譯器                │
+│     │  編譯 + 組譯                              │
+│     ▼                                           │
+│  目的檔 (.o)                                    │
+│     │                                           │
+│     ▼                                           │
+│  <span class="d-acc">arm-none-eabi-ld</span>   ← 連結器（配合 .ld 腳本）   │
+│     │  連結 + 定址                              │
+│     ▼                                           │
+│  ELF 執行檔 (.elf)                              │
+│     │                                           │
+│     ├─ <span class="d-grn">arm-none-eabi-objcopy</span> → Binary / HEX (.bin/.hex)
+│     └─ <span class="d-grn">arm-none-eabi-size</span>   → 查看各段大小       │
+│                                                 │
+└─────────────────────┬───────────────────────────┘
+                      │ USB / SWD (ST-Link)
+                      ▼
+            <span class="d-dim">目標板（STM32F446RE）</span>
+            ┌─────────────────────┐
+            │  <span class="d-blu">OpenOCD</span> / <span class="d-blu">ST-Link</span>  │ ← 燒錄 + 偵錯伺服器
+            │     Flash 燒錄      │
+            │     GDB 遠端偵錯    │
+            └─────────────────────┘
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">工具鏈各元件說明</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>工具</th><th>用途</th><th>輸入</th><th>輸出</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>arm-none-eabi-gcc</code></td>
+                  <td>C/C++ 交叉編譯器</td>
+                  <td>.c / .cpp</td>
+                  <td>.o（目的檔）</td>
+                </tr>
+                <tr>
+                  <td><code>arm-none-eabi-as</code></td>
+                  <td>組語組譯器</td>
+                  <td>.s / .S</td>
+                  <td>.o</td>
+                </tr>
+                <tr>
+                  <td><code>arm-none-eabi-ld</code></td>
+                  <td>連結器，配合 linker script 分配記憶體位址</td>
+                  <td>.o + .ld</td>
+                  <td>.elf</td>
+                </tr>
+                <tr>
+                  <td><code>arm-none-eabi-objcopy</code></td>
+                  <td>格式轉換，從 ELF 提取純二進位或 Intel HEX</td>
+                  <td>.elf</td>
+                  <td>.bin / .hex</td>
+                </tr>
+                <tr>
+                  <td><code>arm-none-eabi-size</code></td>
+                  <td>顯示各段（.text / .data / .bss）大小</td>
+                  <td>.elf</td>
+                  <td>尺寸報告</td>
+                </tr>
+                <tr>
+                  <td><code>arm-none-eabi-gdb</code></td>
+                  <td>GDB 偵錯器，連接 OpenOCD 進行遠端偵錯</td>
+                  <td>.elf</td>
+                  <td>互動式偵錯</td>
+                </tr>
+                <tr>
+                  <td><code>openocd</code></td>
+                  <td>開源偵錯介面，橋接 GDB 與硬體偵錯器</td>
+                  <td>設定檔</td>
+                  <td>GDB Server</td>
+                </tr>
+                <tr>
+                  <td><code>st-flash</code></td>
+                  <td>ST-Link 燒錄工具，直接寫入 Flash</td>
+                  <td>.bin</td>
+                  <td>燒錄完成</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">連結腳本（Linker Script）基本概念</div>
+          <p class="body-text">
+            連結腳本（<code>.ld</code> 檔案）告訴連結器如何將各個目的檔的段（Section）
+            對應到目標晶片的物理記憶體位址。這是嵌入式開發中最獨特也最重要的概念之一。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">linker script — STM32F446RE.ld（簡化版）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* 定義記憶體區域：Flash 起始 0x08000000，大小 512 KB
+                        RAM  起始 0x20000000，大小 128 KB */</span>
+MEMORY
+{
+  FLASH  (rx)  : ORIGIN = <span class="num">0x08000000</span>, LENGTH = <span class="num">512K</span>
+  RAM    (rwx) : ORIGIN = <span class="num">0x20000000</span>, LENGTH = <span class="num">128K</span>
+}
+
+SECTIONS
+{
+  <span class="cm">/* .text 段：可執行程式碼，放進 Flash */</span>
+  .text :
+  {
+    KEEP(*(.isr_vector))   <span class="cm">/* 中斷向量表必須放在最前面 */</span>
+    *(.text*)
+    *(.rodata*)            <span class="cm">/* 唯讀常數也放 Flash */</span>
+  } &gt; FLASH
+
+  <span class="cm">/* .data 段：已初始化全域變數，執行時複製到 RAM */</span>
+  .data :
+  {
+    _sdata = .;
+    *(.data*)
+    _edata = .;
+  } &gt; RAM AT&gt; FLASH       <span class="cm">/* 載入位址在 Flash，執行位址在 RAM */</span>
+
+  <span class="cm">/* .bss 段：未初始化全域變數，RAM 中清零 */</span>
+  .bss :
+  {
+    _sbss = .;
+    *(.bss*)
+    *(COMMON)
+    _ebss = .;
+  } &gt; RAM
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-title">重要觀念</div>
+          <code>_sdata</code>、<code>_edata</code>、<code>_sbss</code>、<code>_ebss</code> 這些符號由連結腳本定義，
+          在啟動碼（startup code）中使用，負責將 <code>.data</code> 從 Flash 複製到 RAM、
+          以及將 <code>.bss</code> 段清零。這是嵌入式程式執行 <code>main()</code> 之前必須完成的初始化工作。
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">建置系統：Makefile vs. CMake</div>
+          <p class="body-text">
+            小型專案通常使用 <strong class="hl">Makefile</strong>，直接描述編譯規則。
+            中大型專案或需要跨平台建置的專案則使用 <strong class="hl">CMake</strong>，
+            透過 <code>CMakeLists.txt</code> 生成各平台的建置檔。
+            STM32CubeIDE 和 VS Code + Cortex-Debug 擴充套件都支援 CMake 工作流。
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 1.5
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-1-5">
+      <div class="lesson-header">
+        <div class="lesson-badge">LESSON 1.5</div>
+        <div class="lesson-header-text">
+          <div class="lesson-title">環境建立與第一個程式</div>
+          <div class="lesson-desc">安裝完整工具鏈，編譯並燒錄 LED Blink — 嵌入式世界的 Hello World</div>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">環境安裝（Ubuntu 22.04 / Debian）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash — 安裝 ARM 工具鏈與偵錯工具</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm"># 更新套件索引</span>
+sudo apt update
+
+<span class="cm"># 安裝 ARM GCC 交叉編譯工具鏈</span>
+sudo apt install -y \
+  gcc-arm-none-eabi \
+  gdb-multiarch \
+  binutils-arm-none-eabi \
+  openocd \
+  stlink-tools \
+  cmake \
+  ninja-build \
+  libusb-1.0-0-dev
+
+<span class="cm"># 安裝 VS Code（若尚未安裝）</span>
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor &gt; packages.microsoft.gpg
+sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+sudo sh -c 'echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] \
+  https://packages.microsoft.com/repos/code stable main" &gt; /etc/apt/sources.list.d/vscode.list'
+sudo apt update &amp;&amp; sudo apt install -y code
+
+<span class="cm"># 確認版本</span>
+arm-none-eabi-gcc --version
+<span class="cm"># 預期輸出：arm-none-eabi-gcc (GNU Arm Embedded Toolchain) 12.x</span>
+
+arm-none-eabi-gdb --version
+openocd --version</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">設定 ST-Link USB 權限（避免每次需要 sudo）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash — udev 規則設定</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 建立 udev 規則，允許一般使用者存取 ST-Link</span>
+sudo tee /etc/udev/rules.d/99-stlink.rules &lt;&lt;'EOF'
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374b", \
+  MODE="0666", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374e", \
+  MODE="0666", GROUP="plugdev"
+EOF
+
+<span class="cm"># 重新載入規則並將當前使用者加入 plugdev 群組</span>
+sudo udevadm control --reload-rules
+sudo usermod -aG plugdev $USER
+
+<span class="cm"># 重新登入後確認裝置是否可見（插入 ST-Link 後）</span>
+lsusb | grep STMicroelectronics
+<span class="cm"># 預期：Bus 001 Device 003: ID 0483:374b STMicroelectronics ST-LINK/V2.1</span></pre>
+          </div>
+        </div>
+
+        <div class="divider">
+          <div class="divider-label">實作範例</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">LED Blink — 用 HAL 庫實作（初學版）</div>
+          <p class="body-text">
+            STM32F446RE Nucleo 開發板的板載 LED 連接在 <code>PA5</code>（GPIO Port A, Pin 5）。
+            以下使用 STM32 HAL 庫撰寫最簡潔的 Blink 程式：
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — main.c（HAL 版 LED Blink）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="pp">#include</span> <span class="str">"stm32f4xx_hal.h"</span>
+
+<span class="kw">void</span> <span class="fn">SystemClock_Config</span>(<span class="kw">void</span>);
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 初始化 HAL 庫（必須最先呼叫）*/</span>
+    <span class="fn">HAL_Init</span>();
+
+    <span class="cm">/* 設定系統時脈（使用外部晶振 HSE，PLL 倍頻至 180 MHz）*/</span>
+    <span class="fn">SystemClock_Config</span>();
+
+    <span class="cm">/* 啟用 GPIOA 的時脈（預設關閉以省電）*/</span>
+    <span class="fn">__HAL_RCC_GPIOA_CLK_ENABLE</span>();
+
+    <span class="cm">/* 設定 PA5 為推挽輸出，無上下拉，低速模式 */</span>
+    <span class="tp">GPIO_InitTypeDef</span> gpio = {<span class="num">0</span>};
+    gpio.Pin   = <span class="kw2">GPIO_PIN_5</span>;
+    gpio.Mode  = <span class="kw2">GPIO_MODE_OUTPUT_PP</span>;
+    gpio.Pull  = <span class="kw2">GPIO_NOPULL</span>;
+    gpio.Speed = <span class="kw2">GPIO_SPEED_FREQ_LOW</span>;
+    <span class="fn">HAL_GPIO_Init</span>(<span class="kw2">GPIOA</span>, &amp;gpio);
+
+    <span class="kw">while</span> (<span class="num">1</span>)
+    {
+        <span class="fn">HAL_GPIO_TogglePin</span>(<span class="kw2">GPIOA</span>, <span class="kw2">GPIO_PIN_5</span>);
+        <span class="fn">HAL_Delay</span>(<span class="num">500</span>);   <span class="cm">/* 500 ms，由 SysTick 計時 */</span>
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">LED Blink — 直接操作暫存器（進階版）</div>
+          <p class="body-text">
+            HAL 庫封裝了大量細節，但作為工程師必須理解底層行為。
+            以下是不依賴任何庫、直接操作記憶體映射暫存器（Memory-Mapped Register）的版本：
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — main.c（暫存器直接操作版）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="pp">#include</span> <span class="str">&lt;stdint.h&gt;</span>
+
+<span class="cm">/* RCC 與 GPIOA 基底位址（來自 STM32F4xx Reference Manual）*/</span>
+<span class="pp">#define</span> RCC_BASE    <span class="num">0x40023800U</span>
+<span class="pp">#define</span> GPIOA_BASE  <span class="num">0x40020000U</span>
+
+<span class="cm">/* RCC AHB1 周邊時脈致能暫存器（偏移 0x30）*/</span>
+<span class="pp">#define</span> RCC_AHB1ENR  (*((<span class="kw">volatile</span> <span class="tp">uint32_t</span> *)(RCC_BASE   + <span class="num">0x30</span>)))
+
+<span class="cm">/* GPIOA 暫存器（各偏移量見 RM0390 第 8 章）*/</span>
+<span class="pp">#define</span> GPIOA_MODER  (*((<span class="kw">volatile</span> <span class="tp">uint32_t</span> *)(GPIOA_BASE + <span class="num">0x00</span>)))
+<span class="pp">#define</span> GPIOA_ODR    (*((<span class="kw">volatile</span> <span class="tp">uint32_t</span> *)(GPIOA_BASE + <span class="num">0x14</span>)))
+<span class="pp">#define</span> GPIOA_BSRR   (*((<span class="kw">volatile</span> <span class="tp">uint32_t</span> *)(GPIOA_BASE + <span class="num">0x18</span>)))
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">delay_ms</span>(<span class="tp">uint32_t</span> ms)
+{
+    <span class="cm">/* 粗略延遲：假設系統時脈為 16 MHz（內部 HSI）*/</span>
+    <span class="kw">for</span> (<span class="tp">uint32_t</span> i = <span class="num">0</span>; i &lt; ms * <span class="num">2000</span>; i++)
+        <span class="fn">__asm__</span>(<span class="str">"nop"</span>);
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 步驟 1：啟用 GPIOA 時脈（RCC_AHB1ENR bit 0）*/</span>
+    RCC_AHB1ENR |= (<span class="num">1U</span> &lt;&lt; <span class="num">0</span>);
+
+    <span class="cm">/* 步驟 2：設定 PA5 為一般輸出（MODER[11:10] = 0b01）*/</span>
+    GPIOA_MODER &amp;= ~(<span class="num">3U</span> &lt;&lt; (<span class="num">5</span> * <span class="num">2</span>));   <span class="cm">/* 先清除 PA5 的 MODER 位元 */</span>
+    GPIOA_MODER |=  (<span class="num">1U</span> &lt;&lt; (<span class="num">5</span> * <span class="num">2</span>));   <span class="cm">/* 設為 01 = General purpose output */</span>
+
+    <span class="kw">while</span> (<span class="num">1</span>)
+    {
+        <span class="cm">/* 使用 BSRR 進行原子性 Set（高 16 bit）/ Reset（低 16 bit）*/</span>
+        GPIOA_BSRR = (<span class="num">1U</span> &lt;&lt; <span class="num">5</span>);            <span class="cm">/* Set PA5 = LED ON  */</span>
+        <span class="fn">delay_ms</span>(<span class="num">500</span>);
+        GPIOA_BSRR = (<span class="num">1U</span> &lt;&lt; (<span class="num">5</span> + <span class="num">16</span>));    <span class="cm">/* Reset PA5 = LED OFF */</span>
+        <span class="fn">delay_ms</span>(<span class="num">500</span>);
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">為什麼用 BSRR 而不用 ODR？</div>
+          直接讀改寫（Read-Modify-Write）<code>ODR</code> 在多中斷環境下有 race condition 風險：
+          若在「讀取」和「寫入」之間發生中斷並修改了同一個 port 的其他 pin，
+          就會產生意外的值被覆蓋。<code>BSRR</code> 是一個<strong>只寫、原子性</strong>的暫存器，
+          Set 和 Reset 用不同的位元控制，不需要先讀取，因此是 GPIO 操作的推薦方式。
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">編譯與燒錄</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash — 編譯並燒錄到 STM32F446RE</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 編譯（需要提供 startup 檔與連結腳本，此處簡化示意）</span>
+arm-none-eabi-gcc \
+  -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
+  -O2 -Wall -Wextra \
+  -T STM32F446RETx_FLASH.ld \
+  startup_stm32f446xx.s main.c \
+  -o blink.elf \
+  -nostartfiles -lc -lm
+
+<span class="cm"># 查看各段大小（確認程式碼沒有超過 Flash 容量）</span>
+arm-none-eabi-size blink.elf
+<span class="cm">#    text    data     bss     dec     hex filename
+#     892       8       0     900     384 blink.elf</span>
+
+<span class="cm"># 轉換為 binary 格式</span>
+arm-none-eabi-objcopy -O binary blink.elf blink.bin
+
+<span class="cm"># 使用 st-flash 燒錄（STM32 Flash 起始位址固定為 0x08000000）</span>
+st-flash write blink.bin 0x08000000
+<span class="cm"># 預期：Flash written and verified! jolly good!</span>
+
+<span class="cm"># 或使用 OpenOCD 燒錄</span>
+openocd \
+  -f interface/stlink.cfg \
+  -f target/stm32f4x.cfg \
+  -c "program blink.elf verify reset exit"</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">本週實作清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box done"></div>
+              <span>安裝 <code>gcc-arm-none-eabi</code>、<code>openocd</code>、<code>stlink-tools</code></span>
+            </div>
+            <div class="check-item">
+              <div class="check-box done"></div>
+              <span>設定 udev 規則，確認不需 sudo 即可存取 ST-Link</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>下載 STM32CubeF4 HAL 庫，建立最小化專案結構</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>編譯並燒錄 HAL 版 LED Blink，確認 LED 以 1 Hz 閃爍</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>改用暫存器直接操作版，比較兩版本的 .elf 大小差異</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>用 OpenOCD + GDB 設置斷點，單步追蹤 <code>HAL_GPIO_TogglePin</code> 內部執行流程</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">延伸挑戰</div>
+          嘗試修改程式，讓 LED 以 <strong>SOS（... --- ...）</strong>摩斯電碼的節奏閃爍。
+          這個練習會讓你熟悉如何用延遲函式控制精確時序，也是理解下一章「中斷驅動 vs. 輪詢」差異的好起點。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="index.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 2L5 7l4 5"/>
+        </svg>
+        課程總覽
+      </a>
+      <span class="week-indicator">Week 01 / 08</span>
+      <a href="week2.html" class="nav-btn primary">
+        Week 02 — 微控制器硬體基礎
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M5 2l4 5-4 5"/>
+        </svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active lesson in sidebar on scroll
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+
+    sections.forEach(section => {
+      const top = section.offsetTop - 80;
+      if (scrollTop >= top) current = section.id;
+    });
+
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+
+    // Update progress bar
+    const completed = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = completed + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (completed / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>
