@@ -808,6 +808,78 @@
     font-family: var(--sans);
   }
 
+  /* ── Numbered Steps ── */
+  .steps {
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 0 1rem;
+    position: relative;
+  }
+
+  .step:not(:last-child) > .step-num::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    width: 1px;
+    height: calc(100% - 32px);
+    background: var(--line2);
+  }
+
+  .step-num {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg4);
+    border: 1px solid var(--line2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+    z-index: 1;
+    margin-top: 0;
+  }
+
+  .step-content {
+    padding-bottom: 1.75rem;
+    min-width: 0;
+  }
+
+  .step-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.65rem;
+    padding-top: 6px;
+    line-height: 1.4;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
+  }
+
+  .step-alt-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0.6rem 0 0.4rem;
+  }
+
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -1627,26 +1699,57 @@ openocd --version</pre>
 
         <div class="sub-section">
           <div class="sub-title">設定 ST-Link USB 權限（避免每次需要 sudo）</div>
-          <div class="code-block">
-            <div class="code-header">
-              <span class="code-lang">bash — udev 規則設定</span>
-              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
-            </div>
-            <pre"><span class="cm"># 建立 udev 規則，允許一般使用者存取 ST-Link</span>
-sudo tee /etc/udev/rules.d/99-stlink.rules &lt;&lt;'EOF'
+          <div class="steps">
+
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <div class="step-title">建立 udev 規則，允許一般使用者存取 ST-Link</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>sudo tee /etc/udev/rules.d/99-stlink.rules &lt;&lt;'EOF'
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374b", \
   MODE="0666", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374e", \
   MODE="0666", GROUP="plugdev"
-EOF
+EOF</pre>
+                </div>
+              </div>
+            </div>
 
-<span class="cm"># 重新載入規則並將當前使用者加入 plugdev 群組</span>
-sudo udevadm control --reload-rules
-sudo usermod -aG plugdev $USER
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <div class="step-title">重新載入規則，並將當前使用者加入 plugdev 群組</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>sudo udevadm control --reload-rules
+sudo usermod -aG plugdev $USER</pre>
+                </div>
+              </div>
+            </div>
 
-<span class="cm"># 重新登入後確認裝置是否可見（插入 ST-Link 後）</span>
-lsusb | grep STMicroelectronics
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <div class="step-title">重新登入後，插入 ST-Link 並確認裝置可見</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>lsusb | grep STMicroelectronics
 <span class="cm"># 預期：Bus 001 Device 003: ID 0483:374b STMicroelectronics ST-LINK/V2.1</span></pre>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1761,37 +1864,86 @@ lsusb | grep STMicroelectronics
 
         <div class="sub-section">
           <div class="sub-title">編譯與燒錄</div>
-          <div class="code-block">
-            <div class="code-header">
-              <span class="code-lang">bash — 編譯並燒錄到 STM32F446RE</span>
-              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
-            </div>
-            <pre"><span class="cm"># 編譯（需要提供 startup 檔與連結腳本，此處簡化示意）</span>
-arm-none-eabi-gcc \
+          <div class="steps">
+
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <div class="step-title">交叉編譯 — 產生 ELF 執行檔</div>
+                <p class="step-desc">需提供 startup 檔（<code>startup_stm32f446xx.s</code>）與連結腳本（<code>.ld</code>）。</p>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>arm-none-eabi-gcc \
   -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
   -O2 -Wall -Wextra \
   -T STM32F446RETx_FLASH.ld \
   startup_stm32f446xx.s main.c \
   -o blink.elf \
-  -nostartfiles -lc -lm
+  -nostartfiles -lc -lm</pre>
+                </div>
+              </div>
+            </div>
 
-<span class="cm"># 查看各段大小（確認程式碼沒有超過 Flash 容量）</span>
-arm-none-eabi-size blink.elf
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <div class="step-title">確認各段大小，未超過 Flash 容量</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>arm-none-eabi-size blink.elf
 <span class="cm">#    text    data     bss     dec     hex filename
-#     892       8       0     900     384 blink.elf</span>
+#     892       8       0     900     384 blink.elf</span></pre>
+                </div>
+              </div>
+            </div>
 
-<span class="cm"># 轉換為 binary 格式</span>
-arm-none-eabi-objcopy -O binary blink.elf blink.bin
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <div class="step-title">轉換為 Binary 格式</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>arm-none-eabi-objcopy -O binary blink.elf blink.bin</pre>
+                </div>
+              </div>
+            </div>
 
-<span class="cm"># 使用 st-flash 燒錄（STM32 Flash 起始位址固定為 0x08000000）</span>
-st-flash write blink.bin 0x08000000
-<span class="cm"># 預期：Flash written and verified! jolly good!</span>
-
-<span class="cm"># 或使用 OpenOCD 燒錄</span>
-openocd \
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <div class="step-title">燒錄到 STM32F446RE</div>
+                <p class="step-desc">STM32 的 Flash 起始位址固定為 <code>0x08000000</code>，擇一方式執行：</p>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash — 方式 A：st-flash</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>st-flash write blink.bin 0x08000000
+<span class="cm"># 預期：Flash written and verified! jolly good!</span></pre>
+                </div>
+                <div class="step-alt-label">或</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">bash — 方式 B：OpenOCD</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>openocd \
   -f interface/stlink.cfg \
   -f target/stm32f4x.cfg \
   -c "program blink.elf verify reset exit"</pre>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
