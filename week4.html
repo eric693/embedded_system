@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 4 — 周邊介面與通訊協定 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header { padding: 1.75rem 1.5rem 1.25rem; border-bottom: 1px solid var(--line); }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+
+  .course-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .sidebar-week-title { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+
+  .nav-section-label {
+    padding: 0.5rem 1.5rem 0.25rem;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-lesson {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
+
+  .nav-num { font-family: var(--mono); font-size: 10px; color: var(--dim); min-width: 22px; }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--line); }
+
+  .progress-label { font-family: var(--mono); font-size: 10px; color: var(--dim); display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+  .progress-bar-wrap { background: var(--bg4); border-radius: 2px; height: 3px; }
+  .progress-bar-fill { background: var(--accent); height: 3px; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+  .main { overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
+
+  .week-hero {
+    padding: 3.5rem 4rem 2.75rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .week-hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hero-eyebrow::after { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); opacity: 0.4; }
+
+  .week-title { font-family: var(--serif); font-size: 36px; font-weight: 600; line-height: 1.25; color: var(--text); margin-bottom: 0.75rem; }
+  .week-subtitle { font-size: 16px; color: var(--muted); margin-bottom: 1.75rem; max-width: 540px; line-height: 1.65; }
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+
+  .tag { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 3px; border: 1px solid var(--line2); color: var(--dim); }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .tag-setup  { border-color: rgba(200,169,110,0.35); color: var(--accent); }
+
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-value { font-family: var(--mono); font-size: 20px; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .objectives-bar {
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg2);
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .obj-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; padding-top: 3px; min-width: 60px; }
+  .obj-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .obj-item { font-size: 12.5px; color: var(--muted); background: var(--bg3); border: 1px solid var(--line); border-radius: 3px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; }
+  .obj-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .lesson-section { padding: 3rem 4rem; border-bottom: 1px solid var(--line); }
+  .lesson-section:last-of-type { border-bottom: none; }
+
+  .lesson-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; gap: 1.25rem; }
+  .lesson-badge { font-family: var(--mono); font-size: 10px; color: var(--accent); background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); padding: 4px 10px; border-radius: 3px; white-space: nowrap; margin-top: 5px; }
+  .lesson-header-text { min-width: 0; }
+  .lesson-title { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 0.3rem; }
+  .lesson-desc { font-size: 13px; color: var(--muted); }
+
+  .lesson-body { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .sub-section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .sub-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 0; padding-left: 1rem; border-left: 2px solid var(--accent2); }
+
+  .body-text { color: var(--muted); font-size: 14px; line-height: 1.85; padding-left: 1rem; }
+  .body-text + .body-text { margin-top: 0.75rem; }
+  strong.hl { color: var(--text); }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(143,168,200,0.06); border-radius: 0 4px 4px 0; padding: 0.875rem 1.1rem 0.875rem 1.25rem; margin-left: 1rem; font-size: 13.5px; color: #a8bcd4; line-height: 1.75; }
+  .callout.warn   { border-color: var(--accent);  background: rgba(200,169,110,0.06); color: #c8b88a; }
+  .callout.tip    { border-color: var(--green);   background: rgba(106,173,142,0.06); color: #7ec4a0; }
+  .callout.danger { border-color: var(--red);     background: rgba(200,106,106,0.06); color: #d48a8a; }
+  .callout-title { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; opacity: 0.75; }
+
+  .code-block { background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; margin-left: 1rem; }
+  .code-header { padding: 0.45rem 1rem; background: var(--bg4); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .code-lang { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-all;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  .tbl-wrap { overflow-x: auto; margin-left: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 0.55rem 1rem; font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--line2); }
+  tbody td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13.5px; vertical-align: top; line-height: 1.6; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+  td code, p code, li code { font-family: var(--mono); font-size: 12px; background: var(--bg4); color: var(--accent2); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line2); }
+  td strong { color: var(--text); }
+
+  .body-list { padding-left: 2rem; color: var(--muted); font-size: 14px; line-height: 1.85; display: flex; flex-direction: column; gap: 0.4rem; }
+  .body-list li::marker { color: var(--dim); }
+
+  .diagram-block { margin-left: 1rem; background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; padding: 1.5rem 1.75rem; font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.9; overflow-x: auto; white-space: pre; }
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+
+  .checklist { margin-left: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  .check-box { width: 16px; height: 16px; border: 1px solid var(--line2); border-radius: 3px; flex-shrink: 0; margin-top: 2px; background: var(--bg4); display: flex; align-items: center; justify-content: center; }
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  .bottom-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem; border-top: 1px solid var(--line); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 0.6rem 1.25rem; border: 1px solid var(--line2); border-radius: 4px; background: none; color: var(--muted); font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: rgba(200,169,110,0.1); border-color: rgba(200,169,110,0.4); color: var(--accent); }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+  .week-indicator { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L4 6l4 4"/></svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 04</span>
+      <div class="sidebar-week-title">周邊介面與通訊協定</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">本週課程</div>
+      <a class="nav-lesson active" href="#lesson-4-1"><span class="nav-num">4.1</span>UART / USART</a>
+      <a class="nav-lesson" href="#lesson-4-2"><span class="nav-num">4.2</span>SPI</a>
+      <a class="nav-lesson" href="#lesson-4-3"><span class="nav-num">4.3</span>I²C</a>
+      <a class="nav-lesson" href="#lesson-4-4"><span class="nav-num">4.4</span>Timer 與 PWM</a>
+      <a class="nav-lesson" href="#lesson-4-5"><span class="nav-num">4.5</span>ADC</a>
+      <a class="nav-lesson" href="#lesson-4-6"><span class="nav-num">4.6</span>CAN Bus</a>
+      <a class="nav-lesson" href="#lesson-4-7"><span class="nav-num">4.7</span>綜合實作</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>本週完成度</span>
+        <span id="progress-text">0 / 7</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Embedded Systems — Week 04</div>
+      <h1 class="week-title">周邊介面與通訊協定</h1>
+      <p class="week-subtitle">
+        微控制器的價值在於與外界溝通。本週深入七種最核心的周邊介面，
+        從電氣特性、協定時序到暫存器層級實作，並以示波器與邏輯分析儀驗證波形。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-lab">動手實作</span>
+        <span class="tag tag-theory">協定理論</span>
+        <span class="tag">7 堂課</span>
+        <span class="tag">約 9 小時</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><span class="stat-value">7</span><span class="stat-label">堂課</span></div>
+        <div class="stat-item"><span class="stat-value">7</span><span class="stat-label">程式範例</span></div>
+        <div class="stat-item"><span class="stat-value">UART·SPI·I²C</span><span class="stat-label">數位介面</span></div>
+        <div class="stat-item"><span class="stat-value">PWM·ADC·CAN</span><span class="stat-label">類比 / 總線</span></div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <div class="obj-label">學習目標</div>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>以暫存器設定 UART，實作 DMA 環形緩衝收發</div>
+        <div class="obj-item"><div class="obj-dot"></div>驅動 SPI Flash，理解 Full-Duplex 時序與 CS 管理</div>
+        <div class="obj-item"><div class="obj-dot"></div>以 I²C 讀寫 BME280 感測器，處理 NACK 與 Clock Stretch</div>
+        <div class="obj-item"><div class="obj-dot"></div>配置 TIM 產生 PWM，以 DMA 實現 WS2812 LED 控制</div>
+        <div class="obj-item"><div class="obj-dot"></div>設定 ADC 多通道連續取樣並以 DMA 存入緩衝區</div>
+        <div class="obj-item"><div class="obj-dot"></div>配置 CAN 過濾器，收發標準幀與擴展幀</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.1  UART
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-1">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.1 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">UART / USART</div>
+          <div class="lesson-desc">非同步串列通訊、鮑率計算、DMA 環形緩衝、流控</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">UART 訊框格式與電氣特性</div>
+          <p class="body-text">
+            UART（Universal Asynchronous Receiver/Transmitter）以<strong class="hl">非同步</strong>方式傳輸，
+            無共用時脈，雙方必須預先協議相同的<strong class="hl">鮑率（Baud Rate）</strong>。
+            每個訊框由 1 個起始位元（低電位）、5–9 個資料位元、可選的同位元以及 1–2 個停止位元（高電位）組成。
+          </p>
+          <div class="diagram-block">
+<span class="d-dim">Idle</span>  <span class="d-acc">Start</span>  <span class="d-hl">D0 D1 D2 D3 D4 D5 D6 D7</span>  <span class="d-grn">Parity</span>  <span class="d-blu">Stop</span>  <span class="d-dim">Idle</span>
+<span class="d-hl">  1  │  0  │  x  x  x  x  x  x  x  x  │   x   │  1   │  1</span>
+     <span class="d-dim">▲                                              ▲</span>
+  <span class="d-dim">下降緣觸發採樣開始                          1 or 2 bit</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">鮑率暫存器計算（BRR）</div>
+          <p class="body-text">
+            STM32 的 USART 鮑率由 <code>BRR</code> 暫存器決定，計算公式如下：
+          </p>
+          <div class="callout">
+            <div class="callout-title">BRR 計算公式</div>
+            <strong>Over8 = 0（預設，16 倍過取樣）：</strong><br>
+            <code>BRR = f_PCLK / Baud</code><br><br>
+            <strong>範例：USART2 掛在 APB1（45 MHz），目標 115200 baud：</strong><br>
+            <code>BRR = 45,000,000 / 115200 ≈ 390.6 → 0x0186 + 小數部分</code><br><br>
+            實務上直接讓 HAL 計算，或使用 STM32CubeMX 確認誤差 &lt; 2%。
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">以 DMA 實作環形緩衝接收</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — USART2 + DMA1 Stream5 環形緩衝接收</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="pp">#define</span> RX_BUF_SIZE  256
+
+<span class="kw">static</span> <span class="tp">uint8_t</span>  rx_buf[RX_BUF_SIZE];
+<span class="kw">static</span> <span class="tp">uint16_t</span> rx_tail = <span class="num">0</span>;   <span class="cm">/* 上次處理到的位置 */</span>
+
+<span class="kw">void</span> <span class="fn">uart2_dma_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 1. GPIO：PA2=TX(AF7), PA3=RX(AF7) — 省略，見 Week3 */</span>
+
+    <span class="cm">/* 2. 啟用 USART2 時脈 */</span>
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+    <span class="cm">/* 3. 設定 USART2：115200 8N1 */</span>
+    USART2->BRR = <span class="num">0x0186</span>;          <span class="cm">/* 45MHz / 115200 ≈ 390 */</span>
+    USART2->CR1 = USART_CR1_UE    <span class="cm">/* 啟用 USART */</span>
+                | USART_CR1_RE    <span class="cm">/* 接收器 enable */</span>
+                | USART_CR1_TE;   <span class="cm">/* 傳送器 enable */</span>
+    USART2->CR3 |= USART_CR3_DMAR; <span class="cm">/* 啟用 RX DMA 請求 */</span>
+
+    <span class="cm">/* 4. DMA1 Stream5 Channel4 = USART2_RX */</span>
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+    DMA1_Stream5->CR = <span class="num">0</span>;
+    <span class="kw">while</span> (DMA1_Stream5->CR & DMA_SxCR_EN);
+
+    DMA1_Stream5->PAR  = (<span class="tp">uint32_t</span>)&USART2->DR;
+    DMA1_Stream5->M0AR = (<span class="tp">uint32_t</span>)rx_buf;
+    DMA1_Stream5->NDTR = RX_BUF_SIZE;
+    DMA1_Stream5->CR   =
+        (<span class="num">4U</span> << DMA_SxCR_CHSEL_Pos) |  <span class="cm">/* Channel 4 */</span>
+        DMA_SxCR_MINC               |  <span class="cm">/* Memory 遞增 */</span>
+        DMA_SxCR_CIRC;                 <span class="cm">/* Circular（環形）*/</span>
+    DMA1_Stream5->CR |= DMA_SxCR_EN;
+}
+
+<span class="cm">/* 主迴圈輪詢：計算 DMA 已寫入多少新資料 */</span>
+<span class="kw">void</span> <span class="fn">uart2_process</span>(<span class="kw">void</span>)
+{
+    <span class="tp">uint16_t</span> head = RX_BUF_SIZE - DMA1_Stream5->NDTR; <span class="cm">/* DMA 目前寫到哪 */</span>
+    <span class="kw">while</span> (rx_tail != head) {
+        <span class="fn">handle_byte</span>(rx_buf[rx_tail]);
+        rx_tail = (rx_tail + <span class="num">1</span>) % RX_BUF_SIZE;
+    }
+}</pre>
+          </div>
+          <div class="callout tip">
+            <div class="callout-title">Idle Line 中斷搭配 DMA</div>
+            啟用 <code>USART_CR1_IDLEIE</code> 後，匯流排空閒時會觸發中斷，
+            此時可立即處理緩衝區中的不定長度封包，不需等 DMA 滿才處理。
+            這是嵌入式 UART 協定解析的最佳實踐（STM32 HAL 的 <code>UART_RECEIVER_TIMEOUT</code> 亦基於此）。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.2  SPI
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-2">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.2 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">SPI</div>
+          <div class="lesson-desc">全雙工同步串列、四種模式（CPOL/CPHA）、NSS 管理、DMA 加速</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">SPI 訊號線與時序模式</div>
+          <p class="body-text">
+            SPI 使用四條訊號線：<strong class="hl">SCK</strong>（時脈）、<strong class="hl">MOSI</strong>（Master Out Slave In）、
+            <strong class="hl">MISO</strong>（Master In Slave Out）、<strong class="hl">CS/NSS</strong>（片選，低有效）。
+            時序模式由 <strong class="hl">CPOL</strong>（時脈極性）與 <strong class="hl">CPHA</strong>（相位）決定，共四種組合。
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>模式</th><th>CPOL</th><th>CPHA</th><th>空閒時脈</th><th>取樣邊緣</th><th>常見裝置</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Mode 0</strong></td><td>0</td><td>0</td><td>低</td><td>上升緣</td><td>W25Q128、MAX31855</td></tr>
+                <tr><td><strong>Mode 1</strong></td><td>0</td><td>1</td><td>低</td><td>下降緣</td><td>SSD1306（部分）</td></tr>
+                <tr><td><strong>Mode 2</strong></td><td>1</td><td>0</td><td>高</td><td>下降緣</td><td>—</td></tr>
+                <tr><td><strong>Mode 3</strong></td><td>1</td><td>1</td><td>高</td><td>上升緣</td><td>SD Card、MPU-6000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">驅動 W25Q128 SPI Flash（讀取 JEDEC ID）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — SPI1 Mode 0，讀取 W25Q128 裝置 ID</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* SPI1: PA5=SCK, PA6=MISO, PA7=MOSI（AF5），PA4=CS（GPIO 輸出）*/</span>
+
+<span class="kw">static</span> <span class="kw">inline</span> <span class="kw">void</span> <span class="fn">cs_low</span>(<span class="kw">void</span>)  { GPIOA->BSRR = (<span class="num">1U</span> << (<span class="num">4</span>+<span class="num">16</span>)); }
+<span class="kw">static</span> <span class="kw">inline</span> <span class="kw">void</span> <span class="fn">cs_high</span>(<span class="kw">void</span>) { GPIOA->BSRR = (<span class="num">1U</span> << <span class="num">4</span>); }
+
+<span class="tp">uint8_t</span> <span class="fn">spi_transfer</span>(<span class="tp">uint8_t</span> data)
+{
+    <span class="kw">while</span> (!(SPI1->SR & SPI_SR_TXE));   <span class="cm">/* 等待 TX 緩衝空 */</span>
+    *(<span class="kw">volatile</span> <span class="tp">uint8_t</span> *)&SPI1->DR = data;
+    <span class="kw">while</span> (!(SPI1->SR & SPI_SR_RXNE));  <span class="cm">/* 等待 RX 有資料 */</span>
+    <span class="kw">return</span> *(<span class="kw">volatile</span> <span class="tp">uint8_t</span> *)&SPI1->DR;
+}
+
+<span class="kw">void</span> <span class="fn">w25q_read_jedec_id</span>(<span class="tp">uint8_t</span> *mfr, <span class="tp">uint8_t</span> *type, <span class="tp">uint8_t</span> *cap)
+{
+    <span class="fn">cs_low</span>();
+    <span class="fn">spi_transfer</span>(<span class="num">0x9F</span>);   <span class="cm">/* JEDEC ID 指令 */</span>
+    *mfr  = <span class="fn">spi_transfer</span>(<span class="num">0xFF</span>);  <span class="cm">/* Manufacturer（W25Q = 0xEF）*/</span>
+    *type = <span class="fn">spi_transfer</span>(<span class="num">0xFF</span>);  <span class="cm">/* Memory Type */</span>
+    *cap  = <span class="fn">spi_transfer</span>(<span class="num">0xFF</span>);  <span class="cm">/* Capacity（0x18 = 128Mbit）*/</span>
+    <span class="fn">cs_high</span>();
+}
+
+<span class="kw">void</span> <span class="fn">spi1_init</span>(<span class="kw">void</span>)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+    <span class="cm">/* MSTR=1, BR=101(÷64 → ~1.4MHz), SSM=1, SSI=1, SPE=1 */</span>
+    SPI1->CR1 = SPI_CR1_MSTR | (<span class="num">5U</span> << SPI_CR1_BR_Pos) |
+                SPI_CR1_SSM  | SPI_CR1_SSI | SPI_CR1_SPE;
+    SPI1->CR2 = <span class="num">0</span>;   <span class="cm">/* 8-bit 資料幀 */</span>
+}</pre>
+          </div>
+          <div class="callout warn">
+            <div class="callout-title">8-bit vs. 16-bit 資料幀存取</div>
+            STM32F4 的 SPI DR 暫存器是 16-bit，但 FIFO 由存取寬度決定幀大小。
+            8-bit 模式時必須用 <code>(volatile uint8_t *)&SPI1->DR</code> 存取，
+            否則會送出 16-bit 幀。STM32F7/H7 有更明確的 <code>FRXTH</code> 位元控制。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.3  I²C
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-3">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.3 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">I²C</div>
+          <div class="lesson-desc">半雙工兩線協定、位址、ACK/NACK、Clock Stretching、多主機</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">I²C 協定要點</div>
+          <p class="body-text">
+            I²C 使用兩條開汲（Open-Drain）訊號線：<strong class="hl">SDA</strong>（資料）與 <strong class="hl">SCL</strong>（時脈），
+            需要外部上拉電阻（通常 4.7 kΩ）。所有裝置並聯在匯流排上，靠 7-bit 或 10-bit
+            <strong class="hl">從機位址</strong>區分目標。標準速度 100 kHz，快速模式 400 kHz，快速模式+ 1 MHz。
+          </p>
+          <div class="diagram-block">
+<span class="d-acc">典型 I²C 寫入時序（Master 寫 1 byte 到 Slave）</span>
+
+SDA: <span class="d-hl">Start</span> │ <span class="d-blu">Addr[6:0]</span> │ <span class="d-blu">W</span> │ <span class="d-grn">ACK</span> │ <span class="d-hl">Data[7:0]</span> │ <span class="d-grn">ACK</span> │ <span class="d-acc">Stop</span>
+SCL:   ▔▔   │    ▔▔▔▔▔▔▔    │     │  ▁▁ │   ▔▔▔▔▔▔▔  │  ▁▁ │   ▔▔
+
+<span class="d-dim">Start = SDA 下降緣（SCL 高時）
+Stop  = SDA 上升緣（SCL 高時）
+ACK   = 從機將 SDA 拉低（第 9 個時脈）
+NACK  = SDA 保持高（裝置不存在或忙碌）</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">讀寫 BME280 溫溼壓感測器</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — I²C1 讀取 BME280 Chip ID（暫存器 0xD0）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="pp">#define</span> BME280_ADDR  (<span class="num">0x76</span> << <span class="num">1</span>)  <span class="cm">/* 7-bit 位址左移 1 bit */</span>
+<span class="pp">#define</span> BME280_ID_REG  <span class="num">0xD0</span>
+
+<span class="cm">/* 等待旗標並逾時保護 */</span>
+<span class="kw">static</span> <span class="tp">int</span> <span class="fn">i2c_wait</span>(<span class="tp">uint32_t</span> flag, <span class="tp">uint32_t</span> set)
+{
+    <span class="tp">uint32_t</span> t = <span class="num">10000</span>;
+    <span class="kw">if</span> (set) { <span class="kw">while</span> (!(I2C1->SR1 & flag) && --t); }
+    <span class="kw">else</span>     { <span class="kw">while</span>  (I2C1->SR1 & flag  && --t); }
+    <span class="kw">return</span> t ? <span class="num">0</span> : -<span class="num">1</span>;   <span class="cm">/* 0 = OK, -1 = timeout */</span>
+}
+
+<span class="tp">int</span> <span class="fn">i2c_read_reg</span>(<span class="tp">uint8_t</span> dev_addr, <span class="tp">uint8_t</span> reg, <span class="tp">uint8_t</span> *data)
+{
+    <span class="cm">/* Phase 1: 寫入暫存器位址 */</span>
+    I2C1->CR1 |= I2C_CR1_START;
+    <span class="kw">if</span> (<span class="fn">i2c_wait</span>(I2C_SR1_SB, <span class="num">1</span>)) <span class="kw">return</span> -<span class="num">1</span>;      <span class="cm">/* 等待 Start */</span>
+
+    I2C1->DR = dev_addr;                            <span class="cm">/* 送位址（寫模式）*/</span>
+    <span class="kw">if</span> (<span class="fn">i2c_wait</span>(I2C_SR1_ADDR, <span class="num">1</span>)) <span class="kw">return</span> -<span class="num">1</span>;    <span class="cm">/* 等待 ADDR */</span>
+    (<span class="kw">void</span>)I2C1->SR2;                                <span class="cm">/* 讀 SR2 清除 ADDR */</span>
+
+    I2C1->DR = reg;
+    <span class="kw">if</span> (<span class="fn">i2c_wait</span>(I2C_SR1_TXE, <span class="num">1</span>)) <span class="kw">return</span> -<span class="num">1</span>;
+
+    <span class="cm">/* Phase 2: Repeated Start → 讀取 1 byte */</span>
+    I2C1->CR1 |= I2C_CR1_START;
+    <span class="kw">if</span> (<span class="fn">i2c_wait</span>(I2C_SR1_SB, <span class="num">1</span>)) <span class="kw">return</span> -<span class="num">1</span>;
+
+    I2C1->CR1 &= ~I2C_CR1_ACK;                     <span class="cm">/* 最後 1 byte 不回 ACK */</span>
+    I2C1->DR = dev_addr | <span class="num">0x01</span>;                   <span class="cm">/* 讀模式 */</span>
+    <span class="kw">if</span> (<span class="fn">i2c_wait</span>(I2C_SR1_ADDR, <span class="num">1</span>)) <span class="kw">return</span> -<span class="num">1</span>;
+    (<span class="kw">void</span>)I2C1->SR2;
+    I2C1->CR1 |= I2C_CR1_STOP;                     <span class="cm">/* 提前設定 Stop */</span>
+
+    <span class="kw">if</span> (<span class="fn">i2c_wait</span>(I2C_SR1_RXNE, <span class="num">1</span>)) <span class="kw">return</span> -<span class="num">1</span>;
+    *data = (<span class="tp">uint8_t</span>)I2C1->DR;
+    I2C1->CR1 |= I2C_CR1_ACK;                     <span class="cm">/* 恢復 ACK 給下次傳輸 */</span>
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+          </div>
+          <div class="callout danger">
+            <div class="callout-title">I²C 匯流排鎖死（Bus Lockup）</div>
+            若通訊中途 Reset，Slave 可能仍在等待更多時脈而將 SDA 拉低，
+            導致 Master 無法送出 Start 條件（SDA 被占用）。
+            解法：在 GPIO 模式下手動產生 9 個 SCL 脈衝，強制 Slave 釋放 SDA，
+            再重新初始化 I²C 周邊。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.4  TIMER / PWM
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-4">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.4 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">Timer 與 PWM</div>
+          <div class="lesson-desc">通用計時器架構、PWM 解析度、互補輸出與 DMA Burst（WS2812）</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">通用計時器架構</div>
+          <p class="body-text">
+            STM32F446 的 TIM2–TIM5 為 32-bit 通用計時器，掛在 APB1 上（Timer clock = 90 MHz）。
+            核心由 <strong class="hl">預分頻器（PSC）</strong>、<strong class="hl">自動重載暫存器（ARR）</strong>
+            與 <strong class="hl">計數器（CNT）</strong> 組成。
+          </p>
+          <div class="callout">
+            <div class="callout-title">PWM 關鍵參數計算</div>
+            <strong>PWM 頻率：</strong><code>f_PWM = f_TIM / ((PSC+1) × (ARR+1))</code><br>
+            <strong>解析度：</strong><code>ARR + 1</code> 個計數步階<br>
+            <strong>工作週期：</strong><code>Duty = CCR / (ARR+1)</code><br><br>
+            <strong>範例：產生 50 Hz 伺服馬達 PWM（TIM2，90 MHz）：</strong><br>
+            <code>PSC = 89</code>（÷90，1 MHz tick）<br>
+            <code>ARR = 19999</code>（20 ms 週期，1–2 ms pulse = CCR 1000–2000）
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">配置 TIM3 CH1 輸出 PWM（PA6）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — TIM3 CH1 PWM，50 Hz 伺服控制</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="kw">void</span> <span class="fn">tim3_pwm_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* PA6 = TIM3_CH1（AF2）*/</span>
+    RCC->AHB1ENR  |= RCC_AHB1ENR_GPIOAEN;
+    RCC->APB1ENR  |= RCC_APB1ENR_TIM3EN;
+
+    GPIOA->MODER  &= ~(<span class="num">3U</span> << (<span class="num">6</span>*<span class="num">2</span>));
+    GPIOA->MODER  |=  (<span class="num">2U</span> << (<span class="num">6</span>*<span class="num">2</span>));  <span class="cm">/* AF 模式 */</span>
+    GPIOA->AFR[<span class="num">0</span>] |=  (<span class="num">2U</span> << (<span class="num">6</span>*<span class="num">4</span>));  <span class="cm">/* AF2 = TIM3 */</span>
+
+    TIM3->PSC   = <span class="num">89</span>;        <span class="cm">/* 90MHz ÷ 90 = 1 MHz */</span>
+    TIM3->ARR   = <span class="num">19999</span>;     <span class="cm">/* 50 Hz */</span>
+    TIM3->CCR1  = <span class="num">1500</span>;      <span class="cm">/* 1.5 ms = 中間位置 */</span>
+
+    <span class="cm">/* PWM Mode 1：CNT < CCR → 高電位 */</span>
+    TIM3->CCMR1 = (<span class="num">6U</span> << TIM_CCMR1_OC1M_Pos) | TIM_CCMR1_OC1PE;
+    TIM3->CCER  |= TIM_CCER_CC1E;  <span class="cm">/* 啟用 CH1 輸出 */</span>
+    TIM3->CR1   |= TIM_CR1_ARPE | TIM_CR1_CEN;
+    TIM3->EGR   |= TIM_EGR_UG;     <span class="cm">/* 觸發更新，載入 PSC/ARR 預載值 */</span>
+}
+
+<span class="cm">/* 設定工作週期（pulse_us 單位：微秒，1000–2000 對應 0°–180°）*/</span>
+<span class="kw">void</span> <span class="fn">servo_set_us</span>(<span class="tp">uint16_t</span> pulse_us) { TIM3->CCR1 = pulse_us; }</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">DMA Burst 驅動 WS2812B LED 燈條</div>
+          <p class="body-text">
+            WS2812B 採用單線 800 kHz NRZ 協定：邏輯 "0" = 短高電位 + 長低電位，
+            邏輯 "1" = 長高電位 + 短低電位。利用 TIM 的 PWM + DMA Burst，
+            以 ARR 固定週期 1.25 µs，每個 bit 對應一個 CCR 值，
+            即可不佔用 CPU 驅動任意數量的 LED。
+          </p>
+          <div class="callout tip">
+            <div class="callout-title">WS2812 DMA 技術要點</div>
+            • <code>ARR = 89</code>（90 MHz ÷ 90 = 1 MHz，周期 1 µs → 搭配 800 kHz 需調整）<br>
+            • 實際 800 kHz：<code>ARR = 112</code>（90 MHz ÷ 113 ≈ 796 kHz ≈ 1.25 µs）<br>
+            • "0" bit：<code>CCR ≈ 28</code>（T0H ≈ 350 ns）<br>
+            • "1" bit：<code>CCR ≈ 58</code>（T1H ≈ 700 ns）<br>
+            • DMA 在每個更新事件（Update Event）時自動更新下一個 CCR，
+              實現 CPU 零介入的連續 PWM 串流。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.5  ADC
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-5">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.5 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">ADC</div>
+          <div class="lesson-desc">逐次逼近原理、取樣時間、多通道掃描、DMA 連續取樣</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">ADC 關鍵參數</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>參數</th><th>STM32F446 ADC1</th><th>說明</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>解析度</td><td>12-bit（可降至 10/8/6-bit）</td><td>12-bit = 0–4095，對應 0–3.3 V</td></tr>
+                <tr><td>最高時脈</td><td>36 MHz（ADCCLK）</td><td>由 APB2（90 MHz）÷ 分頻器得到</td></tr>
+                <tr><td>最高取樣率</td><td>2.4 MSPS（最短取樣時間）</td><td>取樣時間 + 12 個轉換週期</td></tr>
+                <tr><td>輸入通道</td><td>16 個外部 + 2 個內部</td><td>內部：溫度感測器（CH16）、VREFINT（CH17）</td></tr>
+                <tr><td>參考電壓</td><td>VDDA（3.3 V）</td><td><code>V = result × VDDA / 4096</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">多通道 DMA 連續取樣</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — ADC1 掃描 3 通道（CH0/1/4），DMA 連續存入陣列</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="pp">#define</span> ADC_CH_COUNT  <span class="num">3</span>
+<span class="kw">volatile</span> <span class="tp">uint16_t</span> adc_buf[ADC_CH_COUNT];
+
+<span class="kw">void</span> <span class="fn">adc1_dma_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* PA0/PA1/PA4 設為 Analog 模式（MODER = 11）*/</span>
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    GPIOA->MODER |= (<span class="num">3U</span><<<span class="num">0</span>) | (<span class="num">3U</span><<<span class="num">2</span>) | (<span class="num">3U</span><<<span class="num">8</span>);
+
+    <span class="cm">/* ADC 時脈：APB2(90MHz) ÷ 4 = 22.5 MHz */</span>
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+    ADC->CCR = (<span class="num">1U</span> << ADC_CCR_ADCPRE_Pos);   <span class="cm">/* ADCPRE = 01 → ÷4 */</span>
+
+    <span class="cm">/* DMA2 Stream0 Channel0 = ADC1 */</span>
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+    DMA2_Stream0->CR = <span class="num">0</span>;
+    <span class="kw">while</span> (DMA2_Stream0->CR & DMA_SxCR_EN);
+    DMA2_Stream0->PAR  = (<span class="tp">uint32_t</span>)&ADC1->DR;
+    DMA2_Stream0->M0AR = (<span class="tp">uint32_t</span>)adc_buf;
+    DMA2_Stream0->NDTR = ADC_CH_COUNT;
+    DMA2_Stream0->CR   =
+        (<span class="num">0U</span> << DMA_SxCR_CHSEL_Pos)  |  <span class="cm">/* Channel 0 */</span>
+        DMA_SxCR_MSIZE_0            |  <span class="cm">/* Memory 16-bit */</span>
+        DMA_SxCR_PSIZE_0            |  <span class="cm">/* Peripheral 16-bit */</span>
+        DMA_SxCR_MINC               |  <span class="cm">/* Memory 位址遞增 */</span>
+        DMA_SxCR_CIRC;                 <span class="cm">/* Circular */</span>
+    DMA2_Stream0->CR |= DMA_SxCR_EN;
+
+    <span class="cm">/* ADC1 設定：12-bit，掃描模式，連續轉換，DMA 請求 */</span>
+    ADC1->CR1 = ADC_CR1_SCAN;
+    ADC1->CR2 = ADC_CR2_CONT | ADC_CR2_DMA | ADC_CR2_DDS;
+    <span class="cm">/* 取樣時間：各通道 56 cycles */</span>
+    ADC1->SMPR2 = (<span class="num">3U</span><<<span class="num">0</span>) | (<span class="num">3U</span><<<span class="num">3</span>) | (<span class="num">3U</span><<<span class="num">12</span>);   <span class="cm">/* CH0 CH1 CH4 */</span>
+    <span class="cm">/* 序列長度 3，順序 CH0→CH1→CH4 */</span>
+    ADC1->SQR1 = ((<span class="num">3</span>-<span class="num">1</span>) << ADC_SQR1_L_Pos);      <span class="cm">/* L = 2（3 個通道）*/</span>
+    ADC1->SQR3 = (<span class="num">0U</span><<<span class="num">0</span>) | (<span class="num">1U</span><<<span class="num">5</span>) | (<span class="num">4U</span><<<span class="num">10</span>); <span class="cm">/* SQ1=CH0, SQ2=CH1, SQ3=CH4 */</span>
+
+    ADC1->CR2 |= ADC_CR2_ADON;   <span class="cm">/* 開啟 ADC */</span>
+    ADC1->CR2 |= ADC_CR2_SWSTART; <span class="cm">/* 啟動連續轉換 */</span>
+}
+
+<span class="cm">/* 主迴圈直接讀取 adc_buf[]，值由 DMA 持續更新 */</span>
+<span class="cm">/* 轉換為電壓：float v = adc_buf[0] * 3.3f / 4095.0f; */</span></pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.6  CAN Bus
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-6">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.6 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">CAN Bus</div>
+          <div class="lesson-desc">差動訊號、位元時序、仲裁、過濾器配置與錯誤處理</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">CAN Bus 基礎</div>
+          <p class="body-text">
+            CAN（Controller Area Network）採用<strong class="hl">差動雙絞線</strong>（CANH / CANL），
+            以顯性（Dominant，低電位差）和隱性（Recessive，高電位差）狀態傳輸，
+            抗噪能力強，是汽車電子與工業控制的主流匯流排。
+            標準幀 ID 11-bit，最高 1 Mbps；擴展幀 ID 29-bit。
+            多節點同時傳輸時，ID 數值較小的節點優先（非破壞性仲裁）。
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>欄位</th><th>標準幀（CAN 2.0A）</th><th>說明</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>SOF</td><td>1 bit</td><td>起始幀（顯性）</td></tr>
+                <tr><td>ID</td><td>11 bit</td><td>優先權 + 識別，數值越小越優先</td></tr>
+                <tr><td>RTR</td><td>1 bit</td><td>0 = 資料幀，1 = 遠端請求幀</td></tr>
+                <tr><td>DLC</td><td>4 bit</td><td>資料長度（0–8 bytes）</td></tr>
+                <tr><td>Data</td><td>0–64 bit</td><td>最多 8 bytes 有效載荷</td></tr>
+                <tr><td>CRC</td><td>15 + 1 bit</td><td>CRC-15 錯誤偵測</td></tr>
+                <tr><td>ACK</td><td>2 bit</td><td>收到者送出顯性 ACK</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">位元時序與鮑率計算</div>
+          <p class="body-text">
+            CAN 位元時間分為四個段：<strong class="hl">Sync Seg</strong>（1 Tq）、
+            <strong class="hl">Prop Seg</strong>、<strong class="hl">Phase Seg1</strong>、<strong class="hl">Phase Seg2</strong>。
+            總位元時間 = 各段 Tq 之和。STM32 以 <code>BTR</code> 暫存器設定 BRP、TS1、TS2。
+          </p>
+          <div class="callout">
+            <div class="callout-title">500 kbps 位元時序計算（APB1 45 MHz）</div>
+            目標：500 kbps，每 bit = 2 µs = 45 MHz / 500 kHz = 90 Tq<br><br>
+            <code>BRP = 4</code>（÷5，Tq = 5/45 MHz ≈ 111 ns）<br>
+            <code>TS1 = 12</code>（13 Tq）、<code>TS2 = 3</code>（4 Tq）<br>
+            總計：1 + 13 + 4 = 18 Tq，45MHz / (5 × 18) = 500 kHz ✓<br>
+            取樣點 = (1 + 13) / 18 ≈ 78%（建議範圍 75–90%）
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">發送與接收 CAN 幀</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — CAN1 初始化、傳送幀與過濾器設定</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="kw">void</span> <span class="fn">can1_init</span>(<span class="kw">void</span>)
+{
+    RCC->APB1ENR |= RCC_APB1ENR_CAN1EN;
+    <span class="cm">/* PD0=CAN_RX, PD1=CAN_TX (AF9) — GPIO 設定省略 */</span>
+
+    CAN1->MCR |= CAN_MCR_INRQ;             <span class="cm">/* 進入初始化模式 */</span>
+    <span class="kw">while</span> (!(CAN1->MSR & CAN_MSR_INAK));
+
+    CAN1->MCR &= ~CAN_MCR_SLEEP;
+    <span class="cm">/* BTR：BRP=4, TS1=12, TS2=3, SJW=0（500 kbps）*/</span>
+    CAN1->BTR = (<span class="num">4U</span>  << CAN_BTR_BRP_Pos)  |
+                (<span class="num">12U</span> << CAN_BTR_TS1_Pos)  |
+                (<span class="num">3U</span>  << CAN_BTR_TS2_Pos);
+
+    <span class="cm">/* 過濾器 0：接受所有 ID（遮罩 = 0，過濾器 = 0）*/</span>
+    CAN1->FMR  |= CAN_FMR_FINIT;
+    CAN1->FA1R &= ~(<span class="num">1U</span>);            <span class="cm">/* 停用 Filter 0 */</span>
+    CAN1->sFilterRegister[<span class="num">0</span>].FR1 = <span class="num">0x00000000</span>;
+    CAN1->sFilterRegister[<span class="num">0</span>].FR2 = <span class="num">0x00000000</span>;
+    CAN1->FA1R |= (<span class="num">1U</span>);             <span class="cm">/* 啟用 Filter 0 */</span>
+    CAN1->FMR  &= ~CAN_FMR_FINIT;
+
+    CAN1->MCR &= ~CAN_MCR_INRQ;            <span class="cm">/* 離開初始化模式 */</span>
+    <span class="kw">while</span> (CAN1->MSR & CAN_MSR_INAK);
+}
+
+<span class="kw">void</span> <span class="fn">can1_send</span>(<span class="tp">uint32_t</span> id, <span class="kw">const</span> <span class="tp">uint8_t</span> *data, <span class="tp">uint8_t</span> len)
+{
+    <span class="cm">/* 找空的發送信箱 */</span>
+    <span class="tp">uint8_t</span> mbox = (CAN1->TSR & CAN_TSR_CODE) >> CAN_TSR_CODE_Pos;
+
+    CAN1->sTxMailBox[mbox].TIR  = (id << CAN_TI0R_STID_Pos);
+    CAN1->sTxMailBox[mbox].TDTR = len & <span class="num">0x0F</span>;
+    CAN1->sTxMailBox[mbox].TDLR =
+        ((<span class="tp">uint32_t</span>)data[<span class="num">0</span>])       | ((<span class="tp">uint32_t</span>)data[<span class="num">1</span>] << <span class="num">8</span>)  |
+        ((<span class="tp">uint32_t</span>)data[<span class="num">2</span>] << <span class="num">16</span>) | ((<span class="tp">uint32_t</span>)data[<span class="num">3</span>] << <span class="num">24</span>);
+    CAN1->sTxMailBox[mbox].TDHR =
+        ((<span class="tp">uint32_t</span>)data[<span class="num">4</span>])       | ((<span class="tp">uint32_t</span>)data[<span class="num">5</span>] << <span class="num">8</span>)  |
+        ((<span class="tp">uint32_t</span>)data[<span class="num">6</span>] << <span class="num">16</span>) | ((<span class="tp">uint32_t</span>)data[<span class="num">7</span>] << <span class="num">24</span>);
+    CAN1->sTxMailBox[mbox].TIR |= CAN_TI0R_TXRQ;  <span class="cm">/* 請求發送 */</span>
+}</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 4.7  綜合實作
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-4-7">
+      <div class="lesson-header">
+        <span class="lesson-badge">4.7 — 綜合實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">綜合實作</div>
+          <div class="lesson-desc">多協定整合：感測器採集 → 資料處理 → 顯示 → 遠端上報</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">系統架構</div>
+          <div class="diagram-block">
+<span class="d-acc">STM32F446RE Nucleo</span>
+
+  I²C1  ──▶  <span class="d-hl">BME280</span>        溫度 / 濕度 / 氣壓
+  SPI1  ──▶  <span class="d-hl">W25Q128</span>       資料紀錄（Flash）
+  TIM3  ──▶  <span class="d-hl">WS2812B ×8</span>    狀態 LED 燈條
+  ADC1  ──▶  <span class="d-hl">類比搖桿</span>       X/Y 軸電位器
+  USART2──▶  <span class="d-hl">USB-UART</span>       PC 端監控介面
+  CAN1  ──▶  <span class="d-hl">另一顆 MCU</span>     分散式節點通訊
+
+<span class="d-dim">資料流：ADC → 處理 → 透過 CAN 傳送 + UART 輸出 + LED 顯示狀態</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">本週實作清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>UART DMA 環形緩衝：PC 終端輸入指令，MCU 回應（不阻塞主迴圈）</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>SPI Flash：讀取 JEDEC ID，寫入 1 頁（256 bytes），讀回驗證</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>I²C BME280：每秒讀取溫度，透過 UART 輸出「Temp: 25.3°C」</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>TIM3 PWM：伺服馬達隨搖桿 ADC 值轉動（0°–180°）</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>ADC DMA 3 通道：計算各通道移動平均值，UART 每 100 ms 輸出一次</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>WS2812B：以 TIM + DMA 點亮 8 顆 LED，顏色隨 ADC 值漸變</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>CAN 回環測試（Loopback Mode）：自發自收一筆感測器資料幀，UART 確認</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">延伸挑戰</div>
+          以 <strong>Idle Line 中斷 + DMA</strong> 實作一個 MODBUS RTU Slave：
+          接收變長度封包，解析功能碼（03 讀保持暫存器、06 寫單一暫存器），
+          回應 ADC 原始值與 BME280 感測資料。
+          這是工業嵌入式系統中最常見的通訊協定之一。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="week3.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L5 7l4 5"/></svg>
+        Week 03 — 嵌入式 C 程式設計
+      </a>
+      <span class="week-indicator">Week 04 / 08</span>
+      <a href="week5.html" class="nav-btn primary">
+        Week 05 — 即時作業系統 RTOS
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2l4 5-4 5"/></svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+    sections.forEach(s => { if (scrollTop >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+    const done  = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = done + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (done / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>
