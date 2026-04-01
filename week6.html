@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 6 — 嵌入式 Linux 系統 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; min-height: 100vh; }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--line); position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+  .sidebar-header { padding: 1.75rem 1.5rem 1.25rem; border-bottom: 1px solid var(--line); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; color: var(--dim); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+  .course-label { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 0.4rem; }
+  .sidebar-week-title { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+  .nav-section-label { padding: 0.5rem 1.5rem 0.25rem; font-family: var(--mono); font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; }
+  .nav-lesson { display: flex; align-items: center; gap: 10px; padding: 0.5rem 1.5rem; font-size: 13px; color: var(--muted); text-decoration: none; border: none; background: none; width: 100%; text-align: left; transition: color 0.15s, background 0.15s; border-left: 2px solid transparent; }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
+  .nav-num { font-family: var(--mono); font-size: 10px; color: var(--dim); min-width: 22px; }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--line); }
+  .progress-label { font-family: var(--mono); font-size: 10px; color: var(--dim); display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+  .progress-bar-wrap { background: var(--bg4); border-radius: 2px; height: 3px; }
+  .progress-bar-fill { background: var(--accent); height: 3px; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+  .main { overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
+
+  .week-hero { padding: 3.5rem 4rem 2.75rem; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  .week-hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 360px; height: 360px; background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .hero-eyebrow::after { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); opacity: 0.4; }
+  .week-title { font-family: var(--serif); font-size: 36px; font-weight: 600; line-height: 1.25; color: var(--text); margin-bottom: 0.75rem; }
+  .week-subtitle { font-size: 16px; color: var(--muted); margin-bottom: 1.75rem; max-width: 540px; line-height: 1.65; }
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tag { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 3px; border: 1px solid var(--line2); color: var(--dim); }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-value { font-family: var(--mono); font-size: 20px; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .objectives-bar { padding: 1.5rem 4rem; border-bottom: 1px solid var(--line); background: var(--bg2); display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; }
+  .obj-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; padding-top: 3px; min-width: 60px; }
+  .obj-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .obj-item { font-size: 12.5px; color: var(--muted); background: var(--bg3); border: 1px solid var(--line); border-radius: 3px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; }
+  .obj-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .lesson-section { padding: 3rem 4rem; border-bottom: 1px solid var(--line); }
+  .lesson-section:last-of-type { border-bottom: none; }
+  .lesson-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; gap: 1.25rem; }
+  .lesson-badge { font-family: var(--mono); font-size: 10px; color: var(--accent); background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); padding: 4px 10px; border-radius: 3px; white-space: nowrap; margin-top: 5px; }
+  .lesson-header-text { min-width: 0; }
+  .lesson-title { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 0.3rem; }
+  .lesson-desc { font-size: 13px; color: var(--muted); }
+  .lesson-body { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .sub-section { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sub-title { font-size: 15px; font-weight: 500; color: var(--text); padding-left: 1rem; border-left: 2px solid var(--accent2); }
+  .body-text { color: var(--muted); font-size: 14px; line-height: 1.85; padding-left: 1rem; }
+  .body-text + .body-text { margin-top: 0.75rem; }
+  strong.hl { color: var(--text); }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(143,168,200,0.06); border-radius: 0 4px 4px 0; padding: 0.875rem 1.1rem 0.875rem 1.25rem; margin-left: 1rem; font-size: 13.5px; color: #a8bcd4; line-height: 1.75; }
+  .callout.warn   { border-color: var(--accent);  background: rgba(200,169,110,0.06); color: #c8b88a; }
+  .callout.tip    { border-color: var(--green);   background: rgba(106,173,142,0.06); color: #7ec4a0; }
+  .callout.danger { border-color: var(--red);     background: rgba(200,106,106,0.06); color: #d48a8a; }
+  .callout-title { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; opacity: 0.75; }
+
+  .code-block { background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; margin-left: 1rem; }
+  .code-header { padding: 0.45rem 1rem; background: var(--bg4); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .code-lang { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre { padding: 1.25rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; word-break: break-all; -webkit-overflow-scrolling: touch; }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  .tbl-wrap { overflow-x: auto; margin-left: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 0.55rem 1rem; font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--line2); }
+  tbody td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13.5px; vertical-align: top; line-height: 1.6; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+  td code, p code, li code { font-family: var(--mono); font-size: 12px; background: var(--bg4); color: var(--accent2); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line2); }
+  td strong { color: var(--text); }
+
+  .body-list { padding-left: 2rem; color: var(--muted); font-size: 14px; line-height: 1.85; display: flex; flex-direction: column; gap: 0.4rem; }
+  .body-list li::marker { color: var(--dim); }
+
+  .diagram-block { margin-left: 1rem; background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; padding: 1.5rem 1.75rem; font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.9; overflow-x: auto; white-space: pre; }
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+
+  .checklist { margin-left: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  .check-box { width: 16px; height: 16px; border: 1px solid var(--line2); border-radius: 3px; flex-shrink: 0; margin-top: 2px; background: var(--bg4); display: flex; align-items: center; justify-content: center; }
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  .steps { margin-left: 1rem; display: flex; flex-direction: column; }
+  .step { display: grid; grid-template-columns: 32px 1fr; gap: 0 1rem; position: relative; }
+  .step:not(:last-child) > .step-num::after { content: ''; position: absolute; left: 15px; top: 32px; width: 1px; height: calc(100% - 32px); background: var(--line2); }
+  .step-num { position: relative; width: 32px; height: 32px; border-radius: 50%; background: var(--bg4); border: 1px solid var(--line2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; z-index: 1; }
+  .step-content { padding-bottom: 1.75rem; min-width: 0; }
+  .step-title { font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 0.65rem; padding-top: 6px; line-height: 1.4; }
+  .step-desc { font-size: 13px; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.75; }
+
+  .bottom-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem; border-top: 1px solid var(--line); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 0.6rem 1.25rem; border: 1px solid var(--line2); border-radius: 4px; background: none; color: var(--muted); font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: rgba(200,169,110,0.1); border-color: rgba(200,169,110,0.4); color: var(--accent); }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+  .week-indicator { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L4 6l4 4"/></svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 06</span>
+      <div class="sidebar-week-title">嵌入式 Linux 系統</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">本週課程</div>
+      <a class="nav-lesson active" href="#lesson-6-1"><span class="nav-num">6.1</span>開機流程與 Bootloader</a>
+      <a class="nav-lesson" href="#lesson-6-2"><span class="nav-num">6.2</span>Device Tree</a>
+      <a class="nav-lesson" href="#lesson-6-3"><span class="nav-num">6.3</span>Linux 核心模組</a>
+      <a class="nav-lesson" href="#lesson-6-4"><span class="nav-num">6.4</span>字元裝置驅動程式</a>
+      <a class="nav-lesson" href="#lesson-6-5"><span class="nav-num">6.5</span>Platform Driver 與 DT 整合</a>
+      <a class="nav-lesson" href="#lesson-6-6"><span class="nav-num">6.6</span>使用者空間介面與偵錯</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>本週完成度</span>
+        <span id="progress-text">0 / 6</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Embedded Systems — Week 06</div>
+      <h1 class="week-title">嵌入式 Linux 系統</h1>
+      <p class="week-subtitle">
+        從 U-Boot 開機到寫出第一個核心模組，完整走過嵌入式 Linux 的開發鏈。
+        以 Raspberry Pi 4 / BeagleBone Black 為實驗平台，
+        理解 Device Tree 如何描述硬體、Platform Driver 如何與 DT 綁定，
+        以及如何透過 sysfs、ioctl、mmap 將驅動功能暴露給使用者空間。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-lab">實作導向</span>
+        <span class="tag tag-theory">核心理論</span>
+        <span class="tag">6 堂課</span>
+        <span class="tag">約 10 小時</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><span class="stat-value">6</span><span class="stat-label">堂課</span></div>
+        <div class="stat-item"><span class="stat-value">Linux 6.x</span><span class="stat-label">核心版本</span></div>
+        <div class="stat-item"><span class="stat-value">RPi 4 / BBB</span><span class="stat-label">實驗平台</span></div>
+        <div class="stat-item"><span class="stat-value">U-Boot + DT</span><span class="stat-label">開機鏈</span></div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <div class="obj-label">學習目標</div>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>描述 SPL → U-Boot → 核心的完整開機序列</div>
+        <div class="obj-item"><div class="obj-dot"></div>撰寫並編譯 Device Tree Overlay，動態掛載周邊</div>
+        <div class="obj-item"><div class="obj-dot"></div>建構可載入核心模組（.ko），理解模組生命週期</div>
+        <div class="obj-item"><div class="obj-dot"></div>實作字元裝置驅動：open/read/write/ioctl/mmap</div>
+        <div class="obj-item"><div class="obj-dot"></div>以 Platform Driver 框架驅動 DT 描述的 GPIO 周邊</div>
+        <div class="obj-item"><div class="obj-dot"></div>使用 ftrace、dynamic_debug、devmem2 診斷驅動問題</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 6.1
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-6-1">
+      <div class="lesson-header">
+        <span class="lesson-badge">6.1 — 理論</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">開機流程與 Bootloader</div>
+          <div class="lesson-desc">ROM → SPL → U-Boot → 核心的四階段開機，U-Boot 環境變數與網路開機</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">四階段開機序列</div>
+          <div class="diagram-block">
+<span class="d-dim">上電 / Reset</span>
+     │
+     ▼
+<span class="d-acc">① ROM Code</span>  <span class="d-dim">（片上唯讀，不可修改）</span>
+     初始化最低限度硬體（SRAM、時脈）
+     從 SD Card / eMMC / NAND 載入下一階段
+     │
+     ▼
+<span class="d-acc">② SPL / MLO</span>  <span class="d-dim">（Secondary Program Loader，&lt; 128 KB）</span>
+     初始化 DRAM 控制器
+     從儲存媒體載入完整 U-Boot 到 DRAM
+     │
+     ▼
+<span class="d-acc">③ U-Boot</span>      <span class="d-dim">（完整 Bootloader，支援網路 / USB / 環境變數）</span>
+     設定核心開機參數（bootargs）
+     載入 zImage + DTB → DRAM
+     跳轉至核心入口點
+     │
+     ▼
+<span class="d-acc">④ Linux Kernel</span>
+     解壓縮自身、初始化 MMU / 排程器 / 驅動
+     掛載 rootfs → 執行 /sbin/init（systemd / BusyBox）
+     │
+     ▼
+<span class="d-grn">使用者空間</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">U-Boot 常用指令</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>指令</th><th>說明</th><th>範例</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>printenv</code></td><td>顯示所有環境變數</td><td><code>printenv bootargs</code></td></tr>
+                <tr><td><code>setenv</code></td><td>設定環境變數（臨時）</td><td><code>setenv bootdelay 3</code></td></tr>
+                <tr><td><code>saveenv</code></td><td>將環境變數寫入 Flash / eMMC 持久保存</td><td><code>saveenv</code></td></tr>
+                <tr><td><code>fatload</code></td><td>從 FAT 分割區載入檔案到記憶體</td><td><code>fatload mmc 0:1 ${loadaddr} zImage</code></td></tr>
+                <tr><td><code>tftp</code></td><td>從 TFTP 伺服器下載（網路開機）</td><td><code>tftp ${loadaddr} zImage</code></td></tr>
+                <tr><td><code>bootz</code></td><td>啟動壓縮 ARM 核心（zImage）</td><td><code>bootz ${loadaddr} - ${fdtaddr}</code></td></tr>
+                <tr><td><code>md</code></td><td>記憶體傾印（偵錯用）</td><td><code>md.l 0x80000000 32</code></td></tr>
+                <tr><td><code>mw</code></td><td>記憶體寫入（直接操作暫存器）</td><td><code>mw.l 0x48000000 0x1</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">設定 bootargs — 核心啟動參數</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">shell — U-Boot console：從 SD Card 啟動 RPi 4</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 設定核心啟動參數：rootfs 在 mmcblk0p2，使用 ext4</span>
+setenv bootargs "console=ttyS0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 rw rootwait"
+
+<span class="cm"># 載入核心映像與 DTB 到 DRAM</span>
+fatload mmc 0:1 0x08000000 zImage
+fatload mmc 0:1 0x08800000 bcm2711-rpi-4-b.dtb
+
+<span class="cm"># 啟動核心（格式：bootz 核心位址 initrd DTB位址）</span>
+bootz 0x08000000 - 0x08800000
+
+<span class="cm"># 將上述指令存為 bootcmd，開機自動執行</span>
+setenv bootcmd "fatload mmc 0:1 0x08000000 zImage; fatload mmc 0:1 0x08800000 bcm2711-rpi-4-b.dtb; bootz 0x08000000 - 0x08800000"
+saveenv</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">NFS 根檔案系統（開發利器）</div>
+          <p class="body-text">
+            開發期間將 rootfs 掛載在開發主機的 NFS 目錄，
+            修改檔案後無需重新燒錄 SD Card，重新開機即生效，大幅縮短迭代時間。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">shell — U-Boot NFS 開機設定</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 主機端：/etc/exports</span>
+/opt/rootfs  *(rw,sync,no_subtree_check,no_root_squash)
+
+<span class="cm"># U-Boot bootargs：NFS rootfs</span>
+setenv bootargs "console=ttyS0,115200 root=/dev/nfs nfsroot=192.168.1.100:/opt/rootfs,v3 ip=192.168.1.50:::::eth0:off rw rootwait"
+
+<span class="cm"># 透過 TFTP 載入核心（快速迭代，不用換 SD Card）</span>
+setenv ipaddr 192.168.1.50
+setenv serverip 192.168.1.100
+tftp 0x08000000 zImage
+tftp 0x08800000 bcm2711-rpi-4-b.dtb
+bootz 0x08000000 - 0x08800000</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 6.2
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-6-2">
+      <div class="lesson-header">
+        <span class="lesson-badge">6.2 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">Device Tree</div>
+          <div class="lesson-desc">DTS 語法、節點 / 屬性 / 相容性字串、Overlay 動態掛載</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">為什麼需要 Device Tree</div>
+          <p class="body-text">
+            ARM 平台的板級硬體配置（哪個 I²C 掛了什麼感測器、哪個 GPIO 接了 LED）
+            過去以 <strong class="hl">board file</strong>（<code>arch/arm/mach-xxx/board-yyy.c</code>）硬編碼在核心裡，
+            導致每塊板子都要維護一份核心。
+            Device Tree 將硬體描述從核心分離出來，同一顆核心可以啟動不同板子，
+            只需替換 DTB（Device Tree Blob）。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">DTS 語法與核心概念</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">dts — 描述一個掛在 I²C1 的 BME280 感測器</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm">/* DTS 根節點 */</span>
+/ {
+    <span class="cm">/* 相容性字串：核心靠此尋找對應的板級 machine_desc */</span>
+    compatible = <span class="str">"raspberrypi,4-model-b"</span>, <span class="str">"brcm,bcm2711"</span>;
+    #address-cells = &lt;<span class="num">1</span>&gt;;  <span class="cm">/* reg 屬性中，位址用 1 個 cell 表示 */</span>
+    #size-cells = &lt;<span class="num">1</span>&gt;;     <span class="cm">/* reg 屬性中，大小用 1 個 cell 表示 */</span>
+
+    <span class="cm">/* 記憶體節點 */</span>
+    memory@0 {
+        device_type = <span class="str">"memory"</span>;
+        reg = &lt;<span class="num">0x00000000</span> <span class="num">0x40000000</span>&gt;;  <span class="cm">/* 1 GB，起始 0x0 */</span>
+    };
+
+    <span class="cm">/* 參照 SoC 的 I²C1 控制器並新增裝置 */</span>
+    &i2c1 {
+        status = <span class="str">"okay"</span>;
+        clock-frequency = &lt;<span class="num">400000</span>&gt;;  <span class="cm">/* 400 kHz 快速模式 */</span>
+
+        bme280: bme280@76 {
+            compatible = <span class="str">"bosch,bme280"</span>;  <span class="cm">/* 驅動程式匹配此字串 */</span>
+            reg = &lt;<span class="num">0x76</span>&gt;;              <span class="cm">/* 7-bit I²C 位址 */</span>
+            <span class="cm">/* 可選：中斷腳位描述 */</span>
+            interrupt-parent = &lt;&gpio&gt;;
+            interrupts = &lt;<span class="num">17</span> <span class="num">1</span>&gt;;        <span class="cm">/* GPIO17，上升緣 */</span>
+        };
+    };
+
+    <span class="cm">/* GPIO 控制器引用，設定 LED 腳位 */</span>
+    leds {
+        compatible = <span class="str">"gpio-leds"</span>;
+        led-green {
+            gpios = &lt;&gpio <span class="num">27</span> <span class="num">0</span>&gt;;     <span class="cm">/* GPIO27，低有效 */</span>
+            linux,default-trigger = <span class="str">"heartbeat"</span>;
+            default-state = <span class="str">"off"</span>;
+        };
+    };
+};</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Device Tree Overlay — 動態掛載周邊</div>
+          <p class="body-text">
+            Overlay 允許在不重新編譯完整 DTB 的情況下，動態增加或修改硬體描述。
+            Raspberry Pi 的 <code>/boot/config.txt</code> 中 <code>dtoverlay=</code> 即使用此機制。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">dts — my-bme280-overlay.dts</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm">/* Overlay：在執行期疊加到基礎 DTB */</span>
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = <span class="str">"brcm,bcm2835"</span>;  <span class="cm">/* 聲明此 overlay 適用的平台 */</span>
+
+    fragment@0 {
+        target = &lt;&i2c1&gt;;          <span class="cm">/* 疊加到 i2c1 節點 */</span>
+        __overlay__ {
+            #address-cells = &lt;<span class="num">1</span>&gt;;
+            #size-cells = &lt;<span class="num">0</span>&gt;;
+            status = <span class="str">"okay"</span>;
+
+            bme280@76 {
+                compatible = <span class="str">"bosch,bme280"</span>;
+                reg = &lt;<span class="num">0x76</span>&gt;;
+            };
+        };
+    };
+};</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">shell — 編譯並載入 Overlay</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 編譯 .dts → .dtbo</span>
+dtc -@ -I dts -O dtb -o my-bme280.dtbo my-bme280-overlay.dts
+
+<span class="cm"># 複製到 overlays 目錄</span>
+sudo cp my-bme280.dtbo /boot/overlays/
+
+<span class="cm"># 在 /boot/config.txt 加入（RPi 平台）</span>
+dtoverlay=my-bme280
+
+<span class="cm"># 或在執行期動態載入（需要 configfs overlay）</span>
+sudo dtoverlay my-bme280.dtbo
+
+<span class="cm"># 確認裝置是否出現</span>
+ls /sys/bus/i2c/devices/
+i2cdetect -y 1   <span class="cm"># 應在位址 0x76 看到裝置</span></pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 6.3
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-6-3">
+      <div class="lesson-header">
+        <span class="lesson-badge">6.3 — 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">Linux 核心模組</div>
+          <div class="lesson-desc">模組生命週期、Kbuild 系統、模組參數、核心日誌與符號匯出</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">最小核心模組</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — hello.c：最小可載入核心模組</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="pp">#include</span> <span class="str">&lt;linux/module.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/kernel.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/init.h&gt;</span>
+
+<span class="cm">/* 模組參數：insmod hello.ko msg="Hi" */</span>
+<span class="kw">static</span> <span class="kw">char</span> *msg = <span class="str">"Hello, kernel!"</span>;
+<span class="fn">module_param</span>(msg, charp, <span class="num">0644</span>);        <span class="cm">/* 型別 charp，sysfs 權限 0644 */</span>
+<span class="fn">MODULE_PARM_DESC</span>(msg, <span class="str">"Message to print on load"</span>);
+
+<span class="kw">static</span> <span class="kw">int</span> <span class="fn">__init</span> hello_init(<span class="kw">void</span>)
+{
+    <span class="fn">pr_info</span>(<span class="str">"hello: loaded — %s\n"</span>, msg);
+    <span class="kw">return</span> <span class="num">0</span>;    <span class="cm">/* 回傳非 0 → 載入失敗，模組不被插入 */</span>
+}
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">__exit</span> hello_exit(<span class="kw">void</span>)
+{
+    <span class="fn">pr_info</span>(<span class="str">"hello: unloaded\n"</span>);
+}
+
+<span class="fn">module_init</span>(hello_init);
+<span class="fn">module_exit</span>(hello_exit);
+
+<span class="fn">MODULE_LICENSE</span>(<span class="str">"GPL"</span>);            <span class="cm">/* 必須宣告，否則無法使用 GPL-only 符號 */</span>
+<span class="fn">MODULE_AUTHOR</span>(<span class="str">"Your Name"</span>);
+<span class="fn">MODULE_DESCRIPTION</span>(<span class="str">"Minimal kernel module example"</span>);</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Kbuild Makefile</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">makefile — 針對目標板交叉編譯</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 指定要編譯的模組（obj-m 告訴 Kbuild 這是一個模組）</span>
+obj-m += hello.o
+
+<span class="cm"># 若模組由多個原始檔組成：</span>
+<span class="cm"># mydrv-objs := mydrv_core.o mydrv_i2c.o</span>
+<span class="cm"># obj-m += mydrv.o</span>
+
+KDIR  ?= /lib/modules/$(shell uname -r)/build
+ARCH  ?= arm64
+CROSS ?= aarch64-linux-gnu-
+
+all:
+	$(MAKE) -C $(KDIR) M=$(PWD) \
+	        ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) modules
+
+clean:
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+
+install:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules_install
+	depmod -a</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">shell — 模組操作指令</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 插入模組（帶參數）</span>
+sudo insmod hello.ko msg="Embedded Linux"
+
+<span class="cm"># 查看核心日誌（即時）</span>
+dmesg | tail -5
+journalctl -k -f       <span class="cm"># systemd 環境</span>
+
+<span class="cm"># 列出已載入模組</span>
+lsmod | grep hello
+
+<span class="cm"># 查看模組資訊（授權、參數、依賴）</span>
+modinfo hello.ko
+
+<span class="cm"># 移除模組</span>
+sudo rmmod hello
+
+<span class="cm"># 從 /sys/module 修改參數（若 0644 權限）</span>
+echo "New message" | sudo tee /sys/module/hello/parameters/msg</pre>
+          </div>
+          <div class="callout warn">
+            <div class="callout-title">核心版本綁定（Module Versioning）</div>
+            核心模組與特定核心版本緊密耦合。
+            在 A 版本核心編譯的 <code>.ko</code> 無法在 B 版本核心載入
+            （除非啟用 <code>CONFIG_MODVERSIONS</code> 且符號 CRC 相符）。
+            交叉編譯時 <code>KDIR</code> 必須指向與目標板相同版本的核心原始碼樹（或標頭檔）。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 6.4
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-6-4">
+      <div class="lesson-header">
+        <span class="lesson-badge">6.4 — 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">字元裝置驅動程式</div>
+          <div class="lesson-desc">cdev 框架、file_operations、ioctl 命令設計、mmap 零拷貝</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">字元裝置架構</div>
+          <div class="diagram-block">
+<span class="d-dim">使用者空間</span>
+  open("/dev/mydev", O_RDWR)
+  read() / write() / ioctl()
+         │  系統呼叫
+─────────┼──────────────────────── 核心邊界
+         │
+<span class="d-acc">VFS 層</span>  ──▶ 依主裝置號 (major) 找到 file_operations 表
+         │
+<span class="d-hl">驅動程式</span>
+  .open    = mydev_open       <span class="d-dim">← 分配 private_data</span>
+  .release = mydev_close      <span class="d-dim">← 釋放資源</span>
+  .read    = mydev_read       <span class="d-dim">← copy_to_user</span>
+  .write   = mydev_write      <span class="d-dim">← copy_from_user</span>
+  .unlocked_ioctl = mydev_ioctl  <span class="d-dim">← 控制指令</span>
+  .mmap    = mydev_mmap       <span class="d-dim">← 零拷貝共享記憶體</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">完整字元裝置驅動實作</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — mydev.c：具備 read/write/ioctl 的字元裝置</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="pp">#include</span> <span class="str">&lt;linux/module.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/cdev.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/fs.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/uaccess.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/slab.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/device.h&gt;</span>
+
+<span class="pp">#define</span> DEV_NAME    <span class="str">"mydev"</span>
+<span class="pp">#define</span> BUF_SIZE    <span class="num">4096</span>
+
+<span class="cm">/* ioctl 命令定義（使用 _IO/_IOR/_IOW 巨集）*/</span>
+<span class="pp">#define</span> MYDEV_MAGIC  <span class="str">'M'</span>
+<span class="pp">#define</span> MYDEV_RESET  <span class="fn">_IO</span>(MYDEV_MAGIC, <span class="num">0</span>)          <span class="cm">/* 無參數 */</span>
+<span class="pp">#define</span> MYDEV_GETSTAT <span class="fn">_IOR</span>(MYDEV_MAGIC, <span class="num">1</span>, <span class="tp">uint32_t</span>) <span class="cm">/* 讀取狀態 */</span>
+<span class="pp">#define</span> MYDEV_SETFREQ <span class="fn">_IOW</span>(MYDEV_MAGIC, <span class="num">2</span>, <span class="tp">uint32_t</span>) <span class="cm">/* 寫入參數 */</span>
+
+<span class="kw">struct</span> <span class="tp">mydev_data</span> {
+    <span class="kw">struct</span> <span class="tp">cdev</span>  cdev;
+    <span class="kw">char</span>        *buf;
+    <span class="tp">size_t</span>       buf_len;
+    <span class="tp">uint32_t</span>     freq_hz;
+    <span class="kw">struct</span> <span class="tp">mutex</span> lock;
+};
+
+<span class="kw">static</span> <span class="kw">struct</span> <span class="tp">mydev_data</span> g_dev;
+<span class="kw">static</span> <span class="tp">dev_t</span>              g_devno;
+<span class="kw">static</span> <span class="kw">struct</span> <span class="tp">class</span>      *g_class;
+
+<span class="kw">static</span> <span class="kw">int</span> <span class="fn">mydev_open</span>(<span class="kw">struct</span> <span class="tp">inode</span> *inode, <span class="kw">struct</span> <span class="tp">file</span> *filp)
+{
+    filp->private_data = &g_dev;  <span class="cm">/* 讓其他 fops 取得裝置上下文 */</span>
+    <span class="fn">pr_debug</span>(<span class="str">"mydev: opened\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="kw">static</span> <span class="tp">ssize_t</span> <span class="fn">mydev_read</span>(<span class="kw">struct</span> <span class="tp">file</span> *filp, <span class="kw">char</span> __user *ubuf,
+                            <span class="tp">size_t</span> count, <span class="tp">loff_t</span> *pos)
+{
+    <span class="kw">struct</span> <span class="tp">mydev_data</span> *dev = filp->private_data;
+    <span class="tp">ssize_t</span> ret;
+
+    <span class="kw">if</span> (*pos >= dev->buf_len) <span class="kw">return</span> <span class="num">0</span>;  <span class="cm">/* EOF */</span>
+    count = <span class="fn">min</span>(count, (<span class="tp">size_t</span>)(dev->buf_len - *pos));
+
+    <span class="cm">/* copy_to_user：安全的核心→使用者空間複製 */</span>
+    ret = <span class="fn">copy_to_user</span>(ubuf, dev->buf + *pos, count);
+    <span class="kw">if</span> (ret) <span class="kw">return</span> -EFAULT;
+
+    *pos += count;
+    <span class="kw">return</span> count;
+}
+
+<span class="kw">static</span> <span class="tp">ssize_t</span> <span class="fn">mydev_write</span>(<span class="kw">struct</span> <span class="tp">file</span> *filp, <span class="kw">const</span> <span class="kw">char</span> __user *ubuf,
+                             <span class="tp">size_t</span> count, <span class="tp">loff_t</span> *pos)
+{
+    <span class="kw">struct</span> <span class="tp">mydev_data</span> *dev = filp->private_data;
+
+    count = <span class="fn">min</span>(count, (<span class="tp">size_t</span>)BUF_SIZE);
+    <span class="kw">if</span> (<span class="fn">copy_from_user</span>(dev->buf, ubuf, count)) <span class="kw">return</span> -EFAULT;
+
+    dev->buf_len = count;
+    *pos = count;
+    <span class="kw">return</span> count;
+}
+
+<span class="kw">static</span> <span class="kw">long</span> <span class="fn">mydev_ioctl</span>(<span class="kw">struct</span> <span class="tp">file</span> *filp, <span class="kw">unsigned</span> <span class="kw">int</span> cmd, <span class="kw">unsigned</span> <span class="kw">long</span> arg)
+{
+    <span class="kw">struct</span> <span class="tp">mydev_data</span> *dev = filp->private_data;
+    <span class="tp">uint32_t</span> val;
+
+    <span class="kw">switch</span> (cmd) {
+    <span class="kw">case</span> MYDEV_RESET:
+        <span class="fn">mutex_lock</span>(&dev->lock);
+        <span class="fn">memset</span>(dev->buf, <span class="num">0</span>, BUF_SIZE);
+        dev->buf_len = <span class="num">0</span>;
+        <span class="fn">mutex_unlock</span>(&dev->lock);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> MYDEV_GETSTAT:
+        val = dev->buf_len;
+        <span class="kw">if</span> (<span class="fn">copy_to_user</span>((<span class="kw">void</span> __user *)arg, &val, <span class="kw">sizeof</span>(val)))
+            <span class="kw">return</span> -EFAULT;
+        <span class="kw">break</span>;
+    <span class="kw">case</span> MYDEV_SETFREQ:
+        <span class="kw">if</span> (<span class="fn">copy_from_user</span>(&val, (<span class="kw">void</span> __user *)arg, <span class="kw">sizeof</span>(val)))
+            <span class="kw">return</span> -EFAULT;
+        dev->freq_hz = val;
+        <span class="fn">pr_info</span>(<span class="str">"mydev: freq set to %u Hz\n"</span>, val);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="kw">return</span> -ENOTTY;
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="kw">static</span> <span class="kw">const</span> <span class="kw">struct</span> <span class="tp">file_operations</span> mydev_fops = {
+    .owner          = THIS_MODULE,
+    .open           = mydev_open,
+    .read           = mydev_read,
+    .write          = mydev_write,
+    .unlocked_ioctl = mydev_ioctl,
+};
+
+<span class="kw">static</span> <span class="kw">int</span> <span class="fn">__init</span> mydev_init(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> ret;
+
+    <span class="cm">/* 動態申請主裝置號 */</span>
+    ret = <span class="fn">alloc_chrdev_region</span>(&g_devno, <span class="num">0</span>, <span class="num">1</span>, DEV_NAME);
+    <span class="kw">if</span> (ret) <span class="kw">return</span> ret;
+
+    <span class="fn">cdev_init</span>(&g_dev.cdev, &mydev_fops);
+    g_dev.cdev.owner = THIS_MODULE;
+    ret = <span class="fn">cdev_add</span>(&g_dev.cdev, g_devno, <span class="num">1</span>);
+    <span class="kw">if</span> (ret) <span class="kw">goto</span> err_region;
+
+    <span class="cm">/* 建立 /dev/mydev（需要 udev / mdev）*/</span>
+    g_class = <span class="fn">class_create</span>(DEV_NAME);
+    <span class="fn">device_create</span>(g_class, <span class="kw">NULL</span>, g_devno, <span class="kw">NULL</span>, DEV_NAME);
+
+    g_dev.buf = <span class="fn">kzalloc</span>(BUF_SIZE, GFP_KERNEL);
+    <span class="kw">if</span> (!g_dev.buf) { ret = -ENOMEM; <span class="kw">goto</span> err_dev; }
+
+    <span class="fn">mutex_init</span>(&g_dev.lock);
+    <span class="fn">pr_info</span>(<span class="str">"mydev: registered, major=%d\n"</span>, <span class="fn">MAJOR</span>(g_devno));
+    <span class="kw">return</span> <span class="num">0</span>;
+
+err_dev:
+    <span class="fn">device_destroy</span>(g_class, g_devno);
+    <span class="fn">class_destroy</span>(g_class);
+    <span class="fn">cdev_del</span>(&g_dev.cdev);
+err_region:
+    <span class="fn">unregister_chrdev_region</span>(g_devno, <span class="num">1</span>);
+    <span class="kw">return</span> ret;
+}
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">__exit</span> mydev_exit(<span class="kw">void</span>)
+{
+    <span class="fn">kfree</span>(g_dev.buf);
+    <span class="fn">device_destroy</span>(g_class, g_devno);
+    <span class="fn">class_destroy</span>(g_class);
+    <span class="fn">cdev_del</span>(&g_dev.cdev);
+    <span class="fn">unregister_chrdev_region</span>(g_devno, <span class="num">1</span>);
+}
+
+<span class="fn">module_init</span>(mydev_init);
+<span class="fn">module_exit</span>(mydev_exit);
+<span class="fn">MODULE_LICENSE</span>(<span class="str">"GPL"</span>);</pre>
+          </div>
+          <div class="callout danger">
+            <div class="callout-title">核心空間絕不能直接存取使用者空間指標</div>
+            所有使用者空間 ↔ 核心空間的資料傳輸必須經過
+            <code>copy_to_user</code> / <code>copy_from_user</code>（或 <code>get_user</code> / <code>put_user</code>），
+            這些函式會驗證指標合法性並處理頁面錯誤。
+            直接解參考 <code>arg</code> 指標可能造成核心崩潰（kernel oops）或安全漏洞。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 6.5
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-6-5">
+      <div class="lesson-header">
+        <span class="lesson-badge">6.5 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">Platform Driver 與 DT 整合</div>
+          <div class="lesson-desc">platform_driver / platform_device 模型、of_match_table、資源取得、中斷處理</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">Platform Driver 框架</div>
+          <p class="body-text">
+            Platform Driver 是嵌入式 Linux 驅動最常見的框架，用於驅動「非熱插拔」的 SoC 內建周邊
+            （GPIO 控制器、UART、SPI、I²C 控制器本身等）。
+            驅動以 <strong class="hl">compatible 字串</strong> 與 Device Tree 節點綁定，
+            核心在掃描 DT 時自動完成 probe。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">完整 Platform Driver 實作（GPIO LED）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — gpio-led-driver.c：從 DT 取得 GPIO 並控制 LED</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="pp">#include</span> <span class="str">&lt;linux/module.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/platform_device.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/of.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/gpio/consumer.h&gt;</span>  <span class="cm">/* gpiod_ API（推薦）*/</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/interrupt.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;linux/sysfs.h&gt;</span>
+
+<span class="kw">struct</span> <span class="tp">myled_priv</span> {
+    <span class="kw">struct</span> <span class="tp">gpio_desc</span> *led_gpiod;   <span class="cm">/* LED GPIO 描述子 */</span>
+    <span class="kw">struct</span> <span class="tp">gpio_desc</span> *btn_gpiod;   <span class="cm">/* 按鍵 GPIO 描述子 */</span>
+    <span class="kw">int</span>               btn_irq;
+    <span class="kw">struct</span> <span class="tp">device</span>    *dev;
+};
+
+<span class="cm">/* sysfs 屬性：/sys/bus/platform/devices/myled.0/led_state */</span>
+<span class="kw">static</span> <span class="tp">ssize_t</span> <span class="fn">led_state_store</span>(<span class="kw">struct</span> <span class="tp">device</span> *dev,
+    <span class="kw">struct</span> <span class="tp">device_attribute</span> *attr, <span class="kw">const</span> <span class="kw">char</span> *buf, <span class="tp">size_t</span> count)
+{
+    <span class="kw">struct</span> <span class="tp">myled_priv</span> *priv = <span class="fn">dev_get_drvdata</span>(dev);
+    <span class="kw">int</span> val;
+
+    <span class="kw">if</span> (<span class="fn">kstrtoint</span>(buf, <span class="num">10</span>, &val)) <span class="kw">return</span> -EINVAL;
+    <span class="fn">gpiod_set_value_cansleep</span>(priv->led_gpiod, !!val);
+    <span class="kw">return</span> count;
+}
+
+<span class="kw">static</span> <span class="tp">ssize_t</span> <span class="fn">led_state_show</span>(<span class="kw">struct</span> <span class="tp">device</span> *dev,
+    <span class="kw">struct</span> <span class="tp">device_attribute</span> *attr, <span class="kw">char</span> *buf)
+{
+    <span class="kw">struct</span> <span class="tp">myled_priv</span> *priv = <span class="fn">dev_get_drvdata</span>(dev);
+    <span class="kw">return</span> <span class="fn">sysfs_emit</span>(buf, <span class="str">"%d\n"</span>, <span class="fn">gpiod_get_value</span>(priv->led_gpiod));
+}
+<span class="kw">static</span> <span class="fn">DEVICE_ATTR_RW</span>(led_state);
+
+<span class="cm">/* 按鍵中斷處理 */</span>
+<span class="kw">static</span> <span class="tp">irqreturn_t</span> <span class="fn">btn_isr</span>(<span class="kw">int</span> irq, <span class="kw">void</span> *data)
+{
+    <span class="kw">struct</span> <span class="tp">myled_priv</span> *priv = data;
+    <span class="fn">gpiod_set_value</span>(priv->led_gpiod,
+                    !<span class="fn">gpiod_get_value</span>(priv->led_gpiod));
+    <span class="kw">return</span> IRQ_HANDLED;
+}
+
+<span class="cm">/* probe：核心匹配到 DT 節點時呼叫 */</span>
+<span class="kw">static</span> <span class="kw">int</span> <span class="fn">myled_probe</span>(<span class="kw">struct</span> <span class="tp">platform_device</span> *pdev)
+{
+    <span class="kw">struct</span> <span class="tp">myled_priv</span> *priv;
+    <span class="kw">int</span> ret;
+
+    <span class="cm">/* devm_ 系列：裝置移除時自動釋放，無需手動 free */</span>
+    priv = <span class="fn">devm_kzalloc</span>(&pdev->dev, <span class="kw">sizeof</span>(*priv), GFP_KERNEL);
+    <span class="kw">if</span> (!priv) <span class="kw">return</span> -ENOMEM;
+
+    priv->dev = &pdev->dev;
+
+    <span class="cm">/* 從 DT 屬性 "led-gpios" 取得 GPIO 描述子 */</span>
+    priv->led_gpiod = <span class="fn">devm_gpiod_get</span>(&pdev->dev, <span class="str">"led"</span>, GPIOD_OUT_LOW);
+    <span class="kw">if</span> (<span class="fn">IS_ERR</span>(priv->led_gpiod))
+        <span class="kw">return</span> <span class="fn">PTR_ERR</span>(priv->led_gpiod);
+
+    <span class="cm">/* 從 DT 屬性 "btn-gpios" 取得按鍵 GPIO */</span>
+    priv->btn_gpiod = <span class="fn">devm_gpiod_get_optional</span>(&pdev->dev, <span class="str">"btn"</span>, GPIOD_IN);
+    <span class="kw">if</span> (priv->btn_gpiod) {
+        priv->btn_irq = <span class="fn">gpiod_to_irq</span>(priv->btn_gpiod);
+        ret = <span class="fn">devm_request_irq</span>(&pdev->dev, priv->btn_irq, btn_isr,
+                               IRQF_TRIGGER_FALLING, <span class="str">"myled-btn"</span>, priv);
+        <span class="kw">if</span> (ret) <span class="kw">return</span> ret;
+    }
+
+    <span class="fn">platform_set_drvdata</span>(pdev, priv);
+
+    <span class="cm">/* 建立 sysfs 屬性 */</span>
+    ret = <span class="fn">device_create_file</span>(&pdev->dev, &dev_attr_led_state);
+    <span class="kw">if</span> (ret) <span class="kw">return</span> ret;
+
+    <span class="fn">dev_info</span>(&pdev->dev, <span class="str">"myled: probed successfully\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">myled_remove</span>(<span class="kw">struct</span> <span class="tp">platform_device</span> *pdev)
+{
+    <span class="fn">device_remove_file</span>(&pdev->dev, &dev_attr_led_state);
+}
+
+<span class="cm">/* DT 相容性表：與 DTS 中 compatible 屬性匹配 */</span>
+<span class="kw">static</span> <span class="kw">const</span> <span class="kw">struct</span> <span class="tp">of_device_id</span> myled_of_match[] = {
+    { .compatible = <span class="str">"mycompany,gpio-led-ctrl"</span> },
+    { }   <span class="cm">/* 哨兵：必須以空元素結尾 */</span>
+};
+<span class="fn">MODULE_DEVICE_TABLE</span>(of, myled_of_match);
+
+<span class="kw">static</span> <span class="kw">struct</span> <span class="tp">platform_driver</span> myled_driver = {
+    .probe  = myled_probe,
+    .remove = myled_remove,
+    .driver = {
+        .name           = <span class="str">"myled"</span>,
+        .of_match_table = myled_of_match,
+    },
+};
+<span class="fn">module_platform_driver</span>(myled_driver);  <span class="cm">/* 展開 module_init/exit */</span>
+
+<span class="fn">MODULE_LICENSE</span>(<span class="str">"GPL"</span>);
+<span class="fn">MODULE_DESCRIPTION</span>(<span class="str">"GPIO LED Platform Driver with DT and sysfs"</span>);</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">對應的 Device Tree 節點</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">dts — 與上述驅動配對的 DT 節點</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm">/* 放在板級 DTS 或 Overlay 中 */</span>
+myled_ctrl: gpio-led-ctrl {
+    compatible = <span class="str">"mycompany,gpio-led-ctrl"</span>;  <span class="cm">/* 匹配 of_match_table */</span>
+    status = <span class="str">"okay"</span>;
+
+    <span class="cm">/* gpiod_get(dev, "led", ...) → 尋找 "led-gpios" 屬性 */</span>
+    led-gpios = &lt;&gpio <span class="num">27</span> GPIO_ACTIVE_HIGH&gt;;
+    btn-gpios = &lt;&gpio <span class="num">17</span> GPIO_ACTIVE_LOW&gt;;  <span class="cm">/* devm_gpiod_get_optional */</span>
+};</pre>
+          </div>
+          <div class="callout tip">
+            <div class="callout-title">devm_ 系列 API 的好處</div>
+            以 <code>devm_</code> 開頭的資源申請函式（<code>devm_kzalloc</code>、<code>devm_gpiod_get</code>、
+            <code>devm_request_irq</code>）會將資源綁定到裝置的生命週期。
+            當 <code>platform_remove</code> 被呼叫時，核心自動按相反順序釋放所有 <code>devm_</code> 資源，
+            大幅降低資源洩漏風險，是現代 Linux 驅動的標準寫法。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 6.6
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-6-6">
+      <div class="lesson-header">
+        <span class="lesson-badge">6.6 — 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">使用者空間介面與偵錯</div>
+          <div class="lesson-desc">sysfs / debugfs 屬性、ftrace、dynamic_debug、devmem2、核心崩潰分析</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">從使用者空間操作驅動</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — user_app.c：呼叫 ioctl 控制字元裝置</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="pp">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;fcntl.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;unistd.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;sys/ioctl.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;stdint.h&gt;</span>
+
+<span class="cm">/* 與驅動共享的 ioctl 定義（通常放在共用標頭）*/</span>
+<span class="pp">#define</span> MYDEV_MAGIC   <span class="str">'M'</span>
+<span class="pp">#define</span> MYDEV_RESET   _IO(MYDEV_MAGIC, 0)
+<span class="pp">#define</span> MYDEV_GETSTAT _IOR(MYDEV_MAGIC, 1, uint32_t)
+<span class="pp">#define</span> MYDEV_SETFREQ _IOW(MYDEV_MAGIC, 2, uint32_t)
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="kw">int</span> fd = <span class="fn">open</span>(<span class="str">"/dev/mydev"</span>, O_RDWR);
+    <span class="kw">if</span> (fd < <span class="num">0</span>) { <span class="fn">perror</span>(<span class="str">"open"</span>); <span class="kw">return</span> <span class="num">1</span>; }
+
+    <span class="cm">/* 重置裝置 */</span>
+    <span class="kw">if</span> (<span class="fn">ioctl</span>(fd, MYDEV_RESET) < <span class="num">0</span>) <span class="fn">perror</span>(<span class="str">"RESET"</span>);
+
+    <span class="cm">/* 設定頻率 */</span>
+    <span class="tp">uint32_t</span> freq = <span class="num">1000</span>;
+    <span class="kw">if</span> (<span class="fn">ioctl</span>(fd, MYDEV_SETFREQ, &freq) < <span class="num">0</span>) <span class="fn">perror</span>(<span class="str">"SETFREQ"</span>);
+
+    <span class="cm">/* 寫入資料 */</span>
+    <span class="kw">const</span> <span class="kw">char</span> *data = <span class="str">"Hello from userspace"</span>;
+    <span class="fn">write</span>(fd, data, <span class="fn">strlen</span>(data));
+
+    <span class="cm">/* 讀取狀態 */</span>
+    <span class="tp">uint32_t</span> stat;
+    <span class="kw">if</span> (<span class="fn">ioctl</span>(fd, MYDEV_GETSTAT, &stat) == <span class="num">0</span>)
+        <span class="fn">printf</span>(<span class="str">"buffer length: %u bytes\n"</span>, stat);
+
+    <span class="fn">close</span>(fd);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">核心偵錯工具速查</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>工具</th><th>用途</th><th>指令範例</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>dmesg / journalctl</strong></td>
+                  <td>查看核心日誌（printk / pr_info 輸出）</td>
+                  <td><code>dmesg -w</code>、<code>journalctl -k -f</code></td>
+                </tr>
+                <tr>
+                  <td><strong>dynamic_debug</strong></td>
+                  <td>執行期開關 <code>pr_debug</code> / <code>dev_dbg</code>，不需重新編譯</td>
+                  <td><code>echo "module mydev +p" > /sys/kernel/debug/dynamic_debug/control</code></td>
+                </tr>
+                <tr>
+                  <td><strong>ftrace</strong></td>
+                  <td>函式呼叫追蹤、延遲測量、中斷追蹤</td>
+                  <td><code>echo function > /sys/kernel/debug/tracing/current_tracer</code></td>
+                </tr>
+                <tr>
+                  <td><strong>devmem2</strong></td>
+                  <td>直接讀寫實體記憶體位址（偵錯暫存器）</td>
+                  <td><code>devmem2 0xFE200000 w</code>（讀 GPIO base）</td>
+                </tr>
+                <tr>
+                  <td><strong>i2cdetect / i2cdump</strong></td>
+                  <td>掃描 I²C 匯流排、傾印裝置暫存器</td>
+                  <td><code>i2cdump -y 1 0x76</code></td>
+                </tr>
+                <tr>
+                  <td><strong>spidev_test</strong></td>
+                  <td>測試 SPI 裝置讀寫（需 spidev 驅動）</td>
+                  <td><code>spidev_test -D /dev/spidev0.0 -s 1000000</code></td>
+                </tr>
+                <tr>
+                  <td><strong>/proc/interrupts</strong></td>
+                  <td>查看各 IRQ 的觸發次數與 CPU 分配</td>
+                  <td><code>watch -n1 cat /proc/interrupts</code></td>
+                </tr>
+                <tr>
+                  <td><strong>kgdb / crash</strong></td>
+                  <td>核心 GDB 偵錯 / vmcore 崩潰分析</td>
+                  <td><code>crash vmlinux vmcore</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">ftrace 追蹤驅動函式延遲</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">shell — 用 ftrace 量測 probe 函式耗時</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre"><span class="cm"># 掛載 debugfs（若未掛載）</span>
+mount -t debugfs none /sys/kernel/debug
+
+<span class="cm"># 設定追蹤特定模組的所有函式</span>
+echo myled > /sys/kernel/debug/tracing/set_ftrace_filter
+echo function > /sys/kernel/debug/tracing/current_tracer
+echo 1 > /sys/kernel/debug/tracing/tracing_on
+
+<span class="cm"># 插入模組，觸發 probe</span>
+insmod gpio-led-driver.ko
+
+<span class="cm"># 讀取追蹤結果</span>
+cat /sys/kernel/debug/tracing/trace | head -30
+
+<span class="cm"># 清除並停止追蹤</span>
+echo 0 > /sys/kernel/debug/tracing/tracing_on
+echo nop > /sys/kernel/debug/tracing/current_tracer
+echo > /sys/kernel/debug/tracing/set_ftrace_filter</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">本週實作清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以 NFS rootfs 啟動 RPi 4，修改任意檔案後不換 SD 卡重開機確認生效</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>撰寫 DT Overlay 掛載 BME280，用 <code>i2cdetect</code> 驗證裝置出現在 <code>0x76</code></span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>編譯 hello.ko，帶參數 <code>msg="Week6"</code> 載入並用 <code>dmesg</code> 確認輸出</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>實作 mydev.c 字元裝置，user_app 透過 ioctl 讀寫資料並驗證結果</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>完成 Platform Driver + DT Overlay，以 <code>echo 1 > led_state</code> 控制 LED</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以 <code>dynamic_debug</code> 執行期開啟 <code>dev_dbg</code>，不重新編譯模組確認日誌出現</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">延伸挑戰</div>
+          為 BME280 實作一個完整的 <strong>IIO（Industrial I/O）子系統驅動</strong>：
+          實作 <code>iio_read_raw</code> 回呼，讓感測器資料可透過
+          <code>/sys/bus/iio/devices/iio:device0/in_temp_input</code> 讀取，
+          並支援 <code>triggered buffer</code>（以 hrtimer 觸發、DMA 搬運）。
+          這是上游 Linux 核心收錄感測器驅動的標準介面。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="week5.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L5 7l4 5"/></svg>
+        Week 05 — 即時作業系統 RTOS
+      </a>
+      <span class="week-indicator">Week 06 / 08</span>
+      <a href="week7.html" class="nav-btn primary">
+        Week 07 — 低功耗與安全設計
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2l4 5-4 5"/></svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main     = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+    sections.forEach(s => { if (scrollTop >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+    const done  = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = done + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (done / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>

@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 7 — 低功耗與安全設計 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; min-height: 100vh; }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--line); position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+  .sidebar-header { padding: 1.75rem 1.5rem 1.25rem; border-bottom: 1px solid var(--line); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; color: var(--dim); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+  .course-label { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 0.4rem; }
+  .sidebar-week-title { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+  .nav-section-label { padding: 0.5rem 1.5rem 0.25rem; font-family: var(--mono); font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; }
+  .nav-lesson { display: flex; align-items: center; gap: 10px; padding: 0.5rem 1.5rem; font-size: 13px; color: var(--muted); text-decoration: none; border: none; background: none; width: 100%; text-align: left; transition: color 0.15s, background 0.15s; border-left: 2px solid transparent; }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
+  .nav-num { font-family: var(--mono); font-size: 10px; color: var(--dim); min-width: 22px; }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--line); }
+  .progress-label { font-family: var(--mono); font-size: 10px; color: var(--dim); display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+  .progress-bar-wrap { background: var(--bg4); border-radius: 2px; height: 3px; }
+  .progress-bar-fill { background: var(--accent); height: 3px; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+  .main { overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
+
+  .week-hero { padding: 3.5rem 4rem 2.75rem; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  .week-hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 360px; height: 360px; background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .hero-eyebrow::after { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); opacity: 0.4; }
+  .week-title { font-family: var(--serif); font-size: 36px; font-weight: 600; line-height: 1.25; color: var(--text); margin-bottom: 0.75rem; }
+  .week-subtitle { font-size: 16px; color: var(--muted); margin-bottom: 1.75rem; max-width: 540px; line-height: 1.65; }
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tag { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 3px; border: 1px solid var(--line2); color: var(--dim); }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-value { font-family: var(--mono); font-size: 20px; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .objectives-bar { padding: 1.5rem 4rem; border-bottom: 1px solid var(--line); background: var(--bg2); display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; }
+  .obj-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; padding-top: 3px; min-width: 60px; }
+  .obj-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .obj-item { font-size: 12.5px; color: var(--muted); background: var(--bg3); border: 1px solid var(--line); border-radius: 3px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; }
+  .obj-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .lesson-section { padding: 3rem 4rem; border-bottom: 1px solid var(--line); }
+  .lesson-section:last-of-type { border-bottom: none; }
+  .lesson-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; gap: 1.25rem; }
+  .lesson-badge { font-family: var(--mono); font-size: 10px; color: var(--accent); background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); padding: 4px 10px; border-radius: 3px; white-space: nowrap; margin-top: 5px; }
+  .lesson-header-text { min-width: 0; }
+  .lesson-title { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 0.3rem; }
+  .lesson-desc { font-size: 13px; color: var(--muted); }
+  .lesson-body { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .sub-section { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sub-title { font-size: 15px; font-weight: 500; color: var(--text); padding-left: 1rem; border-left: 2px solid var(--accent2); }
+  .body-text { color: var(--muted); font-size: 14px; line-height: 1.85; padding-left: 1rem; }
+  .body-text + .body-text { margin-top: 0.75rem; }
+  strong.hl { color: var(--text); }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(143,168,200,0.06); border-radius: 0 4px 4px 0; padding: 0.875rem 1.1rem 0.875rem 1.25rem; margin-left: 1rem; font-size: 13.5px; color: #a8bcd4; line-height: 1.75; }
+  .callout.warn   { border-color: var(--accent);  background: rgba(200,169,110,0.06); color: #c8b88a; }
+  .callout.tip    { border-color: var(--green);   background: rgba(106,173,142,0.06); color: #7ec4a0; }
+  .callout.danger { border-color: var(--red);     background: rgba(200,106,106,0.06); color: #d48a8a; }
+  .callout-title { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; opacity: 0.75; }
+
+  .code-block { background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; margin-left: 1rem; }
+  .code-header { padding: 0.45rem 1rem; background: var(--bg4); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .code-lang { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre { padding: 1.25rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; word-break: break-all; -webkit-overflow-scrolling: touch; }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  .tbl-wrap { overflow-x: auto; margin-left: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 0.55rem 1rem; font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--line2); }
+  tbody td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13.5px; vertical-align: top; line-height: 1.6; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+  td code, p code, li code { font-family: var(--mono); font-size: 12px; background: var(--bg4); color: var(--accent2); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line2); }
+  td strong { color: var(--text); }
+
+  .body-list { padding-left: 2rem; color: var(--muted); font-size: 14px; line-height: 1.85; display: flex; flex-direction: column; gap: 0.4rem; }
+  .body-list li::marker { color: var(--dim); }
+
+  .diagram-block { margin-left: 1rem; background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; padding: 1.5rem 1.75rem; font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.9; overflow-x: auto; white-space: pre; }
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+  .diagram-block .d-red { color: var(--red); }
+
+  .checklist { margin-left: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  .check-box { width: 16px; height: 16px; border: 1px solid var(--line2); border-radius: 3px; flex-shrink: 0; margin-top: 2px; background: var(--bg4); display: flex; align-items: center; justify-content: center; }
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  .steps { margin-left: 1rem; display: flex; flex-direction: column; }
+  .step { display: grid; grid-template-columns: 32px 1fr; gap: 0 1rem; position: relative; }
+  .step:not(:last-child) > .step-num::after { content: ''; position: absolute; left: 15px; top: 32px; width: 1px; height: calc(100% - 32px); background: var(--line2); }
+  .step-num { position: relative; width: 32px; height: 32px; border-radius: 50%; background: var(--bg4); border: 1px solid var(--line2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; z-index: 1; }
+  .step-content { padding-bottom: 1.75rem; min-width: 0; }
+  .step-title { font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 0.65rem; padding-top: 6px; line-height: 1.4; }
+  .step-desc { font-size: 13px; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.75; }
+
+  .bottom-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem; border-top: 1px solid var(--line); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 0.6rem 1.25rem; border: 1px solid var(--line2); border-radius: 4px; background: none; color: var(--muted); font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: rgba(200,169,110,0.1); border-color: rgba(200,169,110,0.4); color: var(--accent); }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+  .week-indicator { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L4 6l4 4"/></svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 07</span>
+      <div class="sidebar-week-title">低功耗與安全設計</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Lessons</div>
+      <a href="#lesson-7-1" class="nav-lesson">
+        <span class="nav-num">7.1</span>STM32 低功耗模式
+      </a>
+      <a href="#lesson-7-2" class="nav-lesson">
+        <span class="nav-num">7.2</span>低功耗程式設計技巧
+      </a>
+      <a href="#lesson-7-3" class="nav-lesson">
+        <span class="nav-num">7.3</span>電源量測與分析
+      </a>
+      <a href="#lesson-7-4" class="nav-lesson">
+        <span class="nav-num">7.4</span>安全啟動與韌體保護
+      </a>
+      <a href="#lesson-7-5" class="nav-lesson">
+        <span class="nav-num">7.5</span>硬體加密加速器
+      </a>
+      <a href="#lesson-7-6" class="nav-lesson">
+        <span class="nav-num">7.6</span>安全硬化實踐
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>學習進度</span>
+        <span id="progress-text">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Week 07</div>
+      <h1 class="week-title">低功耗與安全設計</h1>
+      <p class="week-subtitle">
+        從電源模式選擇、動態頻率調整，到硬體加密加速器與安全啟動，
+        掌握嵌入式系統在功耗與資安兩個關鍵維度上的設計策略。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-theory">理論</span>
+        <span class="tag tag-lab">實作</span>
+        <span class="tag">Low Power</span>
+        <span class="tag">Security</span>
+        <span class="tag">STM32</span>
+        <span class="tag">TrustZone</span>
+        <span class="tag">AES/SHA</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">6</span>
+          <span class="stat-label">Lessons</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">~4h</span>
+          <span class="stat-label">學習時間</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">3</span>
+          <span class="stat-label">實作練習</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <span class="obj-label">目標</span>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>理解 Sleep / Stop / Standby 差異與喚醒路徑</div>
+        <div class="obj-item"><div class="obj-dot"></div>以 FreeRTOS Tickless Idle 實現動態省電</div>
+        <div class="obj-item"><div class="obj-dot"></div>使用電流探針量測並分析功耗時序</div>
+        <div class="obj-item"><div class="obj-dot"></div>配置 RDP 與 Option Bytes 保護韌體</div>
+        <div class="obj-item"><div class="obj-dot"></div>呼叫 STM32 AES / HASH / RNG 硬體加速器</div>
+        <div class="obj-item"><div class="obj-dot"></div>實作 Stack Canary、MPU、安全編譯旗標</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ LESSON 7.1 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-7-1">
+      <div class="lesson-header">
+        <span class="lesson-badge">7.1</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">STM32 低功耗模式</h2>
+          <p class="lesson-desc">三種低功耗狀態的硬體機制、喚醒來源與電流比較</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">三種低功耗模式概覽</div>
+          <p class="body-text">
+            STM32F446RE 提供三層次低功耗模式，關閉的電路域逐層擴大：
+            <strong class="hl">Sleep</strong> 只停止 CPU 時脈；
+            <strong class="hl">Stop</strong> 關閉所有時脈但保留 SRAM 與暫存器內容；
+            <strong class="hl">Standby</strong> 關閉幾乎所有電源域，僅 Backup Domain 存活。
+          </p>
+          <div class="diagram-block"><span class="d-hl">電源模式層次</span>
+
+<span class="d-dim">┌──────────────────────────────────────────────────────┐</span>
+<span class="d-dim">│</span>  <span class="d-hl">Run Mode</span>   CPU + 所有外設 + PLL 全速運行            <span class="d-dim">│</span>
+<span class="d-dim">│</span>  典型功耗：~45 mA @ 180 MHz, VDD=3.3V               <span class="d-dim">│</span>
+<span class="d-dim">├──────────────────────────────────────────────────────┤</span>
+<span class="d-dim">│</span>  <span class="d-grn">Sleep Mode</span>  CPU 時脈停止，外設繼續運作               <span class="d-dim">│</span>
+<span class="d-dim">│</span>  WFI/WFE 指令進入；任意中斷喚醒                      <span class="d-dim">│</span>
+<span class="d-dim">│</span>  典型功耗：~10–25 mA（視啟用外設而定）                <span class="d-dim">│</span>
+<span class="d-dim">├──────────────────────────────────────────────────────┤</span>
+<span class="d-dim">│</span>  <span class="d-acc">Stop Mode</span>   所有時脈停止（含外設），Vcore 可降壓       <span class="d-dim">│</span>
+<span class="d-dim">│</span>  喚醒來源：EXTI 線、RTC Alarm/Tamper/WakeUp           <span class="d-dim">│</span>
+<span class="d-dim">│</span>  喚醒後 HSI 16 MHz 先啟動，需重新設定 PLL             <span class="d-dim">│</span>
+<span class="d-dim">│</span>  典型功耗：~100–400 µA                               <span class="d-dim">│</span>
+<span class="d-dim">├──────────────────────────────────────────────────────┤</span>
+<span class="d-dim">│</span>  <span class="d-red">Standby Mode</span> 僅 Backup Domain 供電                  <span class="d-dim">│</span>
+<span class="d-dim">│</span>  喚醒來源：WKUP pin (PA0)、RTC Alarm、NRST           <span class="d-dim">│</span>
+<span class="d-dim">│</span>  SRAM 內容遺失，相當於硬體重置                       <span class="d-dim">│</span>
+<span class="d-dim">│</span>  典型功耗：~2–10 µA                                  <span class="d-dim">│</span>
+<span class="d-dim">└──────────────────────────────────────────────────────┘</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">進入 Stop Mode — 暫存器操作</div>
+          <p class="body-text">
+            進入 Stop Mode 需設定 <strong class="hl">PWR_CR</strong> 的 LPDS（Low-Power Deepsleep）位，
+            以及 SCB 的 SLEEPDEEP 位，再執行 <code>WFI</code>。
+            為避免電壓調節器持續全速供電，建議同時設定 PDDS=0（Stop，非 Standby）。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — stop_mode.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#include</span> <span class="str">"stm32f4xx.h"</span>
+
+<span class="cm">/* 進入 Stop Mode，以 EXTI line 13 (PC13 user button) 喚醒 */</span>
+<span class="kw">void</span> <span class="fn">enter_stop_mode</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 1. 關閉不需要的外設時鐘以降低 Stop 電流 */</span>
+    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN);
+
+    <span class="cm">/* 2. 設定 PWR：電壓調節器進 Low-Power 模式（LPDS=1），PDDS=0 → Stop */</span>
+    PWR->CR |= PWR_CR_LPDS;
+    PWR->CR &= ~PWR_CR_PDDS;
+
+    <span class="cm">/* 3. SCB SLEEPDEEP = 1 → 讓 WFI 觸發 Deepsleep */</span>
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+
+    <span class="cm">/* 4. 確保 EXTI line 13 已設定為中斷來源（見 lesson 2.3） */</span>
+    __DSB();  <span class="cm">/* Data Sync Barrier：確保所有寫入完成 */</span>
+    __ISB();  <span class="cm">/* Instruction Sync Barrier */</span>
+    __WFI();  <span class="cm">/* 進入 Stop，等待中斷 */</span>
+
+    <span class="cm">/* 5. 喚醒後，硬體自動以 HSI 16 MHz 執行，需重新設定 PLL → 180 MHz */</span>
+    SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
+    <span class="fn">SystemClock_Config</span>();  <span class="cm">/* 重新初始化 PLL */</span>
+}
+
+<span class="cm">/* EXTI15_10 中斷服務（PC13 按鈕喚醒） */</span>
+<span class="kw">void</span> <span class="fn">EXTI15_10_IRQHandler</span>(<span class="kw">void</span>)
+{
+    <span class="kw">if</span> (EXTI->PR & EXTI_PR_PR13) {
+        EXTI->PR = EXTI_PR_PR13;  <span class="cm">/* 清除 pending flag */</span>
+    }
+    <span class="cm">/* 不需要額外動作：中斷本身喚醒 CPU，main 繼續執行 */</span>
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">RTC 定時喚醒 (Standby)</div>
+          <p class="body-text">
+            若應用需要定期醒來採樣後再次入眠，Standby + RTC AlarmA 是最省電的方案。
+            備份暫存器（BKP registers）可在 Standby 後保留少量狀態（如採樣計數）。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — rtc_wakeup.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* RTC 每 5 秒喚醒一次，量測後進入 Standby */</span>
+
+<span class="kw">void</span> <span class="fn">rtc_wakeup_config</span>(<span class="tp">uint32_t</span> seconds)
+{
+    <span class="cm">/* 啟用 PWR 時鐘，解鎖 Backup Domain */</span>
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    PWR->CR      |= PWR_CR_DBP;
+
+    <span class="cm">/* 使用 LSI ~32 kHz 作為 RTC 時鐘來源 */</span>
+    RCC->CSR     |= RCC_CSR_LSION;
+    <span class="kw">while</span> (!(RCC->CSR & RCC_CSR_LSIRDY));
+    RCC->BDCR     = (RCC->BDCR & ~RCC_BDCR_RTCSEL) | RCC_BDCR_RTCSEL_1;
+    RCC->BDCR    |= RCC_BDCR_RTCEN;
+
+    <span class="cm">/* 解除 RTC 寫保護 */</span>
+    RTC->WPR = <span class="num">0xCA</span>;
+    RTC->WPR = <span class="num">0x53</span>;
+
+    <span class="cm">/* 使用 Wakeup Timer：WUCKSEL=100b → ck_spre (1 Hz) */</span>
+    RTC->CR  &= ~RTC_CR_WUTE;
+    <span class="kw">while</span> (!(RTC->ISR & RTC_ISR_WUTWF));
+    RTC->WUTR = seconds - <span class="num">1</span>;
+    RTC->CR   = (RTC->CR & ~RTC_CR_WUCKSEL) | (<span class="num">0x4</span> << RTC_CR_WUCKSEL_Pos);
+    RTC->CR  |= RTC_CR_WUTIE | RTC_CR_WUTE;
+
+    <span class="cm">/* 鎖回 RTC 寫保護 */</span>
+    RTC->WPR = <span class="num">0xFF</span>;
+
+    <span class="cm">/* 設定 EXTI line 22（RTC Wakeup）為上升沿中斷 */</span>
+    EXTI->IMR  |= (<span class="num">1U</span> << <span class="num">22</span>);
+    EXTI->RTSR |= (<span class="num">1U</span> << <span class="num">22</span>);
+}
+
+<span class="kw">void</span> <span class="fn">enter_standby</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 清除 Standby / Wakeup flags */</span>
+    PWR->CR  |= PWR_CR_CSBF | PWR_CR_CWUF;
+    PWR->CR  |= PWR_CR_PDDS;  <span class="cm">/* PDDS=1 → Standby（非 Stop） */</span>
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    __DSB();
+    __WFI();
+    <span class="cm">/* 喚醒後等同硬體 Reset，程式從頭執行 */</span>
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">低功耗模式比較表</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>模式</th>
+                  <th>CPU 時脈</th>
+                  <th>外設時脈</th>
+                  <th>SRAM</th>
+                  <th>喚醒時間</th>
+                  <th>典型電流 (3.3 V)</th>
+                  <th>喚醒來源</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Run</strong></td>
+                  <td>全速</td>
+                  <td>全速</td>
+                  <td>保留</td>
+                  <td>—</td>
+                  <td>~42 mA (180 MHz)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Sleep</strong></td>
+                  <td>停止</td>
+                  <td>運行</td>
+                  <td>保留</td>
+                  <td>&lt; 1 µs</td>
+                  <td>~10–25 mA</td>
+                  <td>任意中斷</td>
+                </tr>
+                <tr>
+                  <td><strong>Stop</strong></td>
+                  <td>停止</td>
+                  <td>停止</td>
+                  <td>保留</td>
+                  <td>~50 µs (HSI)</td>
+                  <td>~100–400 µA</td>
+                  <td>EXTI, RTC</td>
+                </tr>
+                <tr>
+                  <td><strong>Standby</strong></td>
+                  <td>停止</td>
+                  <td>停止</td>
+                  <td>遺失</td>
+                  <td>~300 µs (Reset)</td>
+                  <td>~2–8 µA</td>
+                  <td>WKUP, RTC, NRST</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-title">Stop 模式後 PLL 失效</div>
+          從 Stop 模式喚醒後，HSI 16 MHz 自動恢復，但 PLL 已關閉。
+          若程式邏輯依賴 UART 鮑率或 Timer 週期正確，必須在喚醒後立即呼叫
+          <code>SystemClock_Config()</code> 重新啟動 PLL，否則所有時脈相依外設行為異常。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 7.2 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-7-2">
+      <div class="lesson-header">
+        <span class="lesson-badge">7.2</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">低功耗程式設計技巧</h2>
+          <p class="lesson-desc">動態電壓頻率調整、外設時鐘閘控、FreeRTOS Tickless Idle</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">動態頻率調整 (Run Mode 省電)</div>
+          <p class="body-text">
+            並非所有任務都需要 180 MHz。
+            在等待感測器回應期間將 PLL 降為 16 MHz HSI，完成計算前再拉回 180 MHz，
+            可在不切換低功耗模式的情況下節省 30–50% 電流。
+            STM32 透過修改 <strong class="hl">RCC_CFGR.SW</strong> 切換時鐘來源，且切換過程不中斷外設。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — clk_scale.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* 切換至 HSI 16 MHz（省電），稍後再切回 PLL 180 MHz */</span>
+
+<span class="kw">void</span> <span class="fn">clock_switch_hsi</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 等待 HSI ready */</span>
+    RCC->CR |= RCC_CR_HSION;
+    <span class="kw">while</span> (!(RCC->CR & RCC_CR_HSIRDY));
+
+    <span class="cm">/* 先降低 Flash 等待週期，再切換時脈，避免 Prefetch 錯誤 */</span>
+    FLASH->ACR = (FLASH->ACR & ~FLASH_ACR_LATENCY) | FLASH_ACR_LATENCY_0WS;
+
+    <span class="cm">/* 切換系統時鐘來源：SW = 00 → HSI */</span>
+    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_HSI;
+    <span class="kw">while</span> ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+
+    <span class="cm">/* 更新 SystemCoreClock 供 HAL_Delay / SysTick 正確使用 */</span>
+    SystemCoreClock = <span class="num">16000000UL</span>;
+    <span class="fn">SysTick_Config</span>(SystemCoreClock / <span class="num">1000</span>);
+}
+
+<span class="kw">void</span> <span class="fn">clock_switch_pll_180mhz</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 先設好 Flash 等待週期 5WS (for 180 MHz) */</span>
+    FLASH->ACR = (FLASH->ACR & ~FLASH_ACR_LATENCY) | FLASH_ACR_LATENCY_5WS;
+    FLASH->ACR |= FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | FLASH_ACR_DCEN;
+
+    <span class="cm">/* 切回 PLL */</span>
+    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_PLL;
+    <span class="kw">while</span> ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+
+    SystemCoreClock = <span class="num">180000000UL</span>;
+    <span class="fn">SysTick_Config</span>(SystemCoreClock / <span class="num">1000</span>);
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">外設時鐘閘控</div>
+          <p class="body-text">
+            RCC 的 <strong class="hl">AHB1ENR / APB1ENR / APB2ENR</strong> 每個位元控制一個外設的時鐘。
+            未使用的外設時鐘應在初始化時明確關閉，這是 STM32 省電的最基本手段，
+            可在 Run Mode 下減少 2–5 mA（視外設數量）。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — periph_clock_gate.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* 僅啟用本應用需要的外設；其餘保持 reset 預設（多數為關閉） */</span>
+
+<span class="kw">void</span> <span class="fn">periph_clock_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* AHB1：只開啟 GPIOA、GPIOB、DMA2 */</span>
+    RCC->AHB1ENR = RCC_AHB1ENR_GPIOAEN
+                 | RCC_AHB1ENR_GPIOBEN
+                 | RCC_AHB1ENR_DMA2EN;
+
+    <span class="cm">/* APB1：只開啟 USART2、I2C1 */</span>
+    RCC->APB1ENR = RCC_APB1ENR_USART2EN
+                 | RCC_APB1ENR_I2C1EN;
+
+    <span class="cm">/* APB2：只開啟 ADC1、SPI1 */</span>
+    RCC->APB2ENR = RCC_APB2ENR_ADC1EN
+                 | RCC_APB2ENR_SPI1EN;
+}
+
+<span class="cm">/* 進入 Stop 前，關閉所有外設時鐘（除 RTC 外）以達最低 Stop 電流 */</span>
+<span class="kw">void</span> <span class="fn">periph_clock_all_off</span>(<span class="kw">void</span>)
+{
+    RCC->AHB1ENR = <span class="num">0</span>;
+    RCC->APB1ENR = RCC_APB1ENR_PWREN;  <span class="cm">/* PWR 必須保留 */</span>
+    RCC->APB2ENR = <span class="num">0</span>;
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">FreeRTOS Tickless Idle</div>
+          <p class="body-text">
+            FreeRTOS 預設每個 Tick（通常 1 ms）都會喚醒 CPU 更新計時器，
+            這在低功耗場景是很大的浪費。
+            啟用 <strong class="hl">configUSE_TICKLESS_IDLE = 1</strong> 後，
+            Kernel 在所有任務都 Block 且下一個喚醒時間已知時，
+            會呼叫 <code>vPortSuppressTicksAndSleep()</code> 讓 MCU 進入 Sleep/Stop，
+            並在喚醒後以 RTC 或 SysTick 補回跳過的 Tick 數。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — tickless_idle.c（portmacro 擴充）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* FreeRTOSConfig.h */</span>
+<span class="pp">#define</span> configUSE_TICKLESS_IDLE          <span class="num">2</span>   <span class="cm">/* 2 = 自訂實作 */</span>
+<span class="pp">#define</span> configEXPECTED_IDLE_TIME_BEFORE_SLEEP  <span class="num">5</span>   <span class="cm">/* 至少 5 tick 才值得入睡 */</span>
+
+<span class="cm">/* port_tickless.c — 自訂 vPortSuppressTicksAndSleep */</span>
+<span class="kw">void</span> <span class="fn">vPortSuppressTicksAndSleep</span>(<span class="tp">TickType_t</span> xExpectedIdleTime)
+{
+    <span class="tp">uint32_t</span> ulReloadValue, ulCompleteTickPeriods;
+    <span class="tp">TickType_t</span> xModifiableIdleTime;
+
+    <span class="cm">/* 計算 SysTick 重載值：讓 SysTick 在 idle 期間充當喚醒鬧鐘 */</span>
+    ulReloadValue = (configCPU_CLOCK_HZ / configTICK_RATE_HZ)
+                    * xExpectedIdleTime - <span class="num">1</span>;
+
+    <span class="fn">portDISABLE_INTERRUPTS</span>();
+
+    <span class="cm">/* 再次確認仍然 idle（中斷可能改變狀態） */</span>
+    xModifiableIdleTime = xExpectedIdleTime;
+    <span class="fn">configPRE_SLEEP_PROCESSING</span>(xModifiableIdleTime);
+
+    <span class="kw">if</span> (xModifiableIdleTime > <span class="num">0</span>) {
+        <span class="cm">/* 重新設定 SysTick 為長計時，然後進 Sleep */</span>
+        SysTick->LOAD = ulReloadValue;
+        SysTick->VAL  = <span class="num">0</span>;
+        __DSB();
+        __WFI();  <span class="cm">/* CPU 進入 Sleep，等待 SysTick 或其他中斷 */</span>
+    }
+
+    <span class="fn">configPOST_SLEEP_PROCESSING</span>(xModifiableIdleTime);
+
+    <span class="cm">/* 計算實際睡了多少 tick，補回 xTickCount */</span>
+    ulCompleteTickPeriods = (ulReloadValue - SysTick->VAL)
+                            / (configCPU_CLOCK_HZ / configTICK_RATE_HZ);
+    <span class="fn">vTaskStepTick</span>(ulCompleteTickPeriods);
+
+    <span class="cm">/* 恢復 SysTick 為正常 1 ms 週期 */</span>
+    SysTick->LOAD = (configCPU_CLOCK_HZ / configTICK_RATE_HZ) - <span class="num">1</span>;
+    SysTick->VAL  = <span class="num">0</span>;
+    <span class="fn">portENABLE_INTERRUPTS</span>();
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">省電設計原則</div>
+          「最省電的外設是沒有外設」。在設計硬體前先評估每個外設的靜態電流，
+          並為每個外設配備電源開關 FET（PMOS 或 load switch），
+          讓韌體可以在不使用時完全斷電（例如 GPS、WiFi 模組的 EN 腳）。
+          這比任何軟體省電技巧都有效。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 7.3 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-7-3">
+      <div class="lesson-header">
+        <span class="lesson-badge">7.3</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">電源量測與分析</h2>
+          <p class="lesson-desc">分流電阻電路、邏輯分析儀觸發、功耗時序圖解讀</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">硬體量測電路</div>
+          <p class="body-text">
+            最簡單的電流量測方法是在 VDD 供電線上串聯一個低阻值精密電阻（<strong class="hl">分流電阻</strong>，shunt），
+            以差動放大器或示波器量測電壓差，換算電流。
+            Nucleo-F446RE 在 JP6（IDD 跳線）預留了此量測點：移除跳線，接入 0.1 Ω / 1 W 電阻即可。
+          </p>
+          <div class="diagram-block"><span class="d-hl">量測電路（概念圖）</span>
+
+ 3.3V Rail                         MCU VDD
+    ┤──── 0.1 Ω shunt ────────────── ┤
+         │              │
+         V+             V−
+         └───  差動放大器  ───→  示波器 CH1
+                (Gain × 10)
+
+<span class="d-dim">量測計算：</span>
+  I = V_shunt / R_shunt = (V+ - V−) / 0.1 Ω
+  示波器讀 200 mV → I = 200 mV / 0.1 Ω = 2 A  <span class="d-dim">（舉例）</span>
+  示波器讀   5 mV → I =   5 mV / 0.1 Ω = 50 mA
+
+<span class="d-hl">GPIO 觸發方式</span>（與邏輯分析儀配合）：
+  進入 Stop 前：<span class="d-grn">PA8 HIGH</span>  → 邏輯分析儀 CH2 上升沿 Trigger
+  喚醒完成後：  <span class="d-grn">PA8 LOW</span>   → 標記 Stop 模式結束
+  可在電流波形上對齊找出實際 Stop 電流與喚醒尖峰</div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">韌體埋點 (Power Markers)</div>
+          <p class="body-text">
+            透過 GPIO 輸出狀態讓示波器或邏輯分析儀區分各個工作階段，
+            這是「免費的」功耗 profiling 工具，不需要任何付費軟體。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — power_marker.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* PA8 作為 Power Marker，高電位 = 主動工作，低電位 = 省電 */</span>
+<span class="pp">#define</span> MARKER_HIGH()  (GPIOA->BSRR = GPIO_BSRR_BS8)
+<span class="pp">#define</span> MARKER_LOW()   (GPIOA->BSRR = GPIO_BSRR_BR8)
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="fn">system_init</span>();
+
+    <span class="kw">while</span> (<span class="num">1</span>) {
+        MARKER_HIGH();       <span class="cm">/* 示波器標記：開始工作 */</span>
+        <span class="fn">sensor_read</span>();       <span class="cm">/* SPI 讀取感測器 ~2 ms */</span>
+        <span class="fn">process_data</span>();      <span class="cm">/* DSP 計算 ~0.5 ms */</span>
+        <span class="fn">uart_transmit</span>();     <span class="cm">/* 上傳結果 ~1 ms */</span>
+        MARKER_LOW();        <span class="cm">/* 示波器標記：開始省電 */</span>
+
+        <span class="fn">enter_stop_mode</span>();   <span class="cm">/* Stop ~10 s，由 RTC 喚醒 */</span>
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">常用量測工具比較</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>工具</th>
+                  <th>量測方式</th>
+                  <th>解析度</th>
+                  <th>優點</th>
+                  <th>限制</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>示波器 + 分流電阻</strong></td>
+                  <td>電壓差換算</td>
+                  <td>~1 mA</td>
+                  <td>即時波形，觸發靈活</td>
+                  <td>需差動探頭，精度受限</td>
+                </tr>
+                <tr>
+                  <td><strong>Nordic PPK2</strong></td>
+                  <td>電流源 + ADC</td>
+                  <td>100 nA</td>
+                  <td>nA 等級解析，USB 供電</td>
+                  <td>最大 1 A，需安裝軟體</td>
+                </tr>
+                <tr>
+                  <td><strong>Otii Arc</strong></td>
+                  <td>電流源 + ADC</td>
+                  <td>10 nA</td>
+                  <td>電壓可調，GPIO 追蹤</td>
+                  <td>價格較高</td>
+                </tr>
+                <tr>
+                  <td><strong>J-Link Energy Profiler</strong></td>
+                  <td>SWD + 外部 ADC</td>
+                  <td>~1 mA</td>
+                  <td>與程式碼行對齊</td>
+                  <td>需 J-Link + Ozone</td>
+                </tr>
+                <tr>
+                  <td><strong>STM32CubeMonitor-Power</strong></td>
+                  <td>板載 INA230</td>
+                  <td>~50 µA</td>
+                  <td>免外接，STM32 官方</td>
+                  <td>僅部分 Nucleo 支援</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">量測陷阱</div>
+          量測 Stop / Standby 電流時，若 Nucleo 板上的 ST-LINK 仍透過 USB 供電，
+          ST-LINK 的 3.3 V LDO 會持續向 MCU 供電，使量測值偏高 2–10 mA。
+          正確做法是移除 JP5（3V3 jumper），由外部量測電路供電，ST-LINK 僅用於 SWD 觀察。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 7.4 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-7-4">
+      <div class="lesson-header">
+        <span class="lesson-badge">7.4</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">安全啟動與韌體保護</h2>
+          <p class="lesson-desc">RDP 保護等級、Option Bytes、Chain of Trust、韌體完整性驗證</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">STM32 Read-Out Protection (RDP)</div>
+          <p class="body-text">
+            RDP 是 STM32 防止 Flash 被讀取的第一道防線。
+            透過 <strong class="hl">Option Bytes</strong> 的 <code>RDP[7:0]</code> 欄位設定：
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>等級</th>
+                  <th>RDP 值</th>
+                  <th>Flash 讀取</th>
+                  <th>SRAM 讀取 (debug)</th>
+                  <th>降級方式</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Level 0</strong></td>
+                  <td><code>0xAA</code></td>
+                  <td>允許</td>
+                  <td>允許</td>
+                  <td>出廠預設</td>
+                </tr>
+                <tr>
+                  <td><strong>Level 1</strong></td>
+                  <td>其他值</td>
+                  <td>禁止（debugger 讀取）</td>
+                  <td>允許（debug 仍可連）</td>
+                  <td>降回 Level 0 → Mass Erase Flash</td>
+                </tr>
+                <tr>
+                  <td><strong>Level 2</strong></td>
+                  <td><code>0xCC</code></td>
+                  <td>完全禁止</td>
+                  <td>完全禁止</td>
+                  <td>不可逆（晶片永久鎖定）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout danger">
+            <div class="callout-title">不可逆警告</div>
+            Level 2 是永久性設定，無法解除，亦無法再 Flash 韌體更新。
+            量產前必須確認韌體完全穩定，並建立 OTA 更新機制。切勿在開發階段設定 Level 2。
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">以 STM32CubeProgrammer CLI 設定 Option Bytes</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Shell</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm"># 連接並讀取目前 Option Bytes</span>
+STM32_Programmer_CLI -c port=SWD freq=4000 -ob displ
+
+<span class="cm"># 設定 RDP Level 1（禁止 debugger 讀取 Flash）</span>
+STM32_Programmer_CLI -c port=SWD -ob RDP=0xBB
+
+<span class="cm"># 設定寫保護（WRP）：保護 Sector 0~3 不被擦寫（量產 Bootloader 區域）</span>
+STM32_Programmer_CLI -c port=SWD -ob nWRP=0xFFFFFFF0
+
+<span class="cm"># BOR（Brown-Out Reset）等級：避免低電壓時程式跑飛</span>
+<span class="cm"># BOR_LEV=01 → 2.1 V；BOR_LEV=11 → 2.7 V</span>
+STM32_Programmer_CLI -c port=SWD -ob BOR_LEV=3</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Chain of Trust — 安全啟動流程</div>
+          <p class="body-text">
+            完整的安全啟動（Secure Boot）確保每個啟動階段都驗證下一階段的完整性，
+            任何竄改都會停止啟動。以 SHA-256 + HMAC 為例的流程如下：
+          </p>
+          <div class="diagram-block"><span class="d-hl">安全啟動鏈（Secure Boot Chain）</span>
+
+<span class="d-acc">ROM Bootloader</span> (不可修改，廠商燒錄)
+  │  驗證：Secure Boot Key hash 是否與 OTP 一致
+  ▼
+<span class="d-grn">Stage-1 Bootloader</span> (Sector 0–3，WRP 保護)
+  │  功能：驗證 Application 的 SHA-256 摘要
+  │  摘要儲存於：Flash 最後 32 bytes 或 Backup Register
+  │  金鑰來源：OTP (One-Time Programmable) 區域
+  ▼
+<span class="d-blu">Application Firmware</span> (Sector 4–11)
+  │  正常執行
+  ▼
+<span class="d-dim">（OTA 更新時，Stage-1 驗證新韌體簽章後才覆寫）</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">韌體完整性驗證（SHA-256）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — fw_verify.c（Bootloader 片段）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#include</span> <span class="str">"stm32f4xx.h"</span>
+<span class="pp">#include</span> <span class="str">"sha256.h"</span>   <span class="cm">/* 輕量 SHA-256 實作，或使用 STM32 HASH 硬體 */</span>
+
+<span class="pp">#define</span> APP_START_ADDR   <span class="num">0x08020000UL</span>  <span class="cm">/* Application 起始地址（Sector 4） */</span>
+<span class="pp">#define</span> APP_SIZE         <span class="num">0x00060000UL</span>  <span class="cm">/* 384 KB */</span>
+<span class="pp">#define</span> APP_HASH_ADDR    <span class="num">0x08080000UL</span>  <span class="cm">/* 儲存預期 SHA-256 的地址 */</span>
+
+<span class="kw">typedef</span> <span class="kw">void</span> (*<span class="tp">app_entry_t</span>)(<span class="kw">void</span>);
+
+<span class="tp">bool</span> <span class="fn">bootloader_verify_and_jump</span>(<span class="kw">void</span>)
+{
+    <span class="tp">uint8_t</span>  computed[<span class="num">32</span>];
+    <span class="tp">uint8_t</span> *expected = (<span class="tp">uint8_t</span> *)APP_HASH_ADDR;
+
+    <span class="cm">/* 計算 Application 區域的 SHA-256 */</span>
+    <span class="fn">sha256_compute</span>((<span class="kw">const</span> <span class="tp">uint8_t</span> *)APP_START_ADDR, APP_SIZE, computed);
+
+    <span class="cm">/* 恆定時間比較（防止 timing side-channel attack） */</span>
+    <span class="tp">uint8_t</span> diff = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i < <span class="num">32</span>; i++) {
+        diff |= computed[i] ^ expected[i];
+    }
+    <span class="kw">if</span> (diff != <span class="num">0</span>) {
+        <span class="cm">/* 驗證失敗：停機或進入 Recovery 模式 */</span>
+        <span class="kw">while</span> (<span class="num">1</span>) { <span class="cm">/* Halt — 不跳轉 */</span> }
+    }
+
+    <span class="cm">/* 驗證通過：設定 MSP 並跳轉到 Application */</span>
+    <span class="tp">uint32_t</span>   app_sp    = *((<span class="tp">uint32_t</span> *)APP_START_ADDR);
+    <span class="tp">uint32_t</span>   app_reset = *((<span class="tp">uint32_t</span> *)(APP_START_ADDR + <span class="num">4</span>));
+    <span class="tp">app_entry_t</span> jump     = (<span class="tp">app_entry_t</span>)app_reset;
+
+    <span class="fn">__set_MSP</span>(app_sp);
+    <span class="fn">SCB->VTOR</span> = APP_START_ADDR;  <span class="cm">/* 重定向 Vector Table */</span>
+    <span class="fn">jump</span>();
+
+    <span class="kw">return</span> <span class="kw">true</span>;  <span class="cm">/* unreachable */</span>
+}</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 7.5 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-7-5">
+      <div class="lesson-header">
+        <span class="lesson-badge">7.5</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">硬體加密加速器</h2>
+          <p class="lesson-desc">STM32 AES、HASH、RNG 外設的暫存器操作與效能比較</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">硬體加速器概覽</div>
+          <p class="body-text">
+            STM32F437/F439 系列內建加密外設；F446 系列則無 CRYP 硬體，
+            但配備 <strong class="hl">HASH</strong> 與 <strong class="hl">RNG</strong>。
+            若需要 AES 加速，可選擇 STM32L4 Plus / STM32H7 系列，
+            或在 F4 上使用軟體實作（MbedTLS / TinyCrypt）。
+            以下以 <strong class="hl">STM32F437VG</strong>（含 CRYP）為示範目標。
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>加速器</th>
+                  <th>支援演算法</th>
+                  <th>DMA 支援</th>
+                  <th>典型速度（CPU @ 180 MHz）</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>CRYP</strong></td>
+                  <td>AES-128/192/256 (ECB/CBC/CTR), 3DES, DES</td>
+                  <td>是</td>
+                  <td>&gt;500 Mbps（vs 軟體 ~50 Mbps）</td>
+                </tr>
+                <tr>
+                  <td><strong>HASH</strong></td>
+                  <td>MD5, SHA-1, SHA-224, SHA-256, HMAC</td>
+                  <td>是</td>
+                  <td>&gt;700 Mbps</td>
+                </tr>
+                <tr>
+                  <td><strong>RNG</strong></td>
+                  <td>TRNG（熱雜訊源）</td>
+                  <td>否</td>
+                  <td>~1 Mbit/s</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">AES-CBC 加密（CRYP 外設）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — aes_cbc.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#include</span> <span class="str">"stm32f4xx.h"</span>
+
+<span class="cm">/* AES-128-CBC 加密（CRYP 硬體外設） */</span>
+<span class="kw">void</span> <span class="fn">aes_cbc_encrypt</span>(<span class="kw">const</span> <span class="tp">uint32_t</span> *key,    <span class="cm">/* 128-bit, 4 words */</span>
+                     <span class="kw">const</span> <span class="tp">uint32_t</span> *iv,     <span class="cm">/* 128-bit IV        */</span>
+                     <span class="kw">const</span> <span class="tp">uint32_t</span> *plain,  <span class="cm">/* 明文（16 bytes 倍數）*/</span>
+                     <span class="tp">uint32_t</span>       *cipher, <span class="cm">/* 密文輸出          */</span>
+                     <span class="tp">uint32_t</span>        blocks) <span class="cm">/* 資料塊數（每塊 16B）*/</span>
+{
+    <span class="cm">/* 啟用 CRYP 時鐘 */</span>
+    RCC->AHB2ENR |= RCC_AHB2ENR_CRYPEN;
+
+    <span class="cm">/* 重置 CRYP */</span>
+    CRYP->CR = CRYP_CR_FFLUSH;
+
+    <span class="cm">/* 設定：AES-128-CBC 加密模式，32-bit data 對齊 */</span>
+    CRYP->CR = (CRYP_CR_ALGOMODE_AES_CBC)   <span class="cm">/* 0b111 << 3 */</span>
+             | (CRYP_CR_DATATYPE_32B)        <span class="cm">/* 0b00 << 6：不交換 byte */</span>
+             | (CRYP_CR_KEYSIZE_128B);       <span class="cm">/* 0b00 << 8 */</span>
+
+    <span class="cm">/* 載入金鑰（K0R ~ K3R，從高位開始）*/</span>
+    CRYP->K0LR = key[<span class="num">0</span>]; CRYP->K0RR = key[<span class="num">1</span>];
+    CRYP->K1LR = key[<span class="num">2</span>]; CRYP->K1RR = key[<span class="num">3</span>];
+
+    <span class="cm">/* 載入 IV（初始向量）*/</span>
+    CRYP->IV0LR = iv[<span class="num">0</span>]; CRYP->IV0RR = iv[<span class="num">1</span>];
+    CRYP->IV1LR = iv[<span class="num">2</span>]; CRYP->IV1RR = iv[<span class="num">3</span>];
+
+    <span class="cm">/* 啟動 CRYP */</span>
+    CRYP->CR |= CRYP_CR_CRYPEN;
+
+    <span class="kw">for</span> (<span class="tp">uint32_t</span> b = <span class="num">0</span>; b < blocks; b++) {
+        <span class="kw">const</span> <span class="tp">uint32_t</span> *in  = plain  + b * <span class="num">4</span>;
+        <span class="tp">uint32_t</span>       *out = cipher + b * <span class="num">4</span>;
+
+        <span class="cm">/* 等待輸入 FIFO 有空間 */</span>
+        <span class="kw">while</span> (!(CRYP->SR & CRYP_SR_IFNF));
+        CRYP->DIN = in[<span class="num">0</span>]; CRYP->DIN = in[<span class="num">1</span>];
+        CRYP->DIN = in[<span class="num">2</span>]; CRYP->DIN = in[<span class="num">3</span>];
+
+        <span class="cm">/* 等待輸出 FIFO 有資料 */</span>
+        <span class="kw">while</span> (!(CRYP->SR & CRYP_SR_OFNE));
+        out[<span class="num">0</span>] = CRYP->DOUT; out[<span class="num">1</span>] = CRYP->DOUT;
+        out[<span class="num">2</span>] = CRYP->DOUT; out[<span class="num">3</span>] = CRYP->DOUT;
+    }
+
+    CRYP->CR &= ~CRYP_CR_CRYPEN;  <span class="cm">/* 停止 CRYP */</span>
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">真隨機數產生器 (RNG / TRNG)</div>
+          <p class="body-text">
+            <strong class="hl">RNG</strong> 外設以類比雜訊源（熱雜訊）產生真亂數，
+            通過 FIPS 140-2 統計測試。每次讀取前必須確認 DRDY 旗標，
+            並定期檢查 SEIS（Seed Error）及 CEIS（Clock Error）旗標確保亂數品質。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — rng.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="kw">void</span> <span class="fn">rng_init</span>(<span class="kw">void</span>)
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_RNGEN;
+    RNG->CR      |= RNG_CR_RNGEN;
+}
+
+<span class="cm">/* 取得一個 32-bit 真亂數，失敗回傳 false */</span>
+<span class="tp">bool</span> <span class="fn">rng_get</span>(<span class="tp">uint32_t</span> *out)
+{
+    <span class="tp">uint32_t</span> timeout = <span class="num">1000</span>;
+
+    <span class="kw">while</span> (!(RNG->SR & RNG_SR_DRDY)) {
+        <span class="kw">if</span> (--timeout == <span class="num">0</span>) <span class="kw">return</span> <span class="kw">false</span>;
+    }
+
+    <span class="cm">/* 檢查 Seed / Clock 錯誤 */</span>
+    <span class="kw">if</span> (RNG->SR & (RNG_SR_SEIS | RNG_SR_CEIS)) {
+        RNG->SR &= ~(RNG_SR_SEIS | RNG_SR_CEIS);
+        <span class="kw">return</span> <span class="kw">false</span>;  <span class="cm">/* 清除後重試 */</span>
+    }
+
+    *out = RNG->DR;
+    <span class="kw">return</span> <span class="kw">true</span>;
+}
+
+<span class="cm">/* 產生 N bytes 的隨機資料（用於 IV、Nonce、Salt） */</span>
+<span class="kw">void</span> <span class="fn">rng_fill</span>(<span class="tp">uint8_t</span> *buf, <span class="tp">size_t</span> len)
+{
+    <span class="tp">size_t</span>   i = <span class="num">0</span>;
+    <span class="tp">uint32_t</span> word;
+
+    <span class="kw">while</span> (i < len) {
+        <span class="kw">if</span> (!<span class="fn">rng_get</span>(&word)) <span class="kw">continue</span>;
+        <span class="tp">size_t</span> copy = (len - i < <span class="num">4</span>) ? (len - i) : <span class="num">4</span>;
+        __builtin_memcpy(buf + i, &word, copy);
+        i += copy;
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">SHA-256 硬體 HASH（F4 通用）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — hash_sha256.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* 使用 STM32 HASH 外設計算 SHA-256 摘要 */</span>
+<span class="kw">void</span> <span class="fn">hash_sha256</span>(<span class="kw">const</span> <span class="tp">uint8_t</span> *data, <span class="tp">size_t</span> len, <span class="tp">uint8_t</span> digest[<span class="num">32</span>])
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_HASHEN;
+
+    <span class="cm">/* 設定：SHA-256，big-endian 字元組輸入 */</span>
+    HASH->CR = HASH_CR_ALGO_1    <span class="cm">/* SHA-256 = bit[18:17] = 01 */</span>
+             | HASH_CR_DATATYPE_8B   <span class="cm">/* 0b10：byte 反轉 */</span>
+             | HASH_CR_INIT;    <span class="cm">/* 初始化 Hash 處理器 */</span>
+
+    <span class="cm">/* 逐 word 寫入資料（HASH->DIN 每次接受 32 bits） */</span>
+    <span class="kw">const</span> <span class="tp">uint32_t</span> *p   = (<span class="kw">const</span> <span class="tp">uint32_t</span> *)data;
+    <span class="tp">size_t</span>          words = len / <span class="num">4</span>;
+    <span class="kw">for</span> (<span class="tp">size_t</span> i = <span class="num">0</span>; i < words; i++) {
+        HASH->DIN = p[i];
+    }
+
+    <span class="cm">/* 處理最後不足 4 bytes 的尾巴 */</span>
+    <span class="tp">uint32_t</span> tail = <span class="num">0</span>;
+    <span class="tp">size_t</span>   rem  = len % <span class="num">4</span>;
+    <span class="kw">if</span> (rem) {
+        __builtin_memcpy(&tail, data + words * <span class="num">4</span>, rem);
+        HASH->CR |= ((rem * <span class="num">8</span>) & HASH_CR_NBLW_Msk) << HASH_CR_NBLW_Pos;
+        HASH->DIN = tail;
+    }
+
+    <span class="cm">/* 觸發 padding 並等待完成 */</span>
+    HASH->STR = HASH_STR_DCAL;
+    <span class="kw">while</span> (!(HASH->SR & HASH_SR_DCIS));
+
+    <span class="cm">/* 讀取 8 個 32-bit digest（SHA-256 = 256 bit = 32 bytes） */</span>
+    <span class="tp">uint32_t</span> *out = (<span class="tp">uint32_t</span> *)digest;
+    out[<span class="num">0</span>] = __REV(HASH->HR[<span class="num">0</span>]);  <span class="cm">/* __REV：byte-swap for big-endian */</span>
+    out[<span class="num">1</span>] = __REV(HASH->HR[<span class="num">1</span>]);
+    out[<span class="num">2</span>] = __REV(HASH->HR[<span class="num">2</span>]);
+    out[<span class="num">3</span>] = __REV(HASH->HR[<span class="num">3</span>]);
+    out[<span class="num">4</span>] = __REV(HASH_DIGEST->HR[<span class="num">0</span>]);
+    out[<span class="num">5</span>] = __REV(HASH_DIGEST->HR[<span class="num">1</span>]);
+    out[<span class="num">6</span>] = __REV(HASH_DIGEST->HR[<span class="num">2</span>]);
+    out[<span class="num">7</span>] = __REV(HASH_DIGEST->HR[<span class="num">3</span>]);
+}</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 7.6 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-7-6">
+      <div class="lesson-header">
+        <span class="lesson-badge">7.6</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">安全硬化實踐</h2>
+          <p class="lesson-desc">MPU 記憶體保護、Stack Canary、安全編譯旗標、嵌入式漏洞防範</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">MPU — 記憶體保護單元</div>
+          <p class="body-text">
+            Cortex-M4 的 <strong class="hl">MPU</strong> 提供最多 8 個可配置的記憶體保護區域。
+            典型用途：將 Bootloader 區域設為唯讀、讓任務堆疊下方加一個「Guard Region」
+            以在堆疊溢位時觸發 MemManage Fault。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — mpu_config.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* 設定 MPU Region 0：Flash（唯讀執行）Region 1：Stack Guard */</span>
+
+<span class="kw">void</span> <span class="fn">mpu_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 關閉 MPU 以進行配置 */</span>
+    ARM_MPU_Disable();
+
+    <span class="cm">/* Region 0：整個 Flash（0x0800_0000，2 MB），唯讀可執行 */</span>
+    MPU->RNR  = <span class="num">0</span>;
+    MPU->RBAR = <span class="num">0x08000000</span>;
+    MPU->RASR = ARM_MPU_RASR(
+        <span class="num">0</span>,                           <span class="cm">/* XN=0: 允許執行 */</span>
+        ARM_MPU_AP_RO,               <span class="cm">/* AP: Read-Only */</span>
+        ARM_MPU_TEX_NORMAL_WT,       <span class="cm">/* Write-Through Cache */</span>
+        <span class="num">1</span>, <span class="num">0</span>,                        <span class="cm">/* S=1(Shareable), C=0 */</span>
+        <span class="num">0</span>,                           <span class="cm">/* Sub-region disable = 0 */</span>
+        ARM_MPU_REGION_SIZE_2MB,     <span class="cm">/* 2 MB */</span>
+        <span class="num">1</span>                            <span class="cm">/* Enable */</span>
+    );
+
+    <span class="cm">/* Region 1：Stack Guard（32 bytes，位於 Task Stack 底部）
+     * 設為 No Access：若 Stack 溢出碰到此區域 → MemManage Fault */</span>
+    <span class="kw">extern</span> <span class="tp">uint32_t</span> _task_stack_bottom;  <span class="cm">/* linker symbol */</span>
+    MPU->RNR  = <span class="num">1</span>;
+    MPU->RBAR = (<span class="tp">uint32_t</span>)&_task_stack_bottom;
+    MPU->RASR = ARM_MPU_RASR(
+        <span class="num">1</span>,                           <span class="cm">/* XN=1: 禁止執行 */</span>
+        ARM_MPU_AP_NONE,             <span class="cm">/* AP: No Access */</span>
+        ARM_MPU_TEX_NORMAL_WT,
+        <span class="num">1</span>, <span class="num">0</span>,
+        <span class="num">0</span>,
+        ARM_MPU_REGION_SIZE_32B,     <span class="cm">/* 32 bytes Guard */</span>
+        <span class="num">1</span>
+    );
+
+    <span class="cm">/* 啟動 MPU，啟用 PRIVDEFENA（特權模式保留預設 map） */</span>
+    ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);
+}
+
+<span class="cm">/* MemManage Fault Handler：輸出故障位址並停機 */</span>
+<span class="kw">void</span> <span class="fn">MemManage_Handler</span>(<span class="kw">void</span>)
+{
+    <span class="tp">uint32_t</span> mmfar = SCB->MMFAR;  <span class="cm">/* 發生保護違規的地址 */</span>
+    <span class="tp">uint8_t</span>  mmfsr = SCB->CFSR & <span class="num">0xFF</span>;
+
+    <span class="cm">/* 記錄到 Backup RAM 或 UART，然後系統重置 */</span>
+    <span class="fn">fault_log</span>(mmfar, mmfsr);
+    NVIC_SystemReset();
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Stack Canary 與安全編譯旗標</div>
+          <p class="body-text">
+            GCC 的 <code>-fstack-protector-strong</code> 在函數 prologue 寫入隨機
+            <strong class="hl">Canary 值</strong>，epilogue 驗證，若被覆寫則呼叫
+            <code>__stack_chk_fail()</code>。嵌入式環境需自行實作此函數。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Makefile — 安全編譯旗標</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre>CFLAGS += \
+    -fstack-protector-strong \     <span class="cm"># Stack Canary（推薦）</span>
+    -fno-stack-protector \         <span class="cm"># 在 ISR / startup 用 __attribute__((no_stack_protector))</span>
+    -D_FORTIFY_SOURCE=2 \          <span class="cm"># buffer overflow 偵測（需 libc 支援）</span>
+    -Wformat=2 \                   <span class="cm"># printf format-string 漏洞警告</span>
+    -Warray-bounds \               <span class="cm"># 陣列越界存取警告</span>
+    -fno-common \                  <span class="cm"># 禁止弱符號 BSS 合併（降低 symbol collision 風險）</span>
+    -fPIE                          <span class="cm"># Position Independent Executable（嵌入式通常不用，Linux 用）</span>
+
+LDFLAGS += \
+    -Wl,-z,noexecstack \           <span class="cm"># 禁止 stack 執行</span>
+    -Wl,-z,relro \                 <span class="cm"># 唯讀重定位段（ELF）</span>
+    -Wl,-z,now                     <span class="cm"># 立即解析所有符號</span></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — stack_check_fail.c（嵌入式實作）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm">/* GCC 要求提供此符號；預設 libc 版本呼叫 abort()，嵌入式需自訂 */</span>
+<span class="pp">#include</span> <span class="str">"stm32f4xx.h"</span>
+<span class="pp">#include</span> <span class="str">&lt;stdint.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">__stack_chk_fail</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 記錄事件到 Backup Register（Standby 後仍可讀） */</span>
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    PWR->CR      |= PWR_CR_DBP;
+    RTC->BKP0R    = <span class="num">0xDEADC0DE</span>;  <span class="cm">/* 事件標記 */</span>
+
+    <span class="fn">NVIC_SystemReset</span>();  <span class="cm">/* 立即系統重置 */</span>
+}
+
+<span class="cm">/* 必須提供初始 Canary 值（通常由啟動程式碼以 RNG 初始化） */</span>
+<span class="tp">uintptr_t</span> __stack_chk_guard;
+
+<span class="kw">void</span> <span class="fn">stack_guard_init</span>(<span class="kw">void</span>)
+{
+    <span class="tp">uint32_t</span> rng_val;
+    <span class="fn">rng_init</span>();
+    <span class="fn">rng_get</span>(&rng_val);
+    __stack_chk_guard = (<span class="tp">uintptr_t</span>)rng_val;
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">常見嵌入式安全漏洞清單</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>漏洞類型</th>
+                  <th>成因</th>
+                  <th>防範措施</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Buffer Overflow</strong></td>
+                  <td><code>strcpy</code>, <code>memcpy</code> 無邊界檢查</td>
+                  <td>使用 <code>strncpy</code> / <code>strlcpy</code>；<code>-fstack-protector-strong</code>；MPU Guard Region</td>
+                </tr>
+                <tr>
+                  <td><strong>Format String</strong></td>
+                  <td><code>printf(user_input)</code></td>
+                  <td>永遠用 <code>printf("%s", buf)</code>；啟用 <code>-Wformat=2</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Integer Overflow</strong></td>
+                  <td>長度計算溢位導致 heap/stack 配置錯誤</td>
+                  <td><code>-ftrapv</code>（偵測有符號溢位）；明確使用 <code>uint32_t</code> 並作邊界檢查</td>
+                </tr>
+                <tr>
+                  <td><strong>Timing Attack</strong></td>
+                  <td>比較密碼/hash 時提早退出</td>
+                  <td>使用恆定時間比較（所有 bytes XOR 累積）</td>
+                </tr>
+                <tr>
+                  <td><strong>Flash 讀出</strong></td>
+                  <td>JTAG/SWD 未停用，RDP=0</td>
+                  <td>設定 RDP Level 1 以上；停用不用的 debug 介面</td>
+                </tr>
+                <tr>
+                  <td><strong>Fault Injection</strong></td>
+                  <td>電壓/時鐘 glitch 跳過安全驗證</td>
+                  <td>BOR 設定；多重驗證；驗證後再次確認（double-check）</td>
+                </tr>
+                <tr>
+                  <td><strong>Side-Channel（電流）</strong></td>
+                  <td>AES key 相關電流洩漏</td>
+                  <td>使用硬體加速器（具 masking）；加入假操作（dummy ops）</td>
+                </tr>
+                <tr>
+                  <td><strong>Insecure OTA</strong></td>
+                  <td>無驗證直接覆寫 Flash</td>
+                  <td>下載後先驗 SHA-256 + ECDSA，驗過才 commit 寫入</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Week 7 實作檢查清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>量測 STM32 在 Run / Sleep / Stop 三種模式下的實際電流（用示波器或 PPK2）</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以 RTC Wakeup Timer 實作「每 5 秒醒來採樣，其餘時間 Stop」</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>啟用 FreeRTOS Tickless Idle 並以示波器驗證 Idle Task 期間 CPU 時脈停止</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以 STM32CubeProgrammer 設定 RDP Level 1，確認無法透過 debugger 讀取 Flash</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>撰寫 Bootloader：驗證 SHA-256 通過後才跳轉到 Application</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>呼叫 RNG 外設產生 32-byte 隨機 IV，用於 AES-CBC 加密一段感測器資料</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>設定 MPU Stack Guard Region，以人為溢位觸發 MemManage Fault 驗證防護效果</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>加入 <code>-fstack-protector-strong</code> 並實作 <code>__stack_chk_fail</code>，驗證 Canary 保護</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">延伸挑戰</div>
+          實作一個完整的 <strong>OTA（Over-The-Air）更新系統</strong>：
+          Bootloader 透過 UART 接收新韌體（XMODEM 或 SLIP 協定），
+          寫入備用 Flash 分區（Sector 4–7），
+          以 ECDSA P-256 驗證簽章（使用 micro-ecc 庫），
+          通過後設定 Boot Flag 到 Backup Register，
+          重啟後 Bootloader 以新韌體覆寫主分區並清除 Boot Flag。
+          這是量產產品的標準韌體更新架構。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="week6.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L5 7l4 5"/></svg>
+        Week 06 — 嵌入式 Linux 系統
+      </a>
+      <span class="week-indicator">Week 07 / 08</span>
+      <a href="week8.html" class="nav-btn primary">
+        Week 08 — 綜合專案實戰
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2l4 5-4 5"/></svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main     = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+    sections.forEach(s => { if (scrollTop >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+    const done  = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = done + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (done / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>
