@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 — 嵌入式 C 程式設計 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 1.75rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+
+  .course-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .sidebar-week-title {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+
+  .nav-section-label {
+    padding: 0.5rem 1.5rem 0.25rem;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-lesson {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active {
+    color: var(--accent);
+    background: var(--bg3);
+    border-left-color: var(--accent);
+  }
+
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    min-width: 22px;
+  }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .progress-bar-wrap { background: var(--bg4); border-radius: 2px; height: 3px; }
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 3px;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .main { overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
+
+  .week-hero {
+    padding: 3.5rem 4rem 2.75rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .week-hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hero-eyebrow::after {
+    content: '';
+    display: inline-block;
+    width: 32px; height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .week-title {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .week-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+    color: var(--dim);
+  }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .tag-setup  { border-color: rgba(200,169,110,0.35); color: var(--accent); }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-value { font-family: var(--mono); font-size: 20px; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .objectives-bar {
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg2);
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .obj-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding-top: 3px;
+    min-width: 60px;
+  }
+  .obj-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .obj-item {
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .obj-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .lesson-section {
+    padding: 3rem 4rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .lesson-section:last-of-type { border-bottom: none; }
+
+  .lesson-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .lesson-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(200,169,110,0.1);
+    border: 1px solid rgba(200,169,110,0.25);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 5px;
+  }
+  .lesson-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+  }
+  .lesson-desc { font-size: 13px; color: var(--muted); }
+
+  .lesson-body { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .sub-section {}
+  .sub-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent2);
+  }
+  .body-text {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.85;
+    padding-left: 1rem;
+  }
+  .body-text + .body-text { margin-top: 0.75rem; }
+  strong.hl { color: var(--text); }
+
+  .divider { display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0; }
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--line); }
+
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(143,168,200,0.06);
+    border-radius: 0 4px 4px 0;
+    padding: 0.875rem 1.1rem 0.875rem 1.25rem;
+    margin-left: 1rem;
+    font-size: 13.5px;
+    color: #a8bcd4;
+    line-height: 1.75;
+  }
+  .callout.warn  { border-color: var(--accent);  background: rgba(200,169,110,0.06); color: #c8b88a; }
+  .callout.tip   { border-color: var(--green);   background: rgba(106,173,142,0.06); color: #7ec4a0; }
+  .callout.danger{ border-color: var(--red);     background: rgba(200,106,106,0.06); color: #d48a8a; }
+  .callout-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+    opacity: 0.75;
+  }
+
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-left: 1rem;
+  }
+  .code-header {
+    padding: 0.45rem 1rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-all;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  .tbl-wrap { overflow-x: auto; margin-left: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left;
+    padding: 0.55rem 1rem;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line2);
+  }
+  tbody td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+  td code, p code, li code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg4);
+    color: var(--accent2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+  }
+  td strong { color: var(--text); }
+
+  .body-list {
+    padding-left: 2rem;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.85;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .body-list li::marker { color: var(--dim); }
+
+  .diagram-block {
+    margin-left: 1rem;
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    padding: 1.5rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.9;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+
+  .checklist { margin-left: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--bg4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    border-top: 1px solid var(--line);
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1.25rem;
+    border: 1px solid var(--line2);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary {
+    background: rgba(200,169,110,0.1);
+    border-color: rgba(200,169,110,0.4);
+    color: var(--accent);
+  }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+  .week-indicator { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  .steps { margin-left: 1rem; display: flex; flex-direction: column; }
+  .step { display: grid; grid-template-columns: 32px 1fr; gap: 0 1rem; position: relative; }
+  .step:not(:last-child) > .step-num::after {
+    content: '';
+    position: absolute;
+    left: 15px; top: 32px;
+    width: 1px;
+    height: calc(100% - 32px);
+    background: var(--line2);
+  }
+  .step-num {
+    position: relative;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg4);
+    border: 1px solid var(--line2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .step-content { padding-bottom: 1.75rem; min-width: 0; }
+  .step-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.65rem;
+    padding-top: 6px;
+    line-height: 1.4;
+  }
+  .step-desc { font-size: 13px; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.75; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 2L4 6l4 4"/>
+        </svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 03</span>
+      <div class="sidebar-week-title">嵌入式 C 程式設計</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">本週課程</div>
+      <a class="nav-lesson active" href="#lesson-3-1">
+        <span class="nav-num">3.1</span>資料型別、限定詞與記憶體佈局
+      </a>
+      <a class="nav-lesson" href="#lesson-3-2">
+        <span class="nav-num">3.2</span>位元操作與暫存器慣用法
+      </a>
+      <a class="nav-lesson" href="#lesson-3-3">
+        <span class="nav-num">3.3</span>指標、函式指標與回呼
+      </a>
+      <a class="nav-lesson" href="#lesson-3-4">
+        <span class="nav-num">3.4</span>連結腳本與啟動碼（Startup）
+      </a>
+      <a class="nav-lesson" href="#lesson-3-5">
+        <span class="nav-num">3.5</span>Makefile 與工具鏈進階
+      </a>
+      <a class="nav-lesson" href="#lesson-3-6">
+        <span class="nav-num">3.6</span>GDB + OpenOCD 偵錯技巧
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>本週完成度</span>
+        <span id="progress-text">0 / 6</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Embedded Systems — Week 03</div>
+      <h1 class="week-title">嵌入式 C 程式設計</h1>
+      <p class="week-subtitle">
+        嵌入式 C 與桌面 C 的差距，遠比語法層面更深。這週從記憶體佈局、位元操作、
+        指標語意一路推進到連結腳本、Makefile 自動化與 GDB 硬體偵錯，
+        建立完整的「從原始碼到執行」全鏈路掌握能力。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-lab">實作導向</span>
+        <span class="tag tag-setup">工具鏈</span>
+        <span class="tag">6 堂課</span>
+        <span class="tag">約 8 小時</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">6</span>
+          <span class="stat-label">堂課</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">8</span>
+          <span class="stat-label">程式範例</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">arm-none-eabi</span>
+          <span class="stat-label">工具鏈</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">GDB + OpenOCD</span>
+          <span class="stat-label">偵錯器</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <div class="obj-label">學習目標</div>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>正確使用 <code>volatile</code>、<code>const</code>、<code>static</code>、<code>inline</code></div>
+        <div class="obj-item"><div class="obj-dot"></div>以位元遮罩技巧讀寫硬體暫存器</div>
+        <div class="obj-item"><div class="obj-dot"></div>運用函式指標實作回呼與驅動抽象層</div>
+        <div class="obj-item"><div class="obj-dot"></div>撰寫並解讀連結腳本與啟動碼</div>
+        <div class="obj-item"><div class="obj-dot"></div>建構多目標 Makefile，整合編譯、燒錄、clean</div>
+        <div class="obj-item"><div class="obj-dot"></div>以 GDB 設置硬體斷點、觀察點並分析 HardFault</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 3.1
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-3-1">
+      <div class="lesson-header">
+        <span class="lesson-badge">3.1 — 理論</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">資料型別、限定詞與記憶體佈局</div>
+          <div class="lesson-desc"><code>volatile</code>、<code>const</code>、<code>static</code>、大小端、結構體對齊</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title"><code>volatile</code> — 對編譯器說「不要優化我」</div>
+          <p class="body-text">
+            <strong class="hl"><code>volatile</code></strong> 告訴編譯器：這個變數的值可能在編譯器不知情的情況下改變
+            （例如硬體暫存器、ISR 寫入的旗標、DMA 目的地緩衝區）。
+            沒有 <code>volatile</code>，編譯器可能將多次讀取的值快取在暫存器中，
+            導致程式讀不到硬體的最新狀態。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — volatile 正確 vs. 錯誤用法</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* ❌ 錯誤：編譯器可能將迴圈優化為無窮迴圈或直接跳過 */</span>
+<span class="tp">uint32_t</span> *status_reg = (<span class="tp">uint32_t</span> *)<span class="num">0x40020014</span>;
+<span class="kw">while</span> (*status_reg == <span class="num">0</span>);   <span class="cm">/* 編譯器認為此值不會變，可能優化掉 */</span>
+
+<span class="cm">/* ✅ 正確：volatile 強制每次都從記憶體重新讀取 */</span>
+<span class="kw">volatile</span> <span class="tp">uint32_t</span> *status_reg = (<span class="kw">volatile</span> <span class="tp">uint32_t</span> *)<span class="num">0x40020014</span>;
+<span class="kw">while</span> (*status_reg == <span class="num">0</span>);   <span class="cm">/* 每次迭代都會真正讀取硬體暫存器 */</span>
+
+<span class="cm">/* ISR 與主程式共用旗標，必須 volatile */</span>
+<span class="kw">volatile</span> <span class="tp">uint8_t</span> g_data_ready = <span class="num">0</span>;
+
+<span class="kw">void</span> <span class="fn">USART2_IRQHandler</span>(<span class="kw">void</span>) {
+    g_data_ready = <span class="num">1</span>;          <span class="cm">/* ISR 寫入 */</span>
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>) {
+    <span class="kw">while</span> (!g_data_ready);     <span class="cm">/* 主迴圈等待：volatile 確保每次重新讀取 */</span>
+    <span class="fn">process_data</span>();
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title"><code>const</code>、<code>static</code>、<code>inline</code> 在嵌入式的含義</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>限定詞</th><th>嵌入式場景意義</th><th>記憶體影響</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>const</code></td>
+                  <td>常數資料放在 Flash（唯讀），節省 RAM</td>
+                  <td>存於 <code>.rodata</code> 段（Flash）</td>
+                </tr>
+                <tr>
+                  <td><code>static</code>（函式外）</td>
+                  <td>限制連結範圍為本檔案，避免符號衝突</td>
+                  <td><code>.data</code> 或 <code>.bss</code>（RAM）</td>
+                </tr>
+                <tr>
+                  <td><code>static</code>（函式內）</td>
+                  <td>函式呼叫間保留值，但注意執行緒安全</td>
+                  <td><code>.data</code> 或 <code>.bss</code>（RAM）</td>
+                </tr>
+                <tr>
+                  <td><code>inline</code></td>
+                  <td>提示展開避免呼叫開銷，適合短小的暫存器操作</td>
+                  <td>無固定段（可能重複展開）</td>
+                </tr>
+                <tr>
+                  <td><code>__attribute__((section("...")))</code></td>
+                  <td>強制指定段名（如向量表放 <code>.isr_vector</code>）</td>
+                  <td>由連結腳本決定</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">固定寬度整數型別（<code>&lt;stdint.h&gt;</code>）</div>
+          <p class="body-text">
+            嵌入式程式應永遠使用固定寬度型別，避免因平台不同造成 <code>int</code>、<code>long</code> 大小差異。
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>型別</th><th>寬度</th><th>有號範圍</th><th>使用場景</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>uint8_t</code></td><td>8-bit</td><td>0 – 255</td><td>位元組緩衝、UART 資料</td></tr>
+                <tr><td><code>int8_t</code></td><td>8-bit</td><td>-128 – 127</td><td>有號感測器原始值</td></tr>
+                <tr><td><code>uint16_t</code></td><td>16-bit</td><td>0 – 65535</td><td>ADC 結果、計時器計數</td></tr>
+                <tr><td><code>uint32_t</code></td><td>32-bit</td><td>0 – 4294967295</td><td>暫存器位址、時間戳</td></tr>
+                <tr><td><code>uint64_t</code></td><td>64-bit</td><td>—</td><td>高精度計時（謹慎使用，無 FPU 時開銷大）</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">結構體對齊與 Padding</div>
+          <p class="body-text">
+            ARM Cortex-M4 對非對齊存取有嚴格限制（預設拋出 HardFault）。
+            編譯器會在結構體成員間插入 padding 確保對齊，可能造成實際大小遠超預期。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 結構體 padding 與 __packed 屬性</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* sizeof(Sensor) = 12，不是 7！編譯器插入 3 bytes padding */</span>
+<span class="kw">typedef</span> <span class="kw">struct</span> {
+    <span class="tp">uint8_t</span>  id;        <span class="cm">/* offset 0 */</span>
+    <span class="cm">/* 3 bytes padding */</span>
+    <span class="tp">uint32_t</span> value;     <span class="cm">/* offset 4（4-byte 對齊）*/</span>
+    <span class="tp">uint16_t</span> flags;     <span class="cm">/* offset 8 */</span>
+    <span class="cm">/* 2 bytes padding（結尾讓整體大小為 4 的倍數）*/</span>
+} <span class="tp">Sensor</span>;
+
+<span class="cm">/* 以小到大排列成員，最小化 padding */</span>
+<span class="kw">typedef</span> <span class="kw">struct</span> {
+    <span class="tp">uint8_t</span>  id;        <span class="cm">/* offset 0 */</span>
+    <span class="tp">uint8_t</span>  _pad[1];   <span class="cm">/* 或乾脆讓編譯器處理 */</span>
+    <span class="tp">uint16_t</span> flags;     <span class="cm">/* offset 2 */</span>
+    <span class="tp">uint32_t</span> value;     <span class="cm">/* offset 4 */</span>
+} <span class="tp">SensorPacked</span>;      <span class="cm">/* sizeof = 8 */</span>
+
+<span class="cm">/* __packed：強制無 padding（用於通訊協定解析，有非對齊存取風險）*/</span>
+<span class="kw">typedef</span> <span class="kw">struct</span> <span class="kw">__attribute__</span>((packed)) {
+    <span class="tp">uint8_t</span>  cmd;
+    <span class="tp">uint32_t</span> payload;
+    <span class="tp">uint16_t</span> crc;
+} <span class="tp">UartFrame</span>;         <span class="cm">/* sizeof = 7，但存取 payload 可能觸發非對齊中斷 */</span></pre>
+          </div>
+          <div class="callout warn">
+            <div class="callout-title">__packed 的代價</div>
+            <code>__packed</code> 結構體在存取非對齊的多位元組成員時，
+            編譯器會生成多條位元組存取指令來模擬，效能較差。
+            應只在處理外部協定封包（UART、CAN frame）時使用，
+            不要用於一般內部資料結構。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 3.2
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-3-2">
+      <div class="lesson-header">
+        <span class="lesson-badge">3.2 — 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">位元操作與暫存器慣用法</div>
+          <div class="lesson-desc">遮罩、位移、SET/CLEAR/TOGGLE/TEST 四大操作與防禦性寫法</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">四大位元操作原語</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 位元操作慣用語（以 bit N 為例）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* 假設 reg 是一個 32-bit 暫存器，要操作第 N bit */</span>
+<span class="pp">#define</span> BIT(n)   (<span class="num">1U</span> << (n))
+
+<span class="cm">/* SET：將第 N bit 設為 1，其他 bit 不變 */</span>
+reg |= BIT(N);
+
+<span class="cm">/* CLEAR：將第 N bit 清為 0，其他 bit 不變 */</span>
+reg &= ~BIT(N);
+
+<span class="cm">/* TOGGLE：反轉第 N bit */</span>
+reg ^= BIT(N);
+
+<span class="cm">/* TEST：判斷第 N bit 是否為 1 */</span>
+<span class="kw">if</span> (reg & BIT(N)) { <span class="cm">/* ... */</span> }
+
+<span class="cm">/* 多位元欄位操作（例如 MODER[2N+1:2N]，2-bit 欄位）*/</span>
+<span class="pp">#define</span> FIELD_MASK(pos, width)  (((1U << (width)) - 1U) << (pos))
+<span class="pp">#define</span> FIELD_SET(reg, pos, width, val) \
+    ((reg) = ((reg) & ~FIELD_MASK(pos, width)) | (((val) << (pos)) & FIELD_MASK(pos, width)))
+
+<span class="cm">/* 範例：將 GPIOA_MODER 的 PA5 設為輸出（01）*/</span>
+FIELD_SET(GPIOA->MODER, <span class="num">10</span>, <span class="num">2</span>, <span class="num">0x01</span>);   <span class="cm">/* pos=10, width=2, val=01 */</span></pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">以巨集封裝暫存器操作</div>
+          <p class="body-text">
+            直接在業務邏輯中散落 <code>GPIOA->BSRR = (1U &lt;&lt; 5)</code> 的寫法難以維護。
+            建立抽象巨集或 inline 函式，讓程式碼表達意圖而非位元操作細節。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — gpio.h — 可讀性佳的 GPIO 抽象</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="pp">#ifndef</span> GPIO_H
+<span class="pp">#define</span> GPIO_H
+
+<span class="pp">#include</span> <span class="str">"stm32f4xx.h"</span>
+
+<span class="cm">/* 原子性 SET（使用 BSRR 高 16 bit = Reset，低 16 bit = Set）*/</span>
+<span class="kw">static</span> <span class="kw">inline</span> <span class="kw">void</span> <span class="fn">gpio_set</span>(<span class="tp">GPIO_TypeDef</span> *port, <span class="tp">uint16_t</span> pin) {
+    port->BSRR = (<span class="tp">uint32_t</span>)pin;
+}
+
+<span class="cm">/* 原子性 RESET */</span>
+<span class="kw">static</span> <span class="kw">inline</span> <span class="kw">void</span> <span class="fn">gpio_reset</span>(<span class="tp">GPIO_TypeDef</span> *port, <span class="tp">uint16_t</span> pin) {
+    port->BSRR = (<span class="tp">uint32_t</span>)pin << <span class="num">16</span>;
+}
+
+<span class="cm">/* TOGGLE（用 ODR XOR，非原子，多中斷場合應用 BSRR）*/</span>
+<span class="kw">static</span> <span class="kw">inline</span> <span class="kw">void</span> <span class="fn">gpio_toggle</span>(<span class="tp">GPIO_TypeDef</span> *port, <span class="tp">uint16_t</span> pin) {
+    port->ODR ^= pin;
+}
+
+<span class="cm">/* READ */</span>
+<span class="kw">static</span> <span class="kw">inline</span> <span class="tp">uint8_t</span> <span class="fn">gpio_read</span>(<span class="tp">GPIO_TypeDef</span> *port, <span class="tp">uint16_t</span> pin) {
+    <span class="kw">return</span> (port->IDR & pin) ? <span class="num">1</span> : <span class="num">0</span>;
+}
+
+<span class="cm">/* 腳位定義，對應 STM32F446RE Nucleo */</span>
+<span class="pp">#define</span> LED_GREEN_PORT   GPIOA
+<span class="pp">#define</span> LED_GREEN_PIN    (<span class="num">1U</span> << <span class="num">5</span>)   <span class="cm">/* PA5 */</span>
+<span class="pp">#define</span> BTN_PORT         GPIOC
+<span class="pp">#define</span> BTN_PIN          (<span class="num">1U</span> << <span class="num">13</span>)  <span class="cm">/* PC13 */</span>
+
+<span class="pp">#endif</span> <span class="cm">/* GPIO_H */</span></pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">位元欄位（Bit-field）結構體</div>
+          <p class="body-text">
+            C 語言的 bit-field 結構體提供另一種暫存器映射方式，可讀性高但有可攜性問題：
+            位元填充順序（LSB 或 MSB）由實作定義，不同編譯器可能相反。
+            CMSIS 標頭檔採用的策略是：以結構體定義命名欄位提升可讀性，
+            但實際讀寫使用整數型別加位元遮罩確保正確性。
+          </p>
+          <div class="callout warn">
+            <div class="callout-title">Bit-field 的跨平台陷阱</div>
+            切勿用 bit-field 結構體直接映射硬體暫存器並依賴欄位順序，
+            這在更換編譯器或架構時可能靜默失效。
+            CMSIS 的 <code>_TypeDef</code> 結構體用 <code>__IO uint32_t</code> 整數型別存取暫存器，
+            再用帶 <code>_Msk</code>、<code>_Pos</code> 後綴的巨集操作，才是正確做法。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 3.3
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-3-3">
+      <div class="lesson-header">
+        <span class="lesson-badge">3.3 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">指標、函式指標與回呼</div>
+          <div class="lesson-desc">指標算術、函式指標陣列、驅動程式抽象層（HAL 設計模式）</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">指標與記憶體映射</div>
+          <p class="body-text">
+            嵌入式 C 中，指標的核心用途之一是將整數位址強轉為可存取的記憶體映射暫存器。
+            理解指標型別決定的「步進大小」對於位址計算至關重要。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 指標算術與記憶體映射</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="tp">uint32_t</span> *p = (<span class="tp">uint32_t</span> *)<span class="num">0x20000000</span>;
+p++;   <span class="cm">/* p 現在是 0x20000004（+4 bytes，因為 uint32_t 是 4 bytes）*/</span>
+
+<span class="tp">uint8_t</span> *q = (<span class="tp">uint8_t</span> *)<span class="num">0x20000000</span>;
+q++;   <span class="cm">/* q 現在是 0x20000001（+1 byte）*/</span>
+
+<span class="cm">/* 走訪 Flash 中的查找表 */</span>
+<span class="kw">const</span> <span class="tp">uint16_t</span> sine_lut[<span class="num">256</span>] = { <span class="cm">/* ... */</span> };
+<span class="kw">const</span> <span class="tp">uint16_t</span> *lut_ptr = sine_lut;
+<span class="tp">uint16_t</span> sample = lut_ptr[<span class="num">90</span>];   <span class="cm">/* 等同 *(lut_ptr + 90) */</span>
+
+<span class="cm">/* void 指標：泛型緩衝區（如 memcpy 實作）*/</span>
+<span class="kw">void</span> <span class="fn">my_memcpy</span>(<span class="kw">void</span> *dst, <span class="kw">const</span> <span class="kw">void</span> *src, <span class="tp">size_t</span> n) {
+    <span class="tp">uint8_t</span>       *d = (<span class="tp">uint8_t</span> *)dst;
+    <span class="kw">const</span> <span class="tp">uint8_t</span> *s = (<span class="kw">const</span> <span class="tp">uint8_t</span> *)src;
+    <span class="kw">while</span> (n--) *d++ = *s++;
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">函式指標與回呼（Callback）</div>
+          <p class="body-text">
+            函式指標讓嵌入式驅動程式可以在不修改驅動層的情況下，
+            將事件通知傳遞給應用層，實現類似物件導向中「介面」的效果。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — UART 驅動使用回呼解耦應用層</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* ── uart.h ── */</span>
+<span class="kw">typedef</span> <span class="kw">void</span> (*<span class="tp">uart_rx_cb_t</span>)(<span class="tp">uint8_t</span> byte);  <span class="cm">/* 回呼型別定義 */</span>
+
+<span class="kw">void</span> <span class="fn">uart_init</span>(<span class="tp">uint32_t</span> baud, <span class="tp">uart_rx_cb_t</span> cb);
+<span class="kw">void</span> <span class="fn">uart_send</span>(<span class="kw">const</span> <span class="tp">uint8_t</span> *buf, <span class="tp">uint16_t</span> len);
+
+<span class="cm">/* ── uart.c ── */</span>
+<span class="kw">static</span> <span class="tp">uart_rx_cb_t</span> s_rx_cb = <span class="kw">NULL</span>;  <span class="cm">/* 儲存回呼函式指標 */</span>
+
+<span class="kw">void</span> <span class="fn">uart_init</span>(<span class="tp">uint32_t</span> baud, <span class="tp">uart_rx_cb_t</span> cb) {
+    s_rx_cb = cb;
+    <span class="cm">/* ... 硬體初始化 ... */</span>
+}
+
+<span class="kw">void</span> <span class="fn">USART2_IRQHandler</span>(<span class="kw">void</span>) {
+    <span class="kw">if</span> (USART2->SR & USART_SR_RXNE) {
+        <span class="tp">uint8_t</span> data = (<span class="tp">uint8_t</span>)(USART2->DR & <span class="num">0xFF</span>);
+        <span class="kw">if</span> (s_rx_cb) s_rx_cb(data);    <span class="cm">/* 通知應用層，不需知道對方是誰 */</span>
+    }
+}
+
+<span class="cm">/* ── main.c ── */</span>
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">on_byte_received</span>(<span class="tp">uint8_t</span> b) {
+    <span class="cm">/* 應用邏輯：將收到的 byte 存入 ring buffer */</span>
+    <span class="fn">ring_buf_push</span>(&amp;g_rx_buf, b);
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>) {
+    <span class="fn">uart_init</span>(<span class="num">115200</span>, on_byte_received);  <span class="cm">/* 傳入回呼 */</span>
+    <span class="kw">while</span> (<span class="num">1</span>) { <span class="cm">/* ... */</span> }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">函式指標陣列（狀態機 / 分派表）</div>
+          <p class="body-text">
+            函式指標陣列是實作 <strong class="hl">狀態機</strong> 或 <strong class="hl">命令分派表</strong> 的慣用手法，
+            比大型 switch-case 更具擴充性，且跳轉成本固定為 O(1)。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 命令分派表（UART 協定解析）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="kw">typedef</span> <span class="kw">void</span> (*<span class="tp">cmd_handler_t</span>)(<span class="kw">const</span> <span class="tp">uint8_t</span> *payload, <span class="tp">uint8_t</span> len);
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">cmd_ping</span>   (<span class="kw">const</span> <span class="tp">uint8_t</span> *p, <span class="tp">uint8_t</span> l) { <span class="fn">send_pong</span>(); }
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">cmd_led_on</span> (<span class="kw">const</span> <span class="tp">uint8_t</span> *p, <span class="tp">uint8_t</span> l) { <span class="fn">gpio_set</span>(LED_GREEN_PORT, LED_GREEN_PIN); }
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">cmd_led_off</span>(<span class="kw">const</span> <span class="tp">uint8_t</span> *p, <span class="tp">uint8_t</span> l) { <span class="fn">gpio_reset</span>(LED_GREEN_PORT, LED_GREEN_PIN); }
+
+<span class="cm">/* cmd_id 直接作為索引，O(1) 分派 */</span>
+<span class="kw">static</span> <span class="kw">const</span> <span class="tp">cmd_handler_t</span> dispatch_table[] = {
+    [<span class="num">0x01</span>] = cmd_ping,
+    [<span class="num">0x02</span>] = cmd_led_on,
+    [<span class="num">0x03</span>] = cmd_led_off,
+};
+<span class="pp">#define</span> CMD_TABLE_SIZE  (<span class="kw">sizeof</span>(dispatch_table) / <span class="kw">sizeof</span>(dispatch_table[<span class="num">0</span>]))
+
+<span class="kw">void</span> <span class="fn">dispatch_cmd</span>(<span class="tp">uint8_t</span> id, <span class="kw">const</span> <span class="tp">uint8_t</span> *payload, <span class="tp">uint8_t</span> len) {
+    <span class="kw">if</span> (id < CMD_TABLE_SIZE && dispatch_table[id])
+        dispatch_table[id](payload, len);
+}</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 3.4
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-3-4">
+      <div class="lesson-header">
+        <span class="lesson-badge">3.4 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">連結腳本與啟動碼（Startup）</div>
+          <div class="lesson-desc">段（Section）定義、記憶體區域、啟動初始化序列</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">程式碼段（Sections）一覽</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>段名</th><th>存放於</th><th>內容</th><th>初始化</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>.text</code></td><td>Flash</td><td>可執行指令</td><td>—（直接在 Flash 執行）</td></tr>
+                <tr><td><code>.rodata</code></td><td>Flash</td><td><code>const</code> 全域變數、字串常數</td><td>—</td></tr>
+                <tr><td><code>.data</code></td><td>Flash（LMA）→ RAM（VMA）</td><td>有初始值的全域 / static 變數</td><td>啟動碼將 Flash 資料複製至 RAM</td></tr>
+                <tr><td><code>.bss</code></td><td>RAM</td><td>初始值為 0 的全域 / static 變數</td><td>啟動碼將此段清零</td></tr>
+                <tr><td><code>.stack</code></td><td>RAM</td><td>呼叫堆疊</td><td>MSP 初始值由向量表 [0] 設定</td></tr>
+                <tr><td><code>.heap</code></td><td>RAM</td><td>動態記憶體（<code>malloc</code>）</td><td>嵌入式通常避免使用</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">最小連結腳本（STM32F446RE）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">ld — stm32f446re.ld</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre>MEMORY {
+    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 512K
+    RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+}
+
+ENTRY(Reset_Handler)    <span class="cm">/* 進入點 */</span>
+
+SECTIONS {
+    <span class="cm">/* ── 程式碼 ── */</span>
+    .text : {
+        KEEP(*(.isr_vector))    <span class="cm">/* 向量表必須在最前面 */</span>
+        *(.text*)               <span class="cm">/* 所有 .text 段 */</span>
+        *(.rodata*)             <span class="cm">/* 唯讀資料 */</span>
+        . = ALIGN(4);
+    } > FLASH
+
+    <span class="cm">/* ── 已初始化資料（Flash → RAM）── */</span>
+    .data : {
+        _sdata = .;             <span class="cm">/* RAM 起始位址（VMA）*/</span>
+        *(.data*)
+        . = ALIGN(4);
+        _edata = .;             <span class="cm">/* RAM 結束位址 */</span>
+    } > RAM AT > FLASH          <span class="cm">/* VMA=RAM, LMA=Flash */</span>
+    _sidata = LOADADDR(.data);  <span class="cm">/* Flash 中資料的位址（LMA）*/</span>
+
+    <span class="cm">/* ── 未初始化資料（清零段）── */</span>
+    .bss : {
+        _sbss = .;
+        *(.bss*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = .;
+    } > RAM
+
+    <span class="cm">/* ── 堆疊（從 RAM 頂端往下成長）── */</span>
+    _estack = ORIGIN(RAM) + LENGTH(RAM);
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">啟動碼：Reset_Handler 做了什麼</div>
+          <p class="body-text">
+            在 <code>main()</code> 執行之前，Reset_Handler 必須完成三件事：
+          </p>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <div class="step-title">複製 .data 段：Flash → RAM</div>
+                <div class="step-desc">
+                  使用連結腳本提供的 <code>_sdata</code>、<code>_edata</code>、<code>_sidata</code> 符號，
+                  將 Flash 中的初始值資料搬入 RAM。
+                </div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">c — .data 初始化</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre><span class="tp">uint32_t</span> *src = &amp;_sidata;
+<span class="tp">uint32_t</span> *dst = &amp;_sdata;
+<span class="kw">while</span> (dst < &amp;_edata) *dst++ = *src++;</pre>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <div class="step-title">清零 .bss 段</div>
+                <div class="step-desc">
+                  C 語言規定未初始化的全域變數初始值為 0，啟動碼負責執行此操作。
+                </div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">c — .bss 清零</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre><span class="tp">uint32_t</span> *bss = &amp;_sbss;
+<span class="kw">while</span> (bss < &amp;_ebss) *bss++ = <span class="num">0</span>;</pre>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <div class="step-title">呼叫 main()</div>
+                <div class="step-desc">
+                  若有 C++ 靜態建構子，需先執行 <code>__libc_init_array()</code>。
+                  完成後跳轉至 <code>main()</code>，main 不應返回；若返回則進入無窮迴圈。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 3.5
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-3-5">
+      <div class="lesson-header">
+        <span class="lesson-badge">3.5 — 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">Makefile 與工具鏈進階</div>
+          <div class="lesson-desc">多檔案編譯、自動相依、燒錄目標、map 檔分析</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">編譯流程回顧</div>
+          <div class="diagram-block">
+<span class="d-hl">原始碼</span>         <span class="d-acc">工具</span>             <span class="d-grn">產出</span>
+main.c   ──▶  arm-none-eabi-gcc -c  ──▶  main.o    <span class="d-dim">(目的檔)</span>
+gpio.c   ──▶  arm-none-eabi-gcc -c  ──▶  gpio.o
+startup.s ──▶ arm-none-eabi-gcc -c  ──▶  startup.o
+                          │
+                          ▼ arm-none-eabi-gcc (link)
+                       blink.elf  <span class="d-dim">(含符號 + 偵錯資訊)</span>
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+      blink.bin       blink.hex       blink.map
+   <span class="d-dim">(純二進位)</span>      <span class="d-dim">(Intel HEX)</span>    <span class="d-dim">(記憶體映射報告)</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">實用 Makefile 範本</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">makefile — 多檔案 STM32 專案</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre>TARGET  = blink
+MCU     = cortex-m4
+FPU     = fpv4-sp-d16
+FLOAT   = hard
+
+CC      = arm-none-eabi-gcc
+OBJCOPY = arm-none-eabi-objcopy
+SIZE    = arm-none-eabi-size
+
+<span class="cm"># 來源檔案（自動蒐集）</span>
+SRCS    = $(wildcard src/*.c) \
+          startup/startup_stm32f446xx.s
+
+OBJS    = $(patsubst %.c, build/%.o, \
+          $(patsubst %.s, build/%.o, $(SRCS)))
+
+<span class="cm"># 編譯旗標</span>
+CFLAGS  = -mcpu=$(MCU) -mthumb \
+          -mfpu=$(FPU) -mfloat-abi=$(FLOAT) \
+          -O2 -Wall -Wextra \
+          -ffunction-sections -fdata-sections \
+          -Iinc -DSTM32F446xx
+
+LDFLAGS = -T stm32f446re.ld \
+          -Wl,--gc-sections \
+          -Wl,-Map=$(TARGET).map \
+          --specs=nano.specs \
+          -lc -lm
+
+<span class="cm"># 預設目標</span>
+all: $(TARGET).bin $(TARGET).hex
+    $(SIZE) $(TARGET).elf
+
+<span class="cm"># 連結</span>
+$(TARGET).elf: $(OBJS)
+    $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+<span class="cm"># 編譯 .c</span>
+build/%.o: %.c
+    @mkdir -p $(dir $@)
+    $(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
+<span class="cm"># 組譯 .s</span>
+build/%.o: %.s
+    @mkdir -p $(dir $@)
+    $(CC) $(CFLAGS) -c $< -o $@
+
+<span class="cm"># 產生 binary / hex</span>
+$(TARGET).bin: $(TARGET).elf
+    $(OBJCOPY) -O binary $< $@
+
+$(TARGET).hex: $(TARGET).elf
+    $(OBJCOPY) -O ihex $< $@
+
+<span class="cm"># 燒錄（st-flash）</span>
+flash: $(TARGET).bin
+    st-flash write $< 0x08000000
+
+<span class="cm"># 燒錄（OpenOCD）</span>
+flash-ocd: $(TARGET).elf
+    openocd -f interface/stlink.cfg \
+            -f target/stm32f4x.cfg \
+            -c "program $< verify reset exit"
+
+clean:
+    rm -rf build $(TARGET).elf $(TARGET).bin $(TARGET).hex $(TARGET).map
+
+<span class="cm"># 自動相依（-MMD -MP 生成 .d 檔）</span>
+-include $(OBJS:.o=.d)</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">重要編譯器旗標說明</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>旗標</th><th>作用</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>-ffunction-sections</code></td><td>每個函式獨立放入一個段，讓連結器可以刪除未使用的函式</td></tr>
+                <tr><td><code>-fdata-sections</code></td><td>同上，用於全域變數</td></tr>
+                <tr><td><code>-Wl,--gc-sections</code></td><td>連結器刪除未參照的段（Dead Code Elimination）</td></tr>
+                <tr><td><code>-Wl,-Map=x.map</code></td><td>輸出記憶體映射報告，可查看每個符號的大小與位置</td></tr>
+                <tr><td><code>--specs=nano.specs</code></td><td>使用 newlib-nano（較小的 C 標準函式庫）</td></tr>
+                <tr><td><code>-MMD -MP</code></td><td>自動生成標頭檔相依規則（.d 檔），改 .h 後自動重新編譯</td></tr>
+                <tr><td><code>-O2</code></td><td>二級優化（嵌入式常用）；<code>-Os</code> 優先縮小程式碼大小</td></tr>
+                <tr><td><code>-mfloat-abi=hard</code></td><td>使用 FPU 硬體浮點（需搭配 <code>-mfpu=fpv4-sp-d16</code>）</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">解讀 .map 檔案</div>
+          <p class="body-text">
+            <code>.map</code> 檔列出每個段的起始位址、大小以及貢獻的目的檔，
+            是優化 Flash / RAM 用量的必要工具。搭配 <code>arm-none-eabi-size</code> 指令
+            快速查看 <code>.text</code>、<code>.data</code>、<code>.bss</code> 的總用量。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">shell — size 輸出範例</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre>$ arm-none-eabi-size blink.elf
+   text    data     bss     dec     hex filename
+   4328      24     104    4456    1168 blink.elf
+
+<span class="cm"># text  → Flash 用量（程式碼 + rodata）
+# data  → Flash + RAM 各佔（初始值複製）
+# bss   → RAM 用量（清零段）
+# Flash 總用量 = text + data = 4352 bytes
+# RAM   總用量 = data + bss  = 128 bytes</span></pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 3.6
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-3-6">
+      <div class="lesson-header">
+        <span class="lesson-badge">3.6 — 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">GDB + OpenOCD 偵錯技巧</div>
+          <div class="lesson-desc">斷點、觀察點、暫存器檢視、HardFault 分析與 semihosting</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">連線與基本流程</div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <div class="step-title">啟動 OpenOCD（終端機 A）</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">shell</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>openocd \
+  -f interface/stlink.cfg \
+  -f target/stm32f4x.cfg</pre>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <div class="step-title">連接 GDB（終端機 B）</div>
+                <div class="code-block">
+                  <div class="code-header">
+                    <span class="code-lang">shell</span>
+                    <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+                  </div>
+                  <pre>arm-none-eabi-gdb blink.elf
+
+(gdb) target remote :3333          <span class="cm"># 連到 OpenOCD GDB server</span>
+(gdb) monitor reset halt           <span class="cm"># Reset 並暫停在 Reset_Handler</span>
+(gdb) load                         <span class="cm"># 燒錄 .elf 到 Flash</span>
+(gdb) break main                   <span class="cm"># 在 main() 設軟體斷點</span>
+(gdb) continue                     <span class="cm"># 繼續執行</span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">常用 GDB 指令速查</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>指令</th><th>功能</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>break gpio.c:42</code></td><td>在 gpio.c 第 42 行設軟體斷點</td></tr>
+                <tr><td><code>hbreak *0x080012A0</code></td><td>硬體斷點（不修改 Flash，最多 6 個）</td></tr>
+                <tr><td><code>watch g_counter</code></td><td>資料觀察點：g_counter 被寫入時中斷</td></tr>
+                <tr><td><code>rwatch g_counter</code></td><td>讀取觀察點</td></tr>
+                <tr><td><code>info registers</code></td><td>顯示所有 CPU 暫存器</td></tr>
+                <tr><td><code>x/16xw 0x20000000</code></td><td>以 16 進位顯示 RAM 0x20000000 起的 16 個 word</td></tr>
+                <tr><td><code>print/x GPIOA->ODR</code></td><td>顯示 GPIOA ODR 暫存器值（需 CMSIS 標頭）</td></tr>
+                <tr><td><code>backtrace</code></td><td>顯示呼叫堆疊（分析 Fault 用）</td></tr>
+                <tr><td><code>stepi</code></td><td>單步執行一條機器指令</td></tr>
+                <tr><td><code>disassemble</code></td><td>反組譯目前函式</td></tr>
+                <tr><td><code>monitor reset halt</code></td><td>透過 OpenOCD 重置並暫停</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">HardFault 分析手法</div>
+          <p class="body-text">
+            HardFault 是最常見的嵌入式崩潰。發生時 CPU 將 8 個暫存器
+            （R0–R3、R12、LR、PC、xPSR）壓入堆疊，並跳轉至 HardFault_Handler。
+            透過 GDB 讀取堆疊內容，可還原崩潰當下的 PC（造成 Fault 的指令位址）。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — HardFault Handler（列印暫存器資訊）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* 組語部分：判斷使用 MSP 還是 PSP，傳入堆疊指標 */</span>
+<span class="kw">__attribute__</span>((naked))
+<span class="kw">void</span> <span class="fn">HardFault_Handler</span>(<span class="kw">void</span>)
+{
+    <span class="fn">__asm__</span> <span class="kw">volatile</span> (
+        <span class="str">"tst lr, #4          \n"</span>   <span class="cm">/* 檢查 EXC_RETURN bit 2 */</span>
+        <span class="str">"ite eq              \n"</span>
+        <span class="str">"mrseq r0, msp       \n"</span>   <span class="cm">/* Thread 用 MSP */</span>
+        <span class="str">"mrsne r0, psp       \n"</span>   <span class="cm">/* Handler 用 PSP */</span>
+        <span class="str">"b hard_fault_handler_c \n"</span>
+    );
+}
+
+<span class="kw">void</span> <span class="fn">hard_fault_handler_c</span>(<span class="tp">uint32_t</span> *stack)
+{
+    <span class="cm">/* 堆疊佈局（由低到高）: R0 R1 R2 R3 R12 LR PC xPSR */</span>
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> r0   = stack[<span class="num">0</span>];
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> r1   = stack[<span class="num">1</span>];
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> r2   = stack[<span class="num">2</span>];
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> r3   = stack[<span class="num">3</span>];
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> r12  = stack[<span class="num">4</span>];
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> lr   = stack[<span class="num">5</span>];
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> pc   = stack[<span class="num">6</span>];   <span class="cm">/* ← 造成 Fault 的指令位址 */</span>
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> xpsr = stack[<span class="num">7</span>];
+
+    <span class="cm">/* 在 GDB 中：(gdb) print/x pc  → 即可反組譯找出問題指令 */</span>
+    <span class="cm">/* 或查詢 SCB->CFSR（Configurable Fault Status Register）*/</span>
+    <span class="kw">volatile</span> <span class="tp">uint32_t</span> cfsr = SCB->CFSR;  <span class="cm">/* 記憶體 / 匯流排 / 使用 Fault 原因 */</span>
+    (<span class="kw">void</span>)r0; (<span class="kw">void</span>)r1; (<span class="kw">void</span>)r2; (<span class="kw">void</span>)r3;
+    (<span class="kw">void</span>)r12; (<span class="kw">void</span>)lr; (<span class="kw">void</span>)xpsr; (<span class="kw">void</span>)cfsr;
+
+    <span class="kw">while</span> (<span class="num">1</span>);  <span class="cm">/* 停在此處，讓 GDB 連入後查看各變數 */</span>
+}</pre>
+          </div>
+          <div class="callout tip">
+            <div class="callout-title">addr2line 快速定位</div>
+            在 GDB 外，可用 <code>arm-none-eabi-addr2line</code> 直接查詢崩潰位址對應的原始碼行數：<br>
+            <code>arm-none-eabi-addr2line -e blink.elf -f 0x080012A4</code>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">本週實作清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>撰寫 <code>gpio.h</code> / <code>gpio.c</code>，以 inline 函式封裝 SET / RESET / TOGGLE / READ</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>建立多目標 Makefile，支援 <code>make</code>、<code>make flash</code>、<code>make clean</code></span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以自訂連結腳本 + 啟動碼（不使用任何函式庫）成功編譯並執行 LED Blink</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>實作 UART 驅動，使用函式指標回呼，主程式以 <code>uart_init(115200, on_rx)</code> 方式設定</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以 GDB 在 <code>gpio_set()</code> 內設硬體斷點，驗證 PA5 BSRR 寫入值正確</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>故意製造 NULL pointer dereference，用 HardFault Handler + <code>addr2line</code> 定位錯誤行</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">延伸挑戰</div>
+          以函式指標陣列實作一個 <strong>簡易命令列介面（CLI）</strong>：
+          透過 UART 輸入指令字串（如 <code>led on</code>、<code>led off</code>、<code>status</code>），
+          解析後分派到對應的處理函式。這個練習整合了本週的位元操作、函式指標回呼與 UART 驅動。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="week2.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 2L5 7l4 5"/>
+        </svg>
+        Week 02 — 微控制器硬體基礎
+      </a>
+      <span class="week-indicator">Week 03 / 08</span>
+      <a href="week4.html" class="nav-btn primary">
+        Week 04 — 周邊介面與通訊協定
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M5 2l4 5-4 5"/>
+        </svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+    sections.forEach(section => {
+      if (scrollTop >= section.offsetTop - 80) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+    const completed = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = completed + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (completed / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>
