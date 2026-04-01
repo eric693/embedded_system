@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 — 微控制器硬體基礎 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 1.75rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+
+  .course-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .sidebar-week-title {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+
+  .nav-section-label {
+    padding: 0.5rem 1.5rem 0.25rem;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-lesson {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active {
+    color: var(--accent);
+    background: var(--bg3);
+    border-left-color: var(--accent);
+  }
+
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    min-width: 22px;
+  }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .progress-bar-wrap {
+    background: var(--bg4);
+    border-radius: 2px;
+    height: 3px;
+  }
+
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 3px;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Main ── */
+  .main {
+    overflow-y: auto;
+    height: 100vh;
+    scroll-behavior: smooth;
+  }
+
+  /* ── Week hero ── */
+  .week-hero {
+    padding: 3.5rem 4rem 2.75rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .week-hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hero-eyebrow::after {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .week-title {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .week-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+    color: var(--dim);
+  }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .tag-setup  { border-color: rgba(200,169,110,0.35); color: var(--accent); }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Objectives ── */
+  .objectives-bar {
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg2);
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .obj-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding-top: 3px;
+    min-width: 60px;
+  }
+
+  .obj-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .obj-item {
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .obj-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── Lesson sections ── */
+  .lesson-section {
+    padding: 3rem 4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lesson-section:last-of-type { border-bottom: none; }
+
+  .lesson-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .lesson-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(200,169,110,0.1);
+    border: 1px solid rgba(200,169,110,0.25);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 5px;
+  }
+
+  .lesson-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+  }
+
+  .lesson-desc {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .lesson-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ── Sub-section ── */
+  .sub-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent2);
+  }
+
+  .body-text {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.85;
+    padding-left: 1rem;
+  }
+
+  .body-text + .body-text { margin-top: 0.75rem; }
+
+  strong.hl { color: var(--text); }
+
+  /* ── Section divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+  }
+
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(143,168,200,0.06);
+    border-radius: 0 4px 4px 0;
+    padding: 0.875rem 1.1rem 0.875rem 1.25rem;
+    margin-left: 1rem;
+    font-size: 13.5px;
+    color: #a8bcd4;
+    line-height: 1.75;
+  }
+
+  .callout.warn {
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.06);
+    color: #c8b88a;
+  }
+
+  .callout.tip {
+    border-color: var(--green);
+    background: rgba(106,173,142,0.06);
+    color: #7ec4a0;
+  }
+
+  .callout.danger {
+    border-color: var(--red);
+    background: rgba(200,106,106,0.06);
+    color: #d48a8a;
+  }
+
+  .callout-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+    opacity: 0.75;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-left: 1rem;
+  }
+
+  .code-header {
+    padding: 0.45rem 1rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-all;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  /* ── Table ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    margin-left: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 0.55rem 1rem;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line2);
+  }
+
+  tbody td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+
+  td code, p code, li code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg4);
+    color: var(--accent2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--line2);
+  }
+
+  td strong { color: var(--text); }
+
+  /* ── List ── */
+  .body-list {
+    padding-left: 2rem;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.85;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .body-list li::marker { color: var(--dim); }
+
+  /* ── Diagram / visual block ── */
+  .diagram-block {
+    margin-left: 1rem;
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    padding: 1.5rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+
+  /* ── Checklist ── */
+  .checklist {
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--bg4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1.25rem;
+    border: 1px solid var(--line2);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary {
+    background: rgba(200,169,110,0.1);
+    border-color: rgba(200,169,110,0.4);
+    color: var(--accent);
+  }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+
+  .week-indicator {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  /* ── Numbered Steps ── */
+  .steps {
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 0 1rem;
+    position: relative;
+  }
+
+  .step:not(:last-child) > .step-num::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    width: 1px;
+    height: calc(100% - 32px);
+    background: var(--line2);
+  }
+
+  .step-num {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg4);
+    border: 1px solid var(--line2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+    z-index: 1;
+    margin-top: 0;
+  }
+
+  .step-content {
+    padding-bottom: 1.75rem;
+    min-width: 0;
+  }
+
+  .step-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.65rem;
+    padding-top: 6px;
+    line-height: 1.4;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 2L4 6l4 4"/>
+        </svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 02</span>
+      <div class="sidebar-week-title">微控制器硬體基礎</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">本週課程</div>
+      <a class="nav-lesson active" href="#lesson-2-1">
+        <span class="nav-num">2.1</span>ARM Cortex-M4 核心架構
+      </a>
+      <a class="nav-lesson" href="#lesson-2-2">
+        <span class="nav-num">2.2</span>記憶體架構與位址映射
+      </a>
+      <a class="nav-lesson" href="#lesson-2-3">
+        <span class="nav-num">2.3</span>GPIO 深度操作
+      </a>
+      <a class="nav-lesson" href="#lesson-2-4">
+        <span class="nav-num">2.4</span>中斷系統：NVIC 與 EXTI
+      </a>
+      <a class="nav-lesson" href="#lesson-2-5">
+        <span class="nav-num">2.5</span>DMA 控制器
+      </a>
+      <a class="nav-lesson" href="#lesson-2-6">
+        <span class="nav-num">2.6</span>時脈樹與低功耗模式
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>本週完成度</span>
+        <span id="progress-text">0 / 6</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Embedded Systems — Week 02</div>
+      <h1 class="week-title">微控制器硬體基礎</h1>
+      <p class="week-subtitle">
+        深入 ARM Cortex-M4 核心的內部架構，理解記憶體映射、GPIO 電氣特性、
+        中斷優先權機制與 DMA 搬運原理。這些知識是撰寫高效、可靠嵌入式程式的基石。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-theory">硬體理論</span>
+        <span class="tag tag-lab">動手實作</span>
+        <span class="tag">6 堂課</span>
+        <span class="tag">約 7 小時</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">6</span>
+          <span class="stat-label">堂課</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">5</span>
+          <span class="stat-label">程式範例</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">Cortex-M4</span>
+          <span class="stat-label">處理器核心</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">STM32F446RE</span>
+          <span class="stat-label">開發板</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <div class="obj-label">學習目標</div>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>描述 Cortex-M4 的流水線與暫存器組</div>
+        <div class="obj-item"><div class="obj-dot"></div>解讀 STM32 記憶體映射與 4 GB 位址空間分區</div>
+        <div class="obj-item"><div class="obj-dot"></div>設定 GPIO 的所有工作模式與電氣參數</div>
+        <div class="obj-item"><div class="obj-dot"></div>配置 NVIC 優先群組與 EXTI 外部中斷</div>
+        <div class="obj-item"><div class="obj-dot"></div>使用 DMA 進行記憶體對記憶體與周邊對記憶體傳輸</div>
+        <div class="obj-item"><div class="obj-dot"></div>配置 PLL 時脈樹，進入 Sleep / Stop 低功耗模式</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 2.1
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-2-1">
+      <div class="lesson-header">
+        <span class="lesson-badge">2.1 — 理論</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">ARM Cortex-M4 核心架構</div>
+          <div class="lesson-desc">流水線、暫存器組、執行模式與特權等級</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">三級流水線（Pipeline）</div>
+          <p class="body-text">
+            Cortex-M4 採用 <strong class="hl">三級流水線</strong>：取指（Fetch）→ 解碼（Decode）→ 執行（Execute）。
+            在無分支、無資料相依的情況下，每個時脈週期可完成一條指令（CPI ≈ 1）。
+            當發生 <strong class="hl">分支（Branch）</strong> 時，流水線需要清空（Flush），耗費 1–3 個額外週期；
+            Thumb-2 指令集中的條件執行（IT 指令）可在部分情況下避免分支。
+          </p>
+          <p class="body-text">
+            Cortex-M4 支援 <strong class="hl">硬體乘除法</strong>（單週期 32×32 乘法、2–12 週期除法）
+            以及 <strong class="hl">FPU（浮點運算單元）</strong>，支援單精度 IEEE 754 運算，
+            對 DSP 應用（濾波器、FFT）有顯著加速效果。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">暫存器組</div>
+          <div class="diagram-block">
+<span class="d-acc">通用暫存器（General Purpose Registers）</span>
+  R0  – R3   <span class="d-dim">│</span> <span class="d-grn">函式參數 / 回傳值（AAPCS 呼叫慣例）</span>
+  R4  – R11  <span class="d-dim">│</span> <span class="d-grn">被呼叫者保存（callee-saved）</span>
+  R12        <span class="d-dim">│</span> <span class="d-grn">臨時暫存器（IP）</span>
+
+<span class="d-acc">特殊暫存器（Special Purpose Registers）</span>
+  R13 / SP   <span class="d-dim">│</span> <span class="d-blu">堆疊指標（MSP / PSP 雙堆疊）</span>
+  R14 / LR   <span class="d-dim">│</span> <span class="d-blu">連結暫存器（Return Address）</span>
+  R15 / PC   <span class="d-dim">│</span> <span class="d-blu">程式計數器</span>
+
+<span class="d-acc">狀態暫存器</span>
+  xPSR       <span class="d-dim">│</span> <span class="d-hl">N Z C V Q GE[3:0] ICI/IT ISR_Number T</span>
+  PRIMASK    <span class="d-dim">│</span> <span class="d-hl">遮蔽所有可設定優先權的中斷</span>
+  FAULTMASK  <span class="d-dim">│</span> <span class="d-hl">遮蔽所有中斷（含 HardFault）</span>
+  BASEPRI    <span class="d-dim">│</span> <span class="d-hl">遮蔽優先權 ≥ 此值的中斷</span>
+  CONTROL    <span class="d-dim">│</span> <span class="d-hl">選擇堆疊指標 / 執行等級</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">執行模式與特權等級</div>
+          <p class="body-text">
+            Cortex-M4 定義兩種 <strong class="hl">執行模式</strong>：
+            <strong class="hl">Thread Mode</strong>（一般應用程式碼）和 <strong class="hl">Handler Mode</strong>（例外處理程式，永遠為特權等級）。
+            Thread Mode 可以是特權（Privileged）或非特權（Unprivileged）。
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>模式</th>
+                  <th>觸發條件</th>
+                  <th>特權等級</th>
+                  <th>使用堆疊</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Thread Mode</strong></td>
+                  <td>Reset 後預設進入</td>
+                  <td>特權 or 非特權（CONTROL[0]）</td>
+                  <td>MSP or PSP（CONTROL[1]）</td>
+                </tr>
+                <tr>
+                  <td><strong>Handler Mode</strong></td>
+                  <td>任何例外（中斷、Fault）</td>
+                  <td>永遠特權</td>
+                  <td>永遠 MSP</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body-text" style="margin-top:0.75rem">
+            使用 RTOS 時，通常將應用任務設為非特權 Thread Mode（使用 PSP），
+            核心程式碼使用 MSP，實現記憶體保護（MPU）隔離。
+          </p>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">例外與向量表</div>
+          <p class="body-text">
+            Cortex-M4 支援最多 <strong class="hl">240 個外部中斷</strong>（IRQ0–IRQ239）加上 16 個內部系統例外。
+            向量表（Vector Table）存放於 Flash 起始位址 <code>0x08000000</code>，
+            每個向量為 4 Bytes 的函式指標。Reset 時處理器自動從向量表 offset 0 讀取初始 SP，
+            從 offset 4 讀取 Reset Handler 並跳轉執行。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 向量表結構示意（startup_stm32f446xx.s 對應 C 版本）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* 向量表以函式指標陣列形式定義 */</span>
+<span class="kw">typedef</span> <span class="kw">void</span> (*<span class="tp">IRQHandler_t</span>)(<span class="kw">void</span>);
+
+<span class="kw">__attribute__</span>((section(<span class="str">".isr_vector"</span>)))
+<span class="kw">const</span> <span class="tp">IRQHandler_t</span> g_pfnVectors[] = {
+    (<span class="tp">IRQHandler_t</span>)&amp;_estack,   <span class="cm">/* 0x00: 初始 MSP 值（來自連結腳本）*/</span>
+    Reset_Handler,             <span class="cm">/* 0x04: Reset */</span>
+    NMI_Handler,               <span class="cm">/* 0x08: Non-Maskable Interrupt */</span>
+    HardFault_Handler,         <span class="cm">/* 0x0C: Hard Fault */</span>
+    MemManage_Handler,         <span class="cm">/* 0x10: MPU Fault */</span>
+    BusFault_Handler,          <span class="cm">/* 0x14: Bus Fault */</span>
+    UsageFault_Handler,        <span class="cm">/* 0x18: Usage Fault */</span>
+    <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>,               <span class="cm">/* 0x1C–0x28: 保留 */</span>
+    SVC_Handler,               <span class="cm">/* 0x2C: SVCall（系統呼叫）*/</span>
+    DebugMon_Handler,          <span class="cm">/* 0x30: Debug Monitor */</span>
+    <span class="num">0</span>,                         <span class="cm">/* 0x34: 保留 */</span>
+    PendSV_Handler,            <span class="cm">/* 0x38: PendSV（RTOS 任務切換用）*/</span>
+    SysTick_Handler,           <span class="cm">/* 0x3C: SysTick（HAL_Delay 使用）*/</span>
+    <span class="cm">/* 後續為 STM32F446 的 IRQ0 起 ... */</span>
+    WWDG_IRQHandler,           <span class="cm">/* IRQ0: 看門狗 */</span>
+    <span class="cm">/* ... */</span>
+};</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 2.2
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-2-2">
+      <div class="lesson-header">
+        <span class="lesson-badge">2.2 — 理論</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">記憶體架構與位址映射</div>
+          <div class="lesson-desc">4 GB 位址空間、記憶體類型、Bus Matrix 與 Bit-Banding</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">ARM 記憶體映射標準分區</div>
+          <p class="body-text">
+            Cortex-M4 採用 <strong class="hl">統一位址空間（Unified Address Space）</strong>，
+            程式碼、資料與周邊暫存器共用同一個 4 GB 線性位址空間（32-bit）。
+            ARM 架構對這 4 GB 空間有標準分區建議，各晶片廠商在此框架下實作。
+          </p>
+          <div class="diagram-block">
+<span class="d-acc">位址</span>          <span class="d-acc">大小</span>    <span class="d-acc">用途</span>
+<span class="d-hl">0xFFFFFFFF</span>  <span class="d-dim">┐</span>
+            <span class="d-dim">│</span>  512M   <span class="d-grn">Vendor System（私有周邊匯流排 PPB）</span>
+<span class="d-hl">0xE0000000</span>  <span class="d-dim">┼</span>
+            <span class="d-dim">│</span>  512M   <span class="d-blu">外部裝置（External Device）</span>
+<span class="d-hl">0xC0000000</span>  <span class="d-dim">┼</span>
+            <span class="d-dim">│</span>  512M   <span class="d-blu">外部 RAM（External RAM）</span>
+<span class="d-hl">0xA0000000</span>  <span class="d-dim">┼</span>
+            <span class="d-dim">│</span>  512M   周邊（Peripheral）─ APB1/APB2/AHB1/AHB2
+<span class="d-hl">0x40000000</span>  <span class="d-dim">┼</span>
+            <span class="d-dim">│</span>  512M   <span class="d-acc">SRAM（含 Bit-Band Alias 0x22000000）</span>
+<span class="d-hl">0x20000000</span>  <span class="d-dim">┼</span>
+            <span class="d-dim">│</span>  512M   <span class="d-acc">Code（Flash 0x08000000、Bit-Band Alias）</span>
+<span class="d-hl">0x00000000</span>  <span class="d-dim">┘</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">STM32F446RE 具體記憶體配置</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>位址範圍</th>
+                  <th>大小</th>
+                  <th>類型</th>
+                  <th>說明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>0x0800 0000</code> – <code>0x0807 FFFF</code></td>
+                  <td>512 KB</td>
+                  <td><strong>Flash</strong></td>
+                  <td>程式碼 + const 資料，唯讀（燒錄後）</td>
+                </tr>
+                <tr>
+                  <td><code>0x2000 0000</code> – <code>0x2001 BFFF</code></td>
+                  <td>112 KB</td>
+                  <td><strong>SRAM1</strong></td>
+                  <td>主要 RAM，堆疊 / 堆積 / .data / .bss</td>
+                </tr>
+                <tr>
+                  <td><code>0x2001 C000</code> – <code>0x2001 FFFF</code></td>
+                  <td>16 KB</td>
+                  <td><strong>SRAM2</strong></td>
+                  <td>可透過 CCM 存取（高速）</td>
+                </tr>
+                <tr>
+                  <td><code>0x4000 0000</code> – <code>0x4000 7FFF</code></td>
+                  <td>–</td>
+                  <td><strong>APB1</strong></td>
+                  <td>USART2/3、SPI2/3、I2C1/2、TIM2–7 等</td>
+                </tr>
+                <tr>
+                  <td><code>0x4001 0000</code> – <code>0x4001 5FFF</code></td>
+                  <td>–</td>
+                  <td><strong>APB2</strong></td>
+                  <td>USART1/6、SPI1/4、TIM1、ADC1–3 等</td>
+                </tr>
+                <tr>
+                  <td><code>0x4002 0000</code> – <code>0x4002 7FFF</code></td>
+                  <td>–</td>
+                  <td><strong>AHB1</strong></td>
+                  <td>GPIO A–H、DMA1/2、RCC、Flash IF</td>
+                </tr>
+                <tr>
+                  <td><code>0x5000 0000</code> – <code>0x5006 0BFF</code></td>
+                  <td>–</td>
+                  <td><strong>AHB2</strong></td>
+                  <td>USB OTG FS</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Bit-Banding（位元帶）</div>
+          <p class="body-text">
+            Cortex-M4 的 Bit-Banding 機制允許以 <strong class="hl">32-bit 寫入的方式原子性地設定或清除單一 bit</strong>，
+            避免 Read-Modify-Write 的 race condition。
+            SRAM 的 Bit-Band 區域為 <code>0x20000000</code>–<code>0x200FFFFF</code>（1 MB），
+            對應的別名區（Alias Region）位於 <code>0x22000000</code>–<code>0x23FFFFFF</code>（32 MB）。
+          </p>
+          <div class="callout">
+            <div class="callout-title">Bit-Band 位址計算公式</div>
+            設目標 byte 位址為 <code>byte_addr</code>，目標位元為 <code>bit_num</code>（0–7）：<br>
+            <code>alias_addr = 0x22000000 + (byte_addr − 0x20000000) × 32 + bit_num × 4</code><br><br>
+            對 <code>alias_addr</code> 寫入 1 → 設定該 bit；寫入 0 → 清除該 bit。此操作為硬體保證的原子操作。
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Bus Matrix 與等待狀態</div>
+          <p class="body-text">
+            STM32F446 內建 <strong class="hl">多層 AHB Bus Matrix</strong>，允許 CPU、DMA1、DMA2 同時存取不同的記憶體匯流排，
+            在不衝突的情況下實現真正的並行傳輸。Flash 存取速度受 ART Accelerator（指令快取 + 預取）控制，
+            在 180 MHz 時脈下需設定 5 個等待狀態（Wait States）。
+          </p>
+          <div class="callout warn">
+            <div class="callout-title">常見錯誤</div>
+            提升系統時脈後忘記調整 Flash 等待狀態（<code>FLASH_ACR.LATENCY</code>），
+            會導致 CPU 從 Flash 讀到錯誤的指令，產生難以重現的隨機崩潰。
+            應在切換 PLL 之前先設好等待狀態，切換後再確認。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 2.3
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-2-3">
+      <div class="lesson-header">
+        <span class="lesson-badge">2.3 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">GPIO 深度操作</div>
+          <div class="lesson-desc">四種工作模式、電氣參數、替代功能與鎖定機制</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">GPIO 工作模式</div>
+          <p class="body-text">
+            STM32F4 系列的每個 GPIO 腳位可獨立設定為以下四種模式（由 <code>GPIOx_MODER</code> 的 2-bit 欄位控制）：
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>MODER[1:0]</th>
+                  <th>模式</th>
+                  <th>典型應用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>00</code></td>
+                  <td><strong>Input</strong></td>
+                  <td>讀取按鍵、外部訊號</td>
+                </tr>
+                <tr>
+                  <td><code>01</code></td>
+                  <td><strong>General Purpose Output</strong></td>
+                  <td>驅動 LED、控制繼電器</td>
+                </tr>
+                <tr>
+                  <td><code>10</code></td>
+                  <td><strong>Alternate Function</strong></td>
+                  <td>UART、SPI、I2C、PWM、ADC</td>
+                </tr>
+                <tr>
+                  <td><code>11</code></td>
+                  <td><strong>Analog</strong></td>
+                  <td>ADC 輸入、DAC 輸出（最省電）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">輸出類型、速度與上下拉</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>暫存器</th>
+                  <th>功能</th>
+                  <th>選項</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>GPIOx_OTYPER</code></td>
+                  <td>輸出類型</td>
+                  <td><strong>PP</strong>（推挽，可主動拉高拉低）/ <strong>OD</strong>（開汲，需外部上拉，用於 I2C）</td>
+                </tr>
+                <tr>
+                  <td><code>GPIOx_OSPEEDR</code></td>
+                  <td>輸出速度</td>
+                  <td>Low（2 MHz）/ Medium（25 MHz）/ Fast（50 MHz）/ High（100 MHz）</td>
+                </tr>
+                <tr>
+                  <td><code>GPIOx_PUPDR</code></td>
+                  <td>上下拉電阻</td>
+                  <td>No pull / Pull-up / Pull-down（內建約 40 kΩ）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout warn">
+            <div class="callout-title">速度設定的影響</div>
+            輸出速度越高，EMI（電磁干擾）越強、功耗越高。
+            LED 控制使用 Low 速度即可；SPI 高速傳輸才需要 High 速度。
+            不必要的高速設定是 EMC 測試失敗的常見原因之一。
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">替代功能（Alternate Function）設定</div>
+          <p class="body-text">
+            當 GPIO 設為 AF 模式時，需額外設定 <code>GPIOx_AFR[L/H]</code> 指定對應的周邊（每腳 4-bit，值 AF0–AF15）。
+            各腳位與 AF 編號的對應關係必須查閱 Datasheet 的「Alternate function mapping」表格。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 設定 PA2 為 USART2_TX（AF7）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* 步驟 1：啟用 GPIOA 時脈 */</span>
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+<span class="cm">/* 步驟 2：設定 PA2 為 Alternate Function 模式（MODER = 10）*/</span>
+GPIOA->MODER &= ~(<span class="num">3U</span> << (<span class="num">2</span> * <span class="num">2</span>));
+GPIOA->MODER |=  (<span class="num">2U</span> << (<span class="num">2</span> * <span class="num">2</span>));
+
+<span class="cm">/* 步驟 3：設定推挽輸出、高速、無上下拉 */</span>
+GPIOA->OTYPER  &= ~(<span class="num">1U</span> << <span class="num">2</span>);             <span class="cm">/* Push-Pull */</span>
+GPIOA->OSPEEDR |=  (<span class="num">3U</span> << (<span class="num">2</span> * <span class="num">2</span>));        <span class="cm">/* Very High Speed */</span>
+GPIOA->PUPDR   &= ~(<span class="num">3U</span> << (<span class="num">2</span> * <span class="num">2</span>));        <span class="cm">/* No pull */</span>
+
+<span class="cm">/* 步驟 4：選擇 AF7（USART2）─ PA2 在 AFRL（pins 0–7）*/</span>
+GPIOA->AFR[<span class="num">0</span>] &= ~(<span class="num">0xFU</span> << (<span class="num">2</span> * <span class="num">4</span>));       <span class="cm">/* 清除 PA2 的 AF 欄位 */</span>
+GPIOA->AFR[<span class="num">0</span>] |=  (<span class="num">7U</span>  << (<span class="num">2</span> * <span class="num">4</span>));       <span class="cm">/* AF7 = USART1/2/3 */</span></pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">GPIO 鎖定（Lock）機制</div>
+          <p class="body-text">
+            <code>GPIOx_LCKR</code> 允許將指定腳位的設定（MODER/OTYPER/OSPEEDR/PUPDR/AFR）<strong class="hl">鎖定</strong>，
+            鎖定後直到下次系統 Reset 前無法更改。鎖定序列需按 LCKK=1 → LCKK=0 → LCKK=1 → 讀取的特定步驟執行，
+            常用於安全關鍵系統防止程式錯誤意外改變腳位設定。
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 2.4
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-2-4">
+      <div class="lesson-header">
+        <span class="lesson-badge">2.4 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">中斷系統：NVIC 與 EXTI</div>
+          <div class="lesson-desc">優先群組、搶佔優先權、子優先權與外部中斷設定</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">NVIC 優先權模型</div>
+          <p class="body-text">
+            Cortex-M4 的 <strong class="hl">NVIC（Nested Vectored Interrupt Controller）</strong>
+            支援最多 256 個優先權等級（8-bit）。STM32F446 使用高 4-bit（16 個等級）。
+            優先權分為兩個維度：<strong class="hl">搶佔優先權（Preemption Priority）</strong>
+            與 <strong class="hl">子優先權（Sub-Priority）</strong>，由 <code>AIRCR.PRIGROUP</code> 決定分配方式。
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>PRIGROUP</th>
+                  <th>搶佔優先權位數</th>
+                  <th>子優先權位數</th>
+                  <th>搶佔等級數</th>
+                  <th>子優先等級數</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>0 (NVIC_PRIORITYGROUP_4)</code></td><td>4</td><td>0</td><td>16</td><td>1</td></tr>
+                <tr><td><code>1 (NVIC_PRIORITYGROUP_3)</code></td><td>3</td><td>1</td><td>8</td><td>2</td></tr>
+                <tr><td><code>2 (NVIC_PRIORITYGROUP_2)</code></td><td>2</td><td>2</td><td>4</td><td>4</td></tr>
+                <tr><td><code>3 (NVIC_PRIORITYGROUP_1)</code></td><td>1</td><td>3</td><td>2</td><td>8</td></tr>
+                <tr><td><code>4 (NVIC_PRIORITYGROUP_0)</code></td><td>0</td><td>4</td><td>1</td><td>16</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body-text" style="margin-top:0.75rem">
+            <strong class="hl">搶佔優先權較高（數值較小）的中斷可以打斷正在執行的較低搶佔優先權中斷</strong>（巢狀中斷）。
+            子優先權僅在兩個中斷同時發生且搶佔優先權相同時，決定哪個先執行。
+          </p>
+          <div class="callout warn">
+            <div class="callout-title">FreeRTOS 的要求</div>
+            使用 FreeRTOS 時必須將 PRIGROUP 設為 <code>NVIC_PRIORITYGROUP_4</code>（全部為搶佔優先權），
+            且所有使用 FreeRTOS API（如 <code>xQueueSendFromISR</code>）的 ISR 優先權數值
+            必須 ≥ <code>configMAX_SYSCALL_INTERRUPT_PRIORITY</code>（即優先權等級要低於或等於此閾值）。
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">EXTI — 外部中斷/事件控制器</div>
+          <p class="body-text">
+            <strong class="hl">EXTI（External Interrupt/Event Controller）</strong> 負責偵測 GPIO 腳位的電位變化並觸發中斷。
+            STM32F446 有 23 條 EXTI 線，其中 EXTI0–EXTI15 對應 GPIO 的 Pin0–Pin15。
+            每條 EXTI 線只能連接到一個 GPIO Port（由 SYSCFG_EXTICRx 設定），
+            例如 EXTI13 可以連 PA13、PB13、PC13 之一。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — 設定 PC13（Nucleo 按鍵 B1）觸發 EXTI13 中斷</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="cm">/* 1. 啟用 GPIOC 與 SYSCFG 時脈 */</span>
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+
+<span class="cm">/* 2. PC13 設為輸入，啟用上拉（按鍵按下接地，放開為高電位）*/</span>
+GPIOC->MODER  &= ~(<span class="num">3U</span> << (<span class="num">13</span> * <span class="num">2</span>));   <span class="cm">/* Input mode */</span>
+GPIOC->PUPDR  &= ~(<span class="num">3U</span> << (<span class="num">13</span> * <span class="num">2</span>));
+GPIOC->PUPDR  |=  (<span class="num">1U</span> << (<span class="num">13</span> * <span class="num">2</span>));   <span class="cm">/* Pull-up */</span>
+
+<span class="cm">/* 3. SYSCFG_EXTICR4：將 EXTI13 映射到 PC（Port C = 0x02）*/</span>
+SYSCFG->EXTICR[<span class="num">3</span>] &= ~SYSCFG_EXTICR4_EXTI13;
+SYSCFG->EXTICR[<span class="num">3</span>] |=  SYSCFG_EXTICR4_EXTI13_PC;
+
+<span class="cm">/* 4. 設定 EXTI13 觸發邊緣（下降緣 = 按鍵按下）*/</span>
+EXTI->FTSR |= EXTI_FTSR_TR13;   <span class="cm">/* Falling trigger enable */</span>
+EXTI->RTSR &= ~EXTI_RTSR_TR13;  <span class="cm">/* 不使用上升緣 */</span>
+
+<span class="cm">/* 5. 在 EXTI 遮罩暫存器中解除遮罩（允許中斷）*/</span>
+EXTI->IMR |= EXTI_IMR_MR13;
+
+<span class="cm">/* 6. 在 NVIC 中啟用 EXTI15_10_IRQn，設定優先權 */</span>
+NVIC_SetPriority(EXTI15_10_IRQn, <span class="num">5</span>);
+NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+<span class="cm">/* 7. ISR — EXTI15_10 涵蓋 Pin 10–15，需判斷來源 */</span>
+<span class="kw">void</span> <span class="fn">EXTI15_10_IRQHandler</span>(<span class="kw">void</span>)
+{
+    <span class="kw">if</span> (EXTI->PR & EXTI_PR_PR13) {       <span class="cm">/* 確認是 EXTI13 */</span>
+        EXTI->PR = EXTI_PR_PR13;          <span class="cm">/* 寫 1 清除 Pending flag */</span>
+        <span class="cm">/* 使用者邏輯 */</span>
+        GPIOA->BSRR = (<span class="num">1U</span> << (<span class="num">5</span> + <span class="num">16</span>)); <span class="cm">/* Toggle LED */</span>
+    }
+}</pre>
+          </div>
+          <div class="callout danger">
+            <div class="callout-title">必須清除 Pending Flag</div>
+            ISR 結束前必須清除 <code>EXTI->PR</code> 對應的位元（寫入 1 清除），
+            否則 CPU 離開 ISR 後會立刻再次進入，形成無窮迴圈。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 2.5
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-2-5">
+      <div class="lesson-header">
+        <span class="lesson-badge">2.5 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">DMA 控制器</div>
+          <div class="lesson-desc">Stream、Channel、傳輸方向與中斷驅動的零 CPU 開銷資料搬移</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">DMA 基本概念</div>
+          <p class="body-text">
+            <strong class="hl">DMA（Direct Memory Access）</strong> 控制器允許在 <strong class="hl">不佔用 CPU</strong> 的情況下，
+            在記憶體與記憶體、或記憶體與周邊暫存器之間搬移資料。
+            STM32F446 有兩個 DMA 控制器（DMA1、DMA2），各有 8 條 Stream，
+            每條 Stream 支援 8 個 Channel（決定連接哪個周邊）。
+          </p>
+          <div class="diagram-block">
+<span class="d-acc">DMA 傳輸方向</span>
+  M2M  <span class="d-dim">│</span> Memory → Memory          <span class="d-grn">僅 DMA2 支援</span>
+  M2P  <span class="d-dim">│</span> Memory → Peripheral      <span class="d-grn">例：記憶體資料送 USART TX</span>
+  P2M  <span class="d-dim">│</span> Peripheral → Memory      <span class="d-grn">例：ADC 結果存入陣列</span>
+  P2P  <span class="d-dim">│</span> Peripheral → Peripheral  <span class="d-grn">不常用</span>
+
+<span class="d-acc">DMA2 常用 Stream / Channel 對應（部分）</span>
+  Stream 0, Ch 0  <span class="d-dim">│</span> <span class="d-blu">ADC1</span>
+  Stream 1, Ch 4  <span class="d-dim">│</span> <span class="d-blu">USART6 RX</span>
+  Stream 6, Ch 4  <span class="d-dim">│</span> <span class="d-blu">USART6 TX</span>
+  Stream 7, Ch 5  <span class="d-dim">│</span> <span class="d-blu">USART1 TX</span>
+  Stream 5, Ch 4  <span class="d-dim">│</span> <span class="d-blu">USART1 RX</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">記憶體對記憶體 DMA 搬移範例</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — DMA2 M2M 傳輸 1024 bytes</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="pp">#include</span> <span class="str">"stm32f4xx.h"</span>
+
+<span class="pp">#define</span> BUF_SIZE  <span class="num">1024</span>
+
+<span class="kw">static</span> <span class="tp">uint8_t</span> src[BUF_SIZE];
+<span class="kw">static</span> <span class="tp">uint8_t</span> dst[BUF_SIZE];
+<span class="kw">volatile</span> <span class="tp">uint8_t</span> dma_done = <span class="num">0</span>;
+
+<span class="kw">void</span> <span class="fn">dma_m2m_start</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 啟用 DMA2 時脈 */</span>
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+
+    <span class="cm">/* 使用 DMA2 Stream 0，Channel 0（M2M 任意 channel 均可）*/</span>
+    DMA2_Stream0->CR = <span class="num">0</span>;             <span class="cm">/* 先停用 Stream */</span>
+    <span class="kw">while</span> (DMA2_Stream0->CR & DMA_SxCR_EN); <span class="cm">/* 等待停用完成 */</span>
+
+    DMA2->LIFCR = <span class="num">0x3FU</span>;              <span class="cm">/* 清除 Stream 0 的所有旗標 */</span>
+
+    DMA2_Stream0->PAR  = (<span class="tp">uint32_t</span>)src; <span class="cm">/* 來源（此模式 PAR 作為來源）*/</span>
+    DMA2_Stream0->M0AR = (<span class="tp">uint32_t</span>)dst; <span class="cm">/* 目的地 */</span>
+    DMA2_Stream0->NDTR = BUF_SIZE;
+
+    DMA2_Stream0->CR =
+        (<span class="num">0U</span> << DMA_SxCR_CHSEL_Pos) |  <span class="cm">/* Channel 0 */</span>
+        DMA_SxCR_MINC               |  <span class="cm">/* Memory 位址遞增 */</span>
+        DMA_SxCR_PINC               |  <span class="cm">/* Peripheral（來源）位址遞增 */</span>
+        DMA_SxCR_DIR_1              |  <span class="cm">/* DIR = 10: M2M */</span>
+        DMA_SxCR_TCIE;                 <span class="cm">/* Transfer Complete 中斷 */</span>
+
+    NVIC_SetPriority(DMA2_Stream0_IRQn, <span class="num">3</span>);
+    NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+
+    DMA2_Stream0->CR |= DMA_SxCR_EN;  <span class="cm">/* 啟動傳輸 */</span>
+}
+
+<span class="kw">void</span> <span class="fn">DMA2_Stream0_IRQHandler</span>(<span class="kw">void</span>)
+{
+    <span class="kw">if</span> (DMA2->LISR & DMA_LISR_TCIF0) {
+        DMA2->LIFCR = DMA_LIFCR_CTCIF0;  <span class="cm">/* 清除 Transfer Complete 旗標 */</span>
+        dma_done = <span class="num">1</span>;
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">循環模式（Circular Mode）與雙緩衝</div>
+          <p class="body-text">
+            啟用 <code>DMA_SxCR_CIRC</code> 後，DMA 在完成一次傳輸後會自動從頭開始，
+            適合連續串流資料（如 ADC 連續取樣、音訊 DMA）。
+            搭配 <strong class="hl">雙緩衝模式（Double Buffer Mode）</strong> 可以實現 ping-pong 緩衝：
+            DMA 寫入 Buffer A 時，CPU 處理 Buffer B；Buffer A 滿後自動切換，
+            達到真正的零拷貝、零停頓串流處理。
+          </p>
+          <div class="callout tip">
+            <div class="callout-title">效能比較</div>
+            以 115200 baud USART 接收為例：<br>
+            • 輪詢方式：CPU 必須持續查詢 RXNE 旗標，無法執行其他工作。<br>
+            • 中斷方式：每收到一個 byte 觸發一次中斷，上下文切換開銷累積顯著。<br>
+            • DMA 方式：CPU 完全解放，僅在緩衝區滿時接到一次中斷，效率最高。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         LESSON 2.6
+    ══════════════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-2-6">
+      <div class="lesson-header">
+        <span class="lesson-badge">2.6 — 理論 + 實作</span>
+        <div class="lesson-header-text">
+          <div class="lesson-title">時脈樹與低功耗模式</div>
+          <div class="lesson-desc">PLL 配置、時脈來源切換與 Sleep / Stop / Standby 模式</div>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">STM32F446 時脈樹</div>
+          <p class="body-text">
+            STM32F446RE 的最高系統時脈為 <strong class="hl">180 MHz</strong>。時脈來源有三種：
+            <strong class="hl">HSI</strong>（16 MHz 內部 RC，精度 ±1%）、
+            <strong class="hl">HSE</strong>（外部晶振，Nucleo 板為 8 MHz）、
+            <strong class="hl">LSI / LSE</strong>（32 kHz，用於 RTC / IWDG）。
+            透過 <strong class="hl">PLL</strong>（Phase-Locked Loop）可將 HSI/HSE 倍頻至所需頻率。
+          </p>
+          <div class="diagram-block">
+<span class="d-acc">PLL 配置（HSE 8 MHz → SYSCLK 180 MHz）</span>
+
+  HSE (8 MHz) ──▶ ÷ PLLM (8) ──▶ 1 MHz (VCO 輸入)
+                                    │
+                                    ▼ × PLLN (360)
+                               360 MHz (VCO 輸出)
+                                    │
+                  ┌─────────────────┼───────────────────┐
+                  ▼                 ▼                   ▼
+             ÷ PLLP (2)        ÷ PLLQ (8)         ÷ PLLR (2)
+          <span class="d-grn">SYSCLK 180 MHz</span>   <span class="d-blu">USB/SDIO 45 MHz</span>   <span class="d-acc">I2S...</span>
+
+  SYSCLK ──▶ AHB Prescaler (÷1) ──▶ <span class="d-hl">HCLK 180 MHz</span>
+  HCLK   ──▶ APB1 Prescaler (÷4) ──▶ <span class="d-hl">PCLK1 45 MHz</span>  (APB1 Timer × 2 = 90 MHz)
+  HCLK   ──▶ APB2 Prescaler (÷2) ──▶ <span class="d-hl">PCLK2 90 MHz</span>  (APB2 Timer × 2 = 180 MHz)
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">以暫存器設定 PLL 至 180 MHz</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">c — SystemClock_Config（HSE 8 MHz → 180 MHz）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+            <pre><span class="kw">void</span> <span class="fn">SystemClock_Config</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 1. 啟用 HSE 並等待穩定 */</span>
+    RCC->CR |= RCC_CR_HSEON;
+    <span class="kw">while</span> (!(RCC->CR & RCC_CR_HSERDY));
+
+    <span class="cm">/* 2. 啟用電壓調節器 Scale 1（最高性能，支援 180 MHz）*/</span>
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    PWR->CR |= PWR_CR_VOS;  <span class="cm">/* Scale 1 */</span>
+
+    <span class="cm">/* 3. 先設定 Flash 等待狀態（180 MHz 需 5 WS）*/</span>
+    FLASH->ACR = FLASH_ACR_LATENCY_5WS |
+                 FLASH_ACR_ICEN        |   <span class="cm">/* 指令快取 */</span>
+                 FLASH_ACR_DCEN        |   <span class="cm">/* 資料快取 */</span>
+                 FLASH_ACR_PRFTEN;         <span class="cm">/* 預取 */</span>
+
+    <span class="cm">/* 4. 設定 PLL：HSE / 8 × 360 / 2 = 180 MHz */</span>
+    RCC->PLLCFGR = (<span class="num">8U</span>   << RCC_PLLCFGR_PLLM_Pos) |   <span class="cm">/* M = 8  */</span>
+                   (<span class="num">360U</span> << RCC_PLLCFGR_PLLN_Pos) |   <span class="cm">/* N = 360 */</span>
+                   (<span class="num">0U</span>   << RCC_PLLCFGR_PLLP_Pos) |   <span class="cm">/* P = 2 (00) */</span>
+                   RCC_PLLCFGR_PLLSRC_HSE           |   <span class="cm">/* 來源 HSE */</span>
+                   (<span class="num">8U</span>   << RCC_PLLCFGR_PLLQ_Pos);     <span class="cm">/* Q = 8 → 45 MHz USB */</span>
+
+    <span class="cm">/* 5. 啟用 PLL 並等待鎖定 */</span>
+    RCC->CR |= RCC_CR_PLLON;
+    <span class="kw">while</span> (!(RCC->CR & RCC_CR_PLLRDY));
+
+    <span class="cm">/* 6. 設定 AHB/APB 預分頻器 */</span>
+    RCC->CFGR = RCC_CFGR_HPRE_DIV1  |   <span class="cm">/* AHB = 180 MHz */</span>
+                RCC_CFGR_PPRE1_DIV4 |   <span class="cm">/* APB1 = 45 MHz */</span>
+                RCC_CFGR_PPRE2_DIV2;    <span class="cm">/* APB2 = 90 MHz */</span>
+
+    <span class="cm">/* 7. 切換 SYSCLK 來源為 PLL */</span>
+    RCC->CFGR |= RCC_CFGR_SW_PLL;
+    <span class="kw">while</span> ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">低功耗模式比較</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>模式</th>
+                  <th>進入方式</th>
+                  <th>喚醒來源</th>
+                  <th>SRAM / 暫存器</th>
+                  <th>典型電流</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Sleep</strong></td>
+                  <td><code>WFI</code> / <code>WFE</code></td>
+                  <td>任何中斷</td>
+                  <td>保留</td>
+                  <td>~14 mA</td>
+                </tr>
+                <tr>
+                  <td><strong>Stop</strong></td>
+                  <td><code>PWR_EnterSTOPMode()</code></td>
+                  <td>EXTI、RTC Alarm、IWDG</td>
+                  <td>保留</td>
+                  <td>~1 mA</td>
+                </tr>
+                <tr>
+                  <td><strong>Standby</strong></td>
+                  <td><code>PWR_EnterSTANDBYMode()</code></td>
+                  <td>WKUP pin、RTC、IWDG、Reset</td>
+                  <td>喪失（備份域保留）</td>
+                  <td>~2.4 µA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">
+            <div class="callout-title">Stop 模式喚醒後的時脈</div>
+            從 Stop 模式喚醒後，系統時脈自動切回 <strong>HSI（16 MHz）</strong>，PLL 狀態不保留。
+            若應用需要以 180 MHz 繼續執行，喚醒後必須重新執行 <code>SystemClock_Config()</code>。
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">本週實作清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>讀取 Reference Manual，找出 STM32F446RE 各 GPIO Port 的 AHB1 時脈致能位元</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以暫存器操作設定 PC13（B1 按鍵）為輸入 + EXTI 中斷，按下時切換 PA5 LED</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>設定 DMA2 M2M 傳輸，驗證 1 KB 陣列複製結果正確</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>以 USART2（PA2 TX / PA3 RX）輸出字串「Hello from ISR」，使用 DMA M2P 傳輸</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>配置 PLL 將 SYSCLK 提升至 180 MHz，用示波器量測 MCO1 輸出確認頻率</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>進入 Stop 模式，以 EXTI 喚醒後重新配置 PLL 並繼續 LED 閃爍</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">延伸挑戰</div>
+          嘗試使用 <strong>SysTick Handler</strong> 每 1 ms 更新一個計數器，
+          並以 <strong>DMA Circular Mode</strong> 持續將 ADC 原始值搬入環形緩衝區，
+          主迴圈從中計算移動平均值後透過 USART 輸出。
+          這個練習整合了本週所有核心概念：中斷、DMA 與時脈配置。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="week1.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 2L5 7l4 5"/>
+        </svg>
+        Week 01 — 嵌入式系統概論
+      </a>
+      <span class="week-indicator">Week 02 / 08</span>
+      <a href="week3.html" class="nav-btn primary">
+        Week 03 — 嵌入式 C 程式設計
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M5 2l4 5-4 5"/>
+        </svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+
+    sections.forEach(section => {
+      const top = section.offsetTop - 80;
+      if (scrollTop >= top) current = section.id;
+    });
+
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+
+    const completed = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = completed + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (completed / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>
