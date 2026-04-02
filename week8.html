@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 8 — 綜合專案實戰 | 嵌入式系統完整學習路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0f11;
+    --bg2:    #14161a;
+    --bg3:    #1c1e24;
+    --bg4:    #24272f;
+    --line:   #2a2d36;
+    --line2:  #363a47;
+    --text:   #e8e6df;
+    --muted:  #7a7d8a;
+    --dim:    #4a4d5a;
+    --accent: #c8a96e;
+    --accent2:#8fa8c8;
+    --green:  #6aad8e;
+    --red:    #c86a6a;
+    --mono:   'IBM Plex Mono', monospace;
+    --serif:  'Noto Serif TC', serif;
+    --sans:   'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; min-height: 100vh; }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--line); position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+  .sidebar-header { padding: 1.75rem 1.5rem 1.25rem; border-bottom: 1px solid var(--line); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; color: var(--dim); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 12px; height: 12px; }
+  .course-label { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 0.4rem; }
+  .sidebar-week-title { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+  .nav-section-label { padding: 0.5rem 1.5rem 0.25rem; font-family: var(--mono); font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; }
+  .nav-lesson { display: flex; align-items: center; gap: 10px; padding: 0.5rem 1.5rem; font-size: 13px; color: var(--muted); text-decoration: none; border: none; background: none; width: 100%; text-align: left; transition: color 0.15s, background 0.15s; border-left: 2px solid transparent; }
+  .nav-lesson:hover { color: var(--text); background: var(--bg3); }
+  .nav-lesson.active { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
+  .nav-num { font-family: var(--mono); font-size: 10px; color: var(--dim); min-width: 22px; }
+  .nav-lesson.active .nav-num { color: var(--accent); }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--line); }
+  .progress-label { font-family: var(--mono); font-size: 10px; color: var(--dim); display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+  .progress-bar-wrap { background: var(--bg4); border-radius: 2px; height: 3px; }
+  .progress-bar-fill { background: var(--accent); height: 3px; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+  .main { overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
+
+  .week-hero { padding: 3.5rem 4rem 2.75rem; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  .week-hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 360px; height: 360px; background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .hero-eyebrow::after { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); opacity: 0.4; }
+  .week-title { font-family: var(--serif); font-size: 36px; font-weight: 600; line-height: 1.25; color: var(--text); margin-bottom: 0.75rem; }
+  .week-subtitle { font-size: 16px; color: var(--muted); margin-bottom: 1.75rem; max-width: 540px; line-height: 1.65; }
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tag { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 3px; border: 1px solid var(--line2); color: var(--dim); }
+  .tag-theory { border-color: rgba(143,168,200,0.35); color: var(--accent2); }
+  .tag-lab    { border-color: rgba(106,173,142,0.35); color: var(--green); }
+  .tag-proj   { border-color: rgba(200,169,110,0.35); color: var(--accent); }
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .stat-value { font-family: var(--mono); font-size: 20px; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .objectives-bar { padding: 1.5rem 4rem; border-bottom: 1px solid var(--line); background: var(--bg2); display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; }
+  .obj-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; padding-top: 3px; min-width: 60px; }
+  .obj-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .obj-item { font-size: 12.5px; color: var(--muted); background: var(--bg3); border: 1px solid var(--line); border-radius: 3px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; }
+  .obj-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .lesson-section { padding: 3rem 4rem; border-bottom: 1px solid var(--line); }
+  .lesson-section:last-of-type { border-bottom: none; }
+  .lesson-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; gap: 1.25rem; }
+  .lesson-badge { font-family: var(--mono); font-size: 10px; color: var(--accent); background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); padding: 4px 10px; border-radius: 3px; white-space: nowrap; margin-top: 5px; }
+  .lesson-header-text { min-width: 0; }
+  .lesson-title { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 0.3rem; }
+  .lesson-desc { font-size: 13px; color: var(--muted); }
+  .lesson-body { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .sub-section { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sub-title { font-size: 15px; font-weight: 500; color: var(--text); padding-left: 1rem; border-left: 2px solid var(--accent2); }
+  .body-text { color: var(--muted); font-size: 14px; line-height: 1.85; padding-left: 1rem; }
+  .body-text + .body-text { margin-top: 0.75rem; }
+  strong.hl { color: var(--text); }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(143,168,200,0.06); border-radius: 0 4px 4px 0; padding: 0.875rem 1.1rem 0.875rem 1.25rem; margin-left: 1rem; font-size: 13.5px; color: #a8bcd4; line-height: 1.75; }
+  .callout.warn   { border-color: var(--accent);  background: rgba(200,169,110,0.06); color: #c8b88a; }
+  .callout.tip    { border-color: var(--green);   background: rgba(106,173,142,0.06); color: #7ec4a0; }
+  .callout.danger { border-color: var(--red);     background: rgba(200,106,106,0.06); color: #d48a8a; }
+  .callout-title { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; opacity: 0.75; }
+
+  .code-block { background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; margin-left: 1rem; }
+  .code-header { padding: 0.45rem 1rem; background: var(--bg4); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .code-lang { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+
+  pre { padding: 1.25rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; word-break: break-all; -webkit-overflow-scrolling: touch; }
+
+  .kw  { color: #c86aaa; }
+  .kw2 { color: var(--accent2); }
+  .cm  { color: var(--dim); font-style: italic; }
+  .str { color: var(--green); }
+  .num { color: var(--accent); }
+  .fn  { color: #8fbcbb; }
+  .pp  { color: #b48ead; }
+  .tp  { color: #81a1c1; }
+  .dir { color: #a3be8c; }
+
+  .tbl-wrap { overflow-x: auto; margin-left: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 0.55rem 1rem; font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--line2); }
+  tbody td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13.5px; vertical-align: top; line-height: 1.6; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+  td code, p code, li code { font-family: var(--mono); font-size: 12px; background: var(--bg4); color: var(--accent2); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line2); }
+  td strong { color: var(--text); }
+
+  .body-list { padding-left: 2rem; color: var(--muted); font-size: 14px; line-height: 1.85; display: flex; flex-direction: column; gap: 0.4rem; }
+  .body-list li::marker { color: var(--dim); }
+
+  .diagram-block { margin-left: 1rem; background: var(--bg3); border: 1px solid var(--line2); border-radius: 6px; padding: 1.5rem 1.75rem; font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.9; overflow-x: auto; white-space: pre; }
+  .diagram-block .d-hl  { color: var(--text); }
+  .diagram-block .d-acc { color: var(--accent); }
+  .diagram-block .d-grn { color: var(--green); }
+  .diagram-block .d-blu { color: var(--accent2); }
+  .diagram-block .d-dim { color: var(--dim); }
+  .diagram-block .d-red { color: var(--red); }
+
+  .checklist { margin-left: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  .check-box { width: 16px; height: 16px; border: 1px solid var(--line2); border-radius: 3px; flex-shrink: 0; margin-top: 2px; background: var(--bg4); display: flex; align-items: center; justify-content: center; }
+  .check-box.done { border-color: var(--green); background: rgba(106,173,142,0.1); }
+  .check-box.done::after { content: ''; display: block; width: 6px; height: 4px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+
+  .steps { margin-left: 1rem; display: flex; flex-direction: column; }
+  .step { display: grid; grid-template-columns: 32px 1fr; gap: 0 1rem; position: relative; }
+  .step:not(:last-child) > .step-num::after { content: ''; position: absolute; left: 15px; top: 32px; width: 1px; height: calc(100% - 32px); background: var(--line2); }
+  .step-num { position: relative; width: 32px; height: 32px; border-radius: 50%; background: var(--bg4); border: 1px solid var(--line2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; z-index: 1; }
+  .step-content { padding-bottom: 1.75rem; min-width: 0; }
+  .step-title { font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 0.65rem; padding-top: 6px; line-height: 1.4; }
+  .step-desc { font-size: 13px; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.75; }
+
+  .bottom-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem; border-top: 1px solid var(--line); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 0.6rem 1.25rem; border: 1px solid var(--line2); border-radius: 4px; background: none; color: var(--muted); font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: rgba(200,169,110,0.1); border-color: rgba(200,169,110,0.4); color: var(--accent); }
+  .nav-btn.primary:hover { background: rgba(200,169,110,0.2); }
+  .week-indicator { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .week-hero, .lesson-section, .objectives-bar, .bottom-nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .week-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="back-link">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L4 6l4 4"/></svg>
+        課程總覽
+      </a>
+      <span class="course-label">Week 08</span>
+      <div class="sidebar-week-title">綜合專案實戰</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Lessons</div>
+      <a href="#lesson-8-1" class="nav-lesson">
+        <span class="nav-num">8.1</span>專案規劃與系統架構
+      </a>
+      <a href="#lesson-8-2" class="nav-lesson">
+        <span class="nav-num">8.2</span>智慧環境監測系統
+      </a>
+      <a href="#lesson-8-3" class="nav-lesson">
+        <span class="nav-num">8.3</span>直流馬達 PID 控制器
+      </a>
+      <a href="#lesson-8-4" class="nav-lesson">
+        <span class="nav-num">8.4</span>IoT Linux 閘道器
+      </a>
+      <a href="#lesson-8-5" class="nav-lesson">
+        <span class="nav-num">8.5</span>整合測試與驗收
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>學習進度</span>
+        <span id="progress-text">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main" id="main">
+
+    <!-- Hero -->
+    <div class="week-hero">
+      <div class="hero-eyebrow">Week 08</div>
+      <h1 class="week-title">綜合專案實戰</h1>
+      <p class="week-subtitle">
+        以三個完整的端對端專案收尾：智慧環境監測、直流馬達 PID 控制器，
+        以及 IoT Linux 閘道器。將八週所學融合為可交付的產品原型。
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-proj">專案</span>
+        <span class="tag tag-lab">實作</span>
+        <span class="tag">STM32</span>
+        <span class="tag">FreeRTOS</span>
+        <span class="tag">Raspberry Pi</span>
+        <span class="tag">MQTT</span>
+        <span class="tag">PID</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">5</span>
+          <span class="stat-label">Lessons</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">~6h</span>
+          <span class="stat-label">學習時間</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">3</span>
+          <span class="stat-label">完整專案</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="objectives-bar">
+      <span class="obj-label">目標</span>
+      <div class="obj-list">
+        <div class="obj-item"><div class="obj-dot"></div>以需求文件驅動硬體/軟體分層架構設計</div>
+        <div class="obj-item"><div class="obj-dot"></div>整合 I²C 感測器、FreeRTOS 與 MQTT 完成環境監測節點</div>
+        <div class="obj-item"><div class="obj-dot"></div>實作 PID 閉迴路控制並以 UART 串流調參</div>
+        <div class="obj-item"><div class="obj-dot"></div>在 Raspberry Pi 上建置 MQTT Broker 與 Node-RED 儀表板</div>
+        <div class="obj-item"><div class="obj-dot"></div>撰寫自動化整合測試腳本驗收三個專案</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ LESSON 8.1 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-8-1">
+      <div class="lesson-header">
+        <span class="lesson-badge">8.1</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">專案規劃與系統架構</h2>
+          <p class="lesson-desc">需求分析、硬體選型、軟體分層與開發流程規劃</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">三個專案概覽</div>
+          <p class="body-text">
+            本週以三個獨立但互補的專案作為課程總結，每個專案都整合了前七週的多項技術：
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>專案</th>
+                  <th>主控板</th>
+                  <th>核心技術</th>
+                  <th>交付物</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>智慧環境監測</strong></td>
+                  <td>STM32F446RE</td>
+                  <td>I²C、FreeRTOS、MQTT over UART</td>
+                  <td>感測節點韌體 + 雲端儀表板</td>
+                </tr>
+                <tr>
+                  <td><strong>馬達 PID 控制器</strong></td>
+                  <td>STM32F446RE</td>
+                  <td>PWM、Encoder、PID、串列調參</td>
+                  <td>閉迴路控制韌體 + 調參工具</td>
+                </tr>
+                <tr>
+                  <td><strong>IoT Linux 閘道器</strong></td>
+                  <td>Raspberry Pi 4</td>
+                  <td>Linux Driver、MQTT Broker、REST API</td>
+                  <td>閘道器映像檔 + Node-RED Flow</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">軟體分層架構原則</div>
+          <p class="body-text">
+            嵌入式專案常因「業務邏輯與硬體操作混雜」導致難以測試和移植。
+            標準做法是採用 <strong class="hl">HAL → Driver → Service → Application</strong> 四層架構，
+            每層只依賴下一層的介面，不跨層直接呼叫暫存器。
+          </p>
+          <div class="diagram-block"><span class="d-hl">軟體分層架構</span>
+
+<span class="d-dim">┌─────────────────────────────────────────────┐</span>
+<span class="d-dim">│</span>  <span class="d-acc">Application Layer</span>  main_task, cli_task     <span class="d-dim">│</span>
+<span class="d-dim">│</span>  業務邏輯、狀態機、使用者互動                  <span class="d-dim">│</span>
+<span class="d-dim">├─────────────────────────────────────────────┤</span>
+<span class="d-dim">│</span>  <span class="d-blu">Service Layer</span>      sensor_svc, mqtt_svc    <span class="d-dim">│</span>
+<span class="d-dim">│</span>  協定封裝、資料聚合、錯誤重試                  <span class="d-dim">│</span>
+<span class="d-dim">├─────────────────────────────────────────────┤</span>
+<span class="d-dim">│</span>  <span class="d-grn">Driver Layer</span>       bme280, enc_ab, pwm     <span class="d-dim">│</span>
+<span class="d-dim">│</span>  晶片驅動、暫存器操作、中斷處理                <span class="d-dim">│</span>
+<span class="d-dim">├─────────────────────────────────────────────┤</span>
+<span class="d-dim">│</span>  <span class="d-dim">HAL Layer</span>          i2c_hal, uart_hal       <span class="d-dim">│</span>
+<span class="d-dim">│</span>  STM32 HAL / LL 或 Linux 系統呼叫             <span class="d-dim">│</span>
+<span class="d-dim">└─────────────────────────────────────────────┘</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">開發流程與版本控制</div>
+          <p class="body-text">
+            推薦採用 <strong class="hl">Git Flow</strong> 輕量版：<code>main</code> 只放通過驗收的版本，
+            每個功能開 <code>feature/xxx</code> 分支，完成後 PR 合入 <code>develop</code>，
+            版本標籤使用語意化版本號 <code>v1.0.0</code>。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Shell — 專案初始化流程</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm"># 建立專案目錄結構</span>
+mkdir -p smart_env/{app,drivers,services,hal,tests,docs}
+<span class="fn">cd</span> smart_env
+git init
+
+<span class="cm"># CMakeLists.txt 骨架</span>
+cat &gt; CMakeLists.txt &lt;&lt;<span class="str">'EOF'</span>
+cmake_minimum_required(VERSION 3.20)
+project(smart_env C)
+set(CMAKE_C_STANDARD 11)
+
+add_subdirectory(hal)
+add_subdirectory(drivers)
+add_subdirectory(services)
+add_subdirectory(app)
+<span class="str">EOF</span>
+
+<span class="cm"># 建立 feature 分支</span>
+git checkout -b feature/bme280-driver</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">需求文件（MRD）模板</div>
+          <p class="body-text">
+            即使是原型專案，一份簡短的需求文件也能防止範疇蔓延。
+            以智慧環境監測為例，關鍵需求項目如下：
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>需求描述</th>
+                  <th>驗收標準</th>
+                  <th>優先級</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>REQ-01</code></td>
+                  <td>每 10 秒採集溫濕度與 CO₂</td>
+                  <td>資料誤差 &lt; 0.5°C / 2% RH</td>
+                  <td>Must</td>
+                </tr>
+                <tr>
+                  <td><code>REQ-02</code></td>
+                  <td>感測資料透過 MQTT 上傳至 Broker</td>
+                  <td>延遲 &lt; 500 ms，斷線自動重連</td>
+                  <td>Must</td>
+                </tr>
+                <tr>
+                  <td><code>REQ-03</code></td>
+                  <td>節點工作電流 &lt; 5 mA（平均）</td>
+                  <td>PPK2 量測 1 分鐘平均值</td>
+                  <td>Should</td>
+                </tr>
+                <tr>
+                  <td><code>REQ-04</code></td>
+                  <td>Node-RED 儀表板顯示即時折線圖</td>
+                  <td>瀏覽器可存取，資料每 10 秒更新</td>
+                  <td>Should</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 8.2 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-8-2">
+      <div class="lesson-header">
+        <span class="lesson-badge">8.2</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">智慧環境監測系統</h2>
+          <p class="lesson-desc">BME280 感測器整合、FreeRTOS 多工、UART-to-MQTT 橋接</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">系統架構圖</div>
+          <div class="diagram-block"><span class="d-hl">智慧環境監測 — 系統連接圖</span>
+
+  <span class="d-acc">BME280</span>  <span class="d-dim">──I²C──►</span>  <span class="d-hl">STM32F446RE</span>  <span class="d-dim">──UART──►</span>  <span class="d-blu">ESP8266</span>  <span class="d-dim">──WiFi──►</span>  <span class="d-grn">MQTT Broker</span>
+  <span class="d-dim">(temp/hum/press)</span>              <span class="d-dim">(FreeRTOS)</span>              <span class="d-dim">(AT Cmd)</span>            <span class="d-dim">(Mosquitto)</span>
+
+                                                                             <span class="d-dim">│</span>
+                                                                        <span class="d-dim">subscribe</span>
+                                                                             <span class="d-dim">▼</span>
+                                                                    <span class="d-acc">Node-RED</span> <span class="d-dim">──HTTP──►</span> <span class="d-hl">Browser</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">BME280 I²C 驅動實作</div>
+          <p class="body-text">
+            BME280 預設 I²C 位址為 <code>0x76</code>（SDO 接 GND）或 <code>0x77</code>（SDO 接 VCC）。
+            讀取補償參數後套用 Bosch 官方補償公式，得到校正後的溫度（°C）、濕度（%RH）與氣壓（hPa）。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — bme280_driver.c（核心片段）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#define</span> BME280_ADDR   <span class="num">0x76</span>
+<span class="pp">#define</span> REG_CTRL_HUM  <span class="num">0xF2</span>
+<span class="pp">#define</span> REG_CTRL_MEAS <span class="num">0xF4</span>
+<span class="pp">#define</span> REG_CONFIG    <span class="num">0xF5</span>
+<span class="pp">#define</span> REG_DATA      <span class="num">0xF7</span>  <span class="cm">/* 8 bytes: press(3)+temp(3)+hum(2) */</span>
+
+<span class="kw">typedef struct</span> {
+    <span class="tp">int32_t</span>  temperature;   <span class="cm">/* °C × 100，e.g. 2534 = 25.34°C */</span>
+    <span class="tp">uint32_t</span> humidity;      <span class="cm">/* %RH × 1024 */</span>
+    <span class="tp">uint32_t</span> pressure;      <span class="cm">/* Pa × 256 */</span>
+} bme280_data_t;
+
+<span class="kw">void</span> <span class="fn">bme280_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 過取樣 ×1、Normal mode、standby 1000 ms */</span>
+    <span class="tp">uint8_t</span> buf[<span class="num">2</span>];
+
+    buf[<span class="num">0</span>] = REG_CTRL_HUM; buf[<span class="num">1</span>] = <span class="num">0x01</span>;
+    <span class="fn">i2c_write</span>(BME280_ADDR, buf, <span class="num">2</span>);
+
+    buf[<span class="num">0</span>] = REG_CTRL_MEAS; buf[<span class="num">1</span>] = <span class="num">0x27</span>;  <span class="cm">/* temp ×1, press ×1, normal */</span>
+    <span class="fn">i2c_write</span>(BME280_ADDR, buf, <span class="num">2</span>);
+
+    buf[<span class="num">0</span>] = REG_CONFIG; buf[<span class="num">1</span>] = <span class="num">0xA0</span>;   <span class="cm">/* standby 1000 ms, filter ×4 */</span>
+    <span class="fn">i2c_write</span>(BME280_ADDR, buf, <span class="num">2</span>);
+
+    <span class="fn">bme280_read_calib</span>();  <span class="cm">/* 讀取補償係數（0x88–0x9F, 0xA1, 0xE1–0xF0）*/</span>
+}
+
+<span class="kw">int</span> <span class="fn">bme280_read</span>(bme280_data_t *out)
+{
+    <span class="tp">uint8_t</span> raw[<span class="num">8</span>];
+    <span class="kw">if</span> (<span class="fn">i2c_read_reg</span>(BME280_ADDR, REG_DATA, raw, <span class="kw">sizeof</span>(raw)) != <span class="num">0</span>)
+        <span class="kw">return</span> -<span class="num">1</span>;
+
+    <span class="tp">int32_t</span> adc_T = (raw[<span class="num">3</span>] &lt;&lt; <span class="num">12</span>) | (raw[<span class="num">4</span>] &lt;&lt; <span class="num">4</span>) | (raw[<span class="num">5</span>] &gt;&gt; <span class="num">4</span>);
+    <span class="tp">int32_t</span> adc_H = (raw[<span class="num">6</span>] &lt;&lt;  <span class="num">8</span>) |  raw[<span class="num">7</span>];
+
+    out->temperature = <span class="fn">bme280_compensate_T</span>(adc_T);   <span class="cm">/* 設定 t_fine */</span>
+    out->humidity    = <span class="fn">bme280_compensate_H</span>(adc_H);
+    out->pressure    = <span class="fn">bme280_compensate_P</span>(
+        (raw[<span class="num">0</span>] &lt;&lt; <span class="num">12</span>) | (raw[<span class="num">1</span>] &lt;&lt; <span class="num">4</span>) | (raw[<span class="num">2</span>] &gt;&gt; <span class="num">4</span>));
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">FreeRTOS 任務設計</div>
+          <p class="body-text">
+            系統分為三個任務：<strong class="hl">sensor_task</strong>（讀取感測器，放入 Queue）、
+            <strong class="hl">mqtt_task</strong>（從 Queue 取資料，組 JSON 後透過 UART 發送 AT 指令給 ESP8266）、
+            <strong class="hl">led_task</strong>（心跳燈，指示系統狀態）。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — main.c（任務建立）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#include</span> <span class="str">"FreeRTOS.h"</span>
+<span class="pp">#include</span> <span class="str">"task.h"</span>
+<span class="pp">#include</span> <span class="str">"queue.h"</span>
+
+QueueHandle_t xSensorQueue;
+
+<span class="kw">void</span> <span class="fn">sensor_task</span>(<span class="kw">void</span> *arg)
+{
+    bme280_data_t data;
+    <span class="kw">for</span> (;;) {
+        <span class="kw">if</span> (<span class="fn">bme280_read</span>(&amp;data) == <span class="num">0</span>)
+            <span class="fn">xQueueSend</span>(xSensorQueue, &amp;data, <span class="num">0</span>);
+        <span class="fn">vTaskDelay</span>(<span class="fn">pdMS_TO_TICKS</span>(<span class="num">10000</span>));  <span class="cm">/* 每 10 s 採樣一次 */</span>
+    }
+}
+
+<span class="kw">void</span> <span class="fn">mqtt_task</span>(<span class="kw">void</span> *arg)
+{
+    bme280_data_t data;
+    <span class="kw">char</span> json[<span class="num">128</span>];
+    <span class="kw">for</span> (;;) {
+        <span class="kw">if</span> (<span class="fn">xQueueReceive</span>(xSensorQueue, &amp;data, <span class="fn">portMAX_DELAY</span>)) {
+            <span class="fn">snprintf</span>(json, <span class="kw">sizeof</span>(json),
+                <span class="str">"{\"temp\":%.2f,\"hum\":%.2f,\"press\":%.1f}"</span>,
+                data.temperature / <span class="num">100.0f</span>,
+                data.humidity    / <span class="num">1024.0f</span>,
+                data.pressure    / <span class="num">256.0f</span> / <span class="num">100.0f</span>);
+            <span class="fn">esp8266_publish</span>(<span class="str">"env/node1"</span>, json);
+        }
+    }
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="fn">system_init</span>();
+    <span class="fn">bme280_init</span>();
+    <span class="fn">esp8266_init</span>();
+
+    xSensorQueue = <span class="fn">xQueueCreate</span>(<span class="num">4</span>, <span class="kw">sizeof</span>(bme280_data_t));
+
+    <span class="fn">xTaskCreate</span>(sensor_task, <span class="str">"Sensor"</span>, <span class="num">512</span>, <span class="kw">NULL</span>, <span class="num">2</span>, <span class="kw">NULL</span>);
+    <span class="fn">xTaskCreate</span>(mqtt_task,   <span class="str">"MQTT"</span>,   <span class="num">768</span>, <span class="kw">NULL</span>, <span class="num">2</span>, <span class="kw">NULL</span>);
+    <span class="fn">xTaskCreate</span>(led_task,    <span class="str">"LED"</span>,    <span class="num">128</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>);
+
+    <span class="fn">vTaskStartScheduler</span>();
+    <span class="kw">for</span> (;;);
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">省電優化</div>
+          啟用 FreeRTOS Tickless Idle 後，sensor_task 的 <code>vTaskDelay(10000 ms)</code>
+          會讓 CPU 進入 Stop Mode 長達 10 秒，平均電流可從 ~12 mA 降至 ~0.3 mA，
+          符合 REQ-03 的 5 mA 預算目標。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 8.3 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-8-3">
+      <div class="lesson-header">
+        <span class="lesson-badge">8.3</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">直流馬達 PID 控制器</h2>
+          <p class="lesson-desc">編碼器測速、PWM 輸出、離散 PID 演算法與串列調參介面</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">閉迴路控制架構</div>
+          <div class="diagram-block"><span class="d-hl">PID 閉迴路控制流程</span>
+
+  <span class="d-acc">Setpoint</span>
+  (目標轉速)
+      <span class="d-dim">│</span>
+      <span class="d-dim">▼</span>
+  <span class="d-dim">[+]</span> <span class="d-dim">──────────────────────────────────────────┐</span>
+   <span class="d-dim">│ e(t)</span>                                        <span class="d-dim">│</span>
+   <span class="d-dim">▼</span>                                             <span class="d-dim">│</span>
+ <span class="d-blu">PID Controller</span>  →  <span class="d-grn">PWM Driver</span>  →  <span class="d-acc">DC Motor</span>  <span class="d-dim">│</span>
+ <span class="d-dim">(Kp, Ki, Kd)</span>      <span class="d-dim">(TIM1 CH1)</span>    <span class="d-dim">(H-Bridge)</span>  <span class="d-dim">│</span>
+                                                  <span class="d-dim">│ 實際轉速</span>
+                     <span class="d-acc">Encoder</span>  <span class="d-dim">←──────────────────┘</span>
+                  <span class="d-dim">(TIM3 Encoder Mode)</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">編碼器測速（TIM3 Encoder Mode）</div>
+          <p class="body-text">
+            STM32 定時器的 Encoder Mode 可硬體計數 A/B 相脈波，不需要 CPU 中斷。
+            每 10 ms 讀取計數差值 ΔCount，換算轉速：
+            <code>RPM = (ΔCount / PPR / 4) × (60 / 0.01)</code>，
+            其中 PPR 為編碼器每轉脈波數（本例使用 334 PPR），
+            ×4 為四倍頻計數。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — encoder.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#define</span> ENC_PPR    <span class="num">334</span>     <span class="cm">/* 每轉脈波數 */</span>
+<span class="pp">#define</span> SAMPLE_MS  <span class="num">10</span>      <span class="cm">/* 採樣週期 (ms) */</span>
+
+<span class="kw">static</span> <span class="tp">int32_t</span> last_count = <span class="num">0</span>;
+
+<span class="kw">void</span> <span class="fn">encoder_init</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* TIM3: Encoder Interface Mode，自動重載 0xFFFF */</span>
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+    TIM3->SMCR  = TIM_SMCR_SMS_0 | TIM_SMCR_SMS_1;  <span class="cm">/* Mode 3 */</span>
+    TIM3->CCMR1 = TIM_CCMR1_CC1S_0 | TIM_CCMR1_CC2S_0;
+    TIM3->ARR   = <span class="num">0xFFFF</span>;
+    TIM3->CR1  |= TIM_CR1_CEN;
+}
+
+<span class="tp">float</span> <span class="fn">encoder_get_rpm</span>(<span class="kw">void</span>)
+{
+    <span class="tp">int32_t</span> now   = (<span class="tp">int16_t</span>)TIM3->CNT;  <span class="cm">/* 有符號讀取支援反轉 */</span>
+    <span class="tp">int32_t</span> delta = now - last_count;
+    last_count    = now;
+
+    <span class="cm">/* 換算：ΔCount / (PPR×4) 轉 × (60000/SAMPLE_MS) ms/min */</span>
+    <span class="kw">return</span> ((<span class="tp">float</span>)delta / (ENC_PPR * <span class="num">4</span>)) * (<span class="num">60000.0f</span> / SAMPLE_MS);
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">離散 PID 演算法</div>
+          <p class="body-text">
+            位置式 PID 公式：
+            <code>u(k) = Kp·e(k) + Ki·Σe·T + Kd·(e(k)-e(k-1))/T</code>。
+            實作時需加入<strong class="hl">積分飽和限制</strong>（Anti-Windup）與<strong class="hl">輸出限幅</strong>，
+            防止突然給定大誤差時 PWM 超出 100%。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — pid.c</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="kw">typedef struct</span> {
+    <span class="tp">float</span> kp, ki, kd;
+    <span class="tp">float</span> integral;
+    <span class="tp">float</span> prev_error;
+    <span class="tp">float</span> integral_limit;  <span class="cm">/* Anti-Windup 積分上限 */</span>
+    <span class="tp">float</span> output_limit;    <span class="cm">/* 輸出飽和上限（0–100%） */</span>
+} pid_t;
+
+<span class="tp">float</span> <span class="fn">pid_compute</span>(pid_t *pid, <span class="tp">float</span> setpoint, <span class="tp">float</span> measured, <span class="tp">float</span> dt)
+{
+    <span class="tp">float</span> error = setpoint - measured;
+
+    <span class="cm">/* P 項 */</span>
+    <span class="tp">float</span> p_term = pid->kp * error;
+
+    <span class="cm">/* I 項（含 Anti-Windup 限幅） */</span>
+    pid->integral += error * dt;
+    <span class="kw">if</span>      (pid->integral >  pid->integral_limit) pid->integral =  pid->integral_limit;
+    <span class="kw">else if</span> (pid->integral < -pid->integral_limit) pid->integral = -pid->integral_limit;
+    <span class="tp">float</span> i_term = pid->ki * pid->integral;
+
+    <span class="cm">/* D 項（微分項，使用前後差） */</span>
+    <span class="tp">float</span> d_term = pid->kd * (error - pid->prev_error) / dt;
+    pid->prev_error = error;
+
+    <span class="tp">float</span> output = p_term + i_term + d_term;
+
+    <span class="cm">/* 輸出限幅 */</span>
+    <span class="kw">if</span>      (output >  pid->output_limit) output =  pid->output_limit;
+    <span class="kw">else if</span> (output < -pid->output_limit) output = -pid->output_limit;
+
+    <span class="kw">return</span> output;
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">串列調參介面（CLI over UART）</div>
+          <p class="body-text">
+            量產前的調參通常需要反覆修改 Kp/Ki/Kd 並重刷韌體，效率極低。
+            改用 UART CLI 介面，可在執行期動態設定參數並即時觀察響應曲線，
+            搭配 Python 腳本可自動繪製 step response 圖。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">UART — 調參指令範例</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm"># 設定目標轉速 150 RPM</span>
+<span class="str">set sp 150</span>
+
+<span class="cm"># 調整 PID 係數</span>
+<span class="str">set kp 0.8</span>
+<span class="str">set ki 0.15</span>
+<span class="str">set kd 0.05</span>
+
+<span class="cm"># 查詢目前轉速與誤差</span>
+<span class="str">get status</span>
+<span class="cm"># → sp=150.00 rpm=148.73 err=1.27 duty=62.4%</span>
+
+<span class="cm"># 串流輸出（每 10 ms 一筆，CSV 格式給 Python 繪圖）</span>
+<span class="str">stream on</span>
+<span class="cm"># → 0,150.00,0.00,0.0</span>
+<span class="cm"># → 10,150.00,23.41,18.2</span>
+<span class="cm"># → 20,150.00,89.12,55.6</span>
+<span class="cm"># → ...</span></pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-title">調參建議</div>
+          先用 <strong>Ziegler-Nichols 臨界增益法</strong>：令 Ki=Kd=0，逐步增大 Kp 直到出現持續振盪，
+          記錄臨界增益 Ku 與振盪週期 Tu，再依表設定 Kp=0.6Ku、Ki=1.2Ku/Tu、Kd=0.075Ku·Tu。
+          此後再微調以消除超射或穩態誤差。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 8.4 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-8-4">
+      <div class="lesson-header">
+        <span class="lesson-badge">8.4</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">IoT Linux 閘道器</h2>
+          <p class="lesson-desc">Raspberry Pi 上建置 Mosquitto Broker、Python 資料橋接與 Node-RED 儀表板</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">閘道器系統架構</div>
+          <div class="diagram-block"><span class="d-hl">IoT 閘道器 — 資料流向</span>
+
+  <span class="d-acc">STM32 Node(s)</span>
+  <span class="d-dim">MQTT publish</span>
+        <span class="d-dim">│</span>
+        <span class="d-dim">│  WiFi / Ethernet</span>
+        <span class="d-dim">▼</span>
+ <span class="d-hl">Raspberry Pi 4</span>
+ <span class="d-dim">├─</span> <span class="d-blu">Mosquitto</span>      <span class="d-dim">← MQTT Broker (port 1883)</span>
+ <span class="d-dim">├─</span> <span class="d-grn">Python Bridge</span>  <span class="d-dim">← 訂閱 MQTT → 寫入 InfluxDB</span>
+ <span class="d-dim">├─</span> <span class="d-acc">Node-RED</span>       <span class="d-dim">← 訂閱 MQTT → HTTP Dashboard (port 1880)</span>
+ <span class="d-dim">└─</span> <span class="d-dim">REST API</span>       <span class="d-dim">← Flask，提供歷史資料查詢</span>
+        <span class="d-dim">│</span>
+        <span class="d-dim">▼</span>
+  <span class="d-hl">Browser / App</span>
+  <span class="d-dim">Node-RED Dashboard</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Mosquitto 安裝與設定</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Shell — Raspberry Pi OS</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm"># 安裝 Mosquitto Broker 與客戶端工具</span>
+sudo apt update
+sudo apt install -y mosquitto mosquitto-clients
+
+<span class="cm"># 設定允許匿名連線（開發用途）</span>
+sudo tee /etc/mosquitto/conf.d/local.conf &lt;&lt;<span class="str">'EOF'</span>
+listener 1883
+allow_anonymous true
+<span class="str">EOF</span>
+
+sudo systemctl enable --now mosquitto
+
+<span class="cm"># 測試：訂閱並在另一終端發布</span>
+mosquitto_sub -t "env/#" -v &amp;
+mosquitto_pub -t "env/node1" -m '{"temp":25.3,"hum":62.1}'
+<span class="cm"># → env/node1 {"temp":25.3,"hum":62.1}</span></pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Python 資料橋接腳本</div>
+          <p class="body-text">
+            使用 <code>paho-mqtt</code> 訂閱感測資料，解析 JSON 後寫入 InfluxDB，
+            提供時序資料的長期儲存與查詢能力。
+          </p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Python — mqtt_bridge.py</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="kw">import</span> json
+<span class="kw">import</span> paho.mqtt.client <span class="kw">as</span> mqtt
+<span class="kw">from</span> influxdb_client <span class="kw">import</span> InfluxDBClient, Point
+<span class="kw">from</span> influxdb_client.client.write_api <span class="kw">import</span> SYNCHRONOUS
+
+BROKER   = <span class="str">"localhost"</span>
+TOPIC    = <span class="str">"env/#"</span>
+INFLUX_URL   = <span class="str">"http://localhost:8086"</span>
+INFLUX_TOKEN = <span class="str">"my-token"</span>
+INFLUX_ORG   = <span class="str">"lab"</span>
+INFLUX_BKT   = <span class="str">"sensors"</span>
+
+client_influx = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+write_api = client_influx.write_api(write_options=SYNCHRONOUS)
+
+<span class="kw">def</span> <span class="fn">on_message</span>(client, userdata, msg):
+    <span class="kw">try</span>:
+        data  = json.loads(msg.payload)
+        node  = msg.topic.split(<span class="str">"/"</span>)[-<span class="num">1</span>]  <span class="cm"># e.g. "node1"</span>
+        point = (Point(<span class="str">"environment"</span>)
+                 .tag(<span class="str">"node"</span>, node)
+                 .field(<span class="str">"temperature"</span>, data[<span class="str">"temp"</span>])
+                 .field(<span class="str">"humidity"</span>,    data[<span class="str">"hum"</span>])
+                 .field(<span class="str">"pressure"</span>,    data.get(<span class="str">"press"</span>, <span class="num">0</span>)))
+        write_api.write(bucket=INFLUX_BKT, record=point)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"[{node}] T={data['temp']:.1f}°C H={data['hum']:.1f}%"</span>)
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {e}"</span>)
+
+mqttc = mqtt.Client()
+mqttc.on_message = on_message
+mqttc.connect(BROKER, <span class="num">1883</span>)
+mqttc.subscribe(TOPIC)
+mqttc.loop_forever()</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Node-RED 儀表板設定</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Shell — Node-RED 安裝</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="cm"># 安裝 Node-RED（官方腳本）</span>
+bash &lt;(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+
+<span class="cm"># 安裝 Dashboard UI 套件</span>
+cd ~/.node-red
+npm install node-red-dashboard
+
+<span class="cm"># 啟動並設為開機自動執行</span>
+sudo systemctl enable --now nodered
+
+<span class="cm"># 在瀏覽器開啟 Flow 編輯器</span>
+<span class="cm"># http://&lt;RPi-IP&gt;:1880</span>
+<span class="cm"># 儀表板：http://&lt;RPi-IP&gt;:1880/ui</span></pre>
+          </div>
+          <p class="body-text">
+            Node-RED Flow 設計：
+            <strong class="hl">mqtt in</strong> 節點訂閱 <code>env/#</code> →
+            <strong class="hl">json</strong> 節點解析 →
+            分三路送到 <strong class="hl">gauge</strong>（溫度/濕度）與 <strong class="hl">chart</strong>（時序折線圖）。
+            儀表板無需撰寫任何前端程式碼。
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">systemd 服務化</div>
+          將 <code>mqtt_bridge.py</code> 以 systemd service 管理，確保開機自動執行與崩潰後自動重啟：
+          建立 <code>/etc/systemd/system/mqtt-bridge.service</code>，
+          設定 <code>Restart=on-failure</code> 與 <code>RestartSec=5</code>，
+          再執行 <code>sudo systemctl enable --now mqtt-bridge</code>。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ LESSON 8.5 ═══════════════════════════════════════ -->
+    <section class="lesson-section" id="lesson-8-5">
+      <div class="lesson-header">
+        <span class="lesson-badge">8.5</span>
+        <div class="lesson-header-text">
+          <h2 class="lesson-title">整合測試與驗收</h2>
+          <p class="lesson-desc">自動化測試策略、硬體在環測試（HIL）與專案驗收清單</p>
+        </div>
+      </div>
+      <div class="lesson-body">
+
+        <div class="sub-section">
+          <div class="sub-title">嵌入式測試金字塔</div>
+          <p class="body-text">
+            嵌入式系統的測試分三層：
+            <strong class="hl">單元測試</strong>在 Host PC 上跑（用 Unity/CppUTest 框架，不需硬體）；
+            <strong class="hl">整合測試</strong>在目標板上跑（驗證驅動與 HAL 接層）；
+            <strong class="hl">系統測試</strong>含完整硬體鏈路，以 Python 腳本自動化驗收。
+          </p>
+          <div class="diagram-block"><span class="d-hl">測試金字塔</span>
+
+               <span class="d-acc">系統測試</span>
+              <span class="d-dim">/  完整硬體鏈路  \</span>
+             <span class="d-dim">/   Python 驗收腳本  \</span>
+            <span class="d-dim">────────────────────</span>
+           <span class="d-blu">整合測試</span>
+          <span class="d-dim">/  目標板上跑驅動層  \</span>
+         <span class="d-dim">/  HAL + Driver 驗證   \</span>
+        <span class="d-dim">──────────────────────</span>
+      <span class="d-grn">單元測試（最多）</span>
+     <span class="d-dim">/ Host PC，無需硬體   \</span>
+    <span class="d-dim">/ Unity / CppUTest 框架 \</span>
+   <span class="d-dim">────────────────────────</span></div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">PID 控制器單元測試</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">C — test_pid.c（Unity 框架）</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="pp">#include</span> <span class="str">"unity.h"</span>
+<span class="pp">#include</span> <span class="str">"pid.h"</span>
+
+<span class="kw">static</span> pid_t g_pid;
+
+<span class="kw">void</span> <span class="fn">setUp</span>(<span class="kw">void</span>)
+{
+    g_pid = (pid_t){ .kp = <span class="num">1.0f</span>, .ki = <span class="num">0.1f</span>, .kd = <span class="num">0.05f</span>,
+                     .integral_limit = <span class="num">50.0f</span>, .output_limit = <span class="num">100.0f</span> };
+}
+
+<span class="kw">void</span> <span class="fn">test_zero_error_gives_zero_output</span>(<span class="kw">void</span>)
+{
+    <span class="tp">float</span> out = <span class="fn">pid_compute</span>(&amp;g_pid, <span class="num">100.0f</span>, <span class="num">100.0f</span>, <span class="num">0.01f</span>);
+    <span class="fn">TEST_ASSERT_FLOAT_WITHIN</span>(<span class="num">0.001f</span>, <span class="num">0.0f</span>, out);
+}
+
+<span class="kw">void</span> <span class="fn">test_output_clamped_at_limit</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 大誤差應被限制在 100% 以內 */</span>
+    <span class="tp">float</span> out = <span class="fn">pid_compute</span>(&amp;g_pid, <span class="num">1000.0f</span>, <span class="num">0.0f</span>, <span class="num">0.01f</span>);
+    <span class="fn">TEST_ASSERT_LESS_OR_EQUAL_FLOAT</span>(<span class="num">100.0f</span>, out);
+}
+
+<span class="kw">void</span> <span class="fn">test_integral_windup_clamped</span>(<span class="kw">void</span>)
+{
+    <span class="cm">/* 反覆累積後 integral 不超過 limit */</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">1000</span>; i++)
+        <span class="fn">pid_compute</span>(&amp;g_pid, <span class="num">100.0f</span>, <span class="num">0.0f</span>, <span class="num">0.01f</span>);
+    <span class="fn">TEST_ASSERT_LESS_OR_EQUAL_FLOAT</span>(<span class="num">50.0f</span>, g_pid.integral);
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="fn">UNITY_BEGIN</span>();
+    <span class="fn">RUN_TEST</span>(test_zero_error_gives_zero_output);
+    <span class="fn">RUN_TEST</span>(test_output_clamped_at_limit);
+    <span class="fn">RUN_TEST</span>(test_integral_windup_clamped);
+    <span class="kw">return</span> <span class="fn">UNITY_END</span>();
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Python 系統驗收腳本（智慧環境監測）</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Python — acceptance_test.py</span>
+              <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+            </div>
+<pre><span class="kw">import</span> json, time, pytest
+<span class="kw">import</span> paho.mqtt.client <span class="kw">as</span> mqtt
+
+BROKER  = <span class="str">"192.168.1.100"</span>
+TIMEOUT = <span class="num">30</span>  <span class="cm"># 秒，等待節點上傳</span>
+
+received = []
+
+<span class="kw">def</span> <span class="fn">on_message</span>(client, userdata, msg):
+    received.append(json.loads(msg.payload))
+
+<span class="kw">def</span> <span class="fn">test_sensor_data_received</span>():
+    <span class="str">"""REQ-01 & REQ-02: 應在 30 秒內收到至少一筆感測資料"""</span>
+    mqttc = mqtt.Client()
+    mqttc.on_message = on_message
+    mqttc.connect(BROKER, <span class="num">1883</span>)
+    mqttc.subscribe(<span class="str">"env/#"</span>)
+    mqttc.loop_start()
+
+    deadline = time.time() + TIMEOUT
+    <span class="kw">while</span> time.time() &lt; deadline <span class="kw">and not</span> received:
+        time.sleep(<span class="num">0.5</span>)
+    mqttc.loop_stop()
+
+    <span class="kw">assert</span> len(received) &gt; <span class="num">0</span>, <span class="str">"未在 30 秒內收到 MQTT 資料"</span>
+
+<span class="kw">def</span> <span class="fn">test_sensor_data_schema</span>():
+    <span class="str">"""資料必須包含 temp, hum, press 欄位且在合理範圍內"""</span>
+    msg = received[<span class="num">0</span>]
+    <span class="kw">assert</span> <span class="str">"temp"</span>  <span class="kw">in</span> msg
+    <span class="kw">assert</span> <span class="str">"hum"</span>   <span class="kw">in</span> msg
+    <span class="kw">assert</span> <span class="num">0</span> &lt;= msg[<span class="str">"temp"</span>] &lt;= <span class="num">60</span>,   <span class="fn">f</span><span class="str">"溫度超出範圍: {msg['temp']}"</span>
+    <span class="kw">assert</span> <span class="num">0</span> &lt;= msg[<span class="str">"hum"</span>]  &lt;= <span class="num">100</span>,  <span class="fn">f</span><span class="str">"濕度超出範圍: {msg['hum']}"</span>
+
+<span class="cm"># 執行方式：pytest acceptance_test.py -v</span></pre>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-title">Week 8 總驗收清單</div>
+          <div class="checklist">
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>BME280 正確讀取溫度、濕度、氣壓，誤差在規格範圍內</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>FreeRTOS 三任務穩定運行 1 小時，無堆疊溢位或死鎖</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>感測節點平均電流 &lt; 5 mA（PPK2 量測，含 WiFi 傳輸）</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>馬達 PID 控制器在 50–200 RPM 範圍內穩態誤差 &lt; 3 RPM</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>串列 CLI 可動態調整 Kp/Ki/Kd 並即時生效</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>MQTT Broker 在 RPi 上穩定接收所有節點資料</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>Node-RED Dashboard 在瀏覽器正確顯示即時折線圖</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>Python 驗收腳本 <code>pytest acceptance_test.py</code> 全部通過</span>
+            </div>
+            <div class="check-item">
+              <div class="check-box"></div>
+              <span>所有服務（Mosquitto、mqtt-bridge、Node-RED）設為 systemd 開機自動啟動</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">課程總結</div>
+          恭喜完成八週嵌入式系統完整學習路徑！
+          從第一週的微控制器概論，到今天整合 FreeRTOS、Linux、MQTT 與 PID 控制的完整產品原型，
+          你已具備從硬體底層到雲端儀表板的端對端開發能力。
+          建議下一步：選擇一個感興趣的真實問題，用這套技術棧從零打造屬於自己的嵌入式產品。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+      <a href="week7.html" class="nav-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L5 7l4 5"/></svg>
+        Week 07 — 低功耗與安全設計
+      </a>
+      <span class="week-indicator">Week 08 / 08</span>
+      <a href="index.html" class="nav-btn primary">
+        回到課程總覽
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2l4 5-4 5"/></svg>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.lesson-section');
+  const navLinks = document.querySelectorAll('.nav-lesson');
+  const main     = document.getElementById('main');
+
+  function updateActiveLink() {
+    let current = null;
+    const scrollTop = main.scrollTop;
+    sections.forEach(s => { if (scrollTop >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+    const done  = document.querySelectorAll('.check-box.done').length;
+    const total = document.querySelectorAll('.check-box').length;
+    document.getElementById('progress-text').textContent = done + ' / ' + total;
+    document.getElementById('progress-bar').style.width = (done / total * 100) + '%';
+  }
+
+  main.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+</body>
+</html>
